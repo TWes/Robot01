@@ -1,0 +1,25 @@
+SOURCE_FILES := Server_inet.cpp socket_connection.cpp socket_inet.cpp
+
+OBJECT_FILES := Server_inet.o socket_connection.o socket_inet.o
+GPP = g++
+
+HEADDER_FILES = 
+LIBRARYS = 
+DEBUG = -ggdb
+
+OUTPUT_FILE = connection_library.so
+
+.PHONY: all
+all: $(OUTPUT_FILE)
+
+$(OUTPUT_FILE): $(OBJECT_FILES)
+	$(GPP)  $(OBJECT_FILES) $(LIBRARYS) $(DEBUG) -fPIC -std=c++0x -lpthread -shared -o $(OUTPUT_FILE)
+
+%.o: %.cpp
+	$(GPP) $(HEADDER_FILES) $(DEBUG) -fPIC -std=c++0x -c $< -o $@
+
+rebuild: clean all
+
+clean:
+	rm -f $(OUTPUT_FILE)
+	rm -f $(OBJECT_FILES)

@@ -1,0 +1,12 @@
+# exclude the Qt Creator files
+*.files
+*.includes
+*.config
+*.creator
+*.creator.user
+
+#exlude object files
+*.o
+
+# exclude copies
+*~
