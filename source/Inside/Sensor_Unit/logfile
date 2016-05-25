@@ -1,0 +1,14 @@
+1446987435.611395: Sensor_server setup completed.
+1446987435.716481: i2c_access: Konnte Register nicht schreiben: 5 - Input/output error
+1446987438.19701: Fehler beim Lesen: 5 - Input/output error
+1446987438.22520: Fehler beim Lesen: 5 - Input/output error
+1446987438.23181: Fehler beim Lesen: 5 - Input/output error
+1446987439.210076: i2c_access: Konnte Register nicht schreiben: 5 - Input/output error
+1446987440.382882: i2c_access: Konnte Register nicht schreiben: 5 - Input/output error
+1446987440.573952: Fehler beim Lesen: 5 - Input/output error
+1446987440.743209: i2c_access: Konnte Register nicht schreiben: 5 - Input/output error
+1446987440.746935: Fehler beim Lesen: 5 - Input/output error
+1446987443.361657: i2c_access: Konnte Register nicht schreiben: 5 - Input/output error
+1446987443.845225: i2c_access: Konnte Register nicht schreiben: 5 - Input/output error
+1446987443.845982: i2c_access: Konnte Register nicht schreiben: 5 - Input/output error
+1446987455.613650: Sensor Server cleanup compleded (closing logfile now)
