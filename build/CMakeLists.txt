@@ -18,11 +18,11 @@ set( CMAKE_CXX_FLAGS
 	" -std=gnu++11 "
 )
 
-add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/Shared/connection_library
-	${CMAKE_CURRENT_SOURCE_DIR}/source/Shared/connection_library
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/shared/connection_library
+	${CMAKE_CURRENT_SOURCE_DIR}/source/shared/connection_library
 )
 
 # Build the Robot Monitor
-add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/Remote/Robot_Monitor
-	${CMAKE_CURRENT_SOURCE_DIR}/source/Remote/Robot_Monitor
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/remote/Robot_Monitor
+	${CMAKE_CURRENT_SOURCE_DIR}/source/remote/Robot_Monitor
 )
