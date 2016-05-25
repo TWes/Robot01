@@ -5,7 +5,7 @@
 #include <thread>
 #include <QtGui>
 
-#include "../connection_library/connection_library.hpp"
+#include "socket_inet.hpp"
 #include "Sensor_structs.hpp"
 
 typedef enum{

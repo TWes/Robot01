@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 2.8)
-
 project( connection_library )
 
 
@@ -55,6 +53,8 @@ set( SOCKET_INET_FILES
 )
 
 add_library( socket_inet ${SOCKET_INET_FILES} )
+target_include_directories( socket_inet PUBLIC ${LIB_INCLUDE_DIRS} )
+
 install (TARGETS socket_inet DESTINATION ${LIB_INSTALL_DIR} )
 
 

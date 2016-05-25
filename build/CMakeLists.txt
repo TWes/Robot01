@@ -9,6 +9,10 @@ set( LIB_INSTALL_DIR
 	~/Robot01/install/libraries
 )
 
+set( BINARY_INSTALL_DIR
+	~/Robot01/install/
+)
+
 set( CMAKE_CXX_FLAGS
 	${CMAKE_CXX_FLAGS}
 	" -std=gnu++11 "
@@ -16,4 +20,9 @@ set( CMAKE_CXX_FLAGS
 
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/Shared/connection_library
 	${CMAKE_CURRENT_SOURCE_DIR}/source/Shared/connection_library
+)
+
+# Build the Robot Monitor
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/Remote/Robot_Monitor
+	${CMAKE_CURRENT_SOURCE_DIR}/source/Remote/Robot_Monitor
 )
