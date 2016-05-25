@@ -10,3 +10,9 @@
 
 # exclude copies
 *~
+
+#exclude build directory
+install/*
+
+#include build/CMAke
+!build/CMakeLists.txt
