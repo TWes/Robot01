@@ -1,2 +1,0 @@
-/usr/bin/ar cr ../../../builds/libsocket_connection.a  CMakeFiles/socket_connection.dir/socket_connection.cpp.o
-/usr/bin/ranlib ../../../builds/libsocket_connection.a

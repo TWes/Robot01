@@ -1,2 +1,0 @@
-/usr/bin/ar cr ../../../builds/libsocket_inet.a  CMakeFiles/socket_inet.dir/socket_inet.cpp.o
-/usr/bin/ranlib ../../../builds/libsocket_inet.a

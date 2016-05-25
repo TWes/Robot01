@@ -15,4 +15,5 @@
 install/*
 
 #include build/CMAke
+build/*
 !build/CMakeLists.txt

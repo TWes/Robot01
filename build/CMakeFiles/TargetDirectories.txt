@@ -1,3 +1,0 @@
-/home/tim/Robot01/build/source/Shared/connection_library/CMakeFiles/server_inet.dir
-/home/tim/Robot01/build/source/Shared/connection_library/CMakeFiles/socket_connection.dir
-/home/tim/Robot01/build/source/Shared/connection_library/CMakeFiles/socket_inet.dir

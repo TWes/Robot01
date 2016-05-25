@@ -1,6 +1,0 @@
-/home/tim/Robot01/install/libraries/server_inet.hpp
-/home/tim/Robot01/install/libraries/socket_inet.hpp
-/home/tim/Robot01/install/libraries/socket_connection.hpp
-/home/tim/Robot01/install/libraries/libserver_inet.a
-/home/tim/Robot01/install/libraries/libsocket_connection.a
-/home/tim/Robot01/install/libraries/libsocket_inet.a

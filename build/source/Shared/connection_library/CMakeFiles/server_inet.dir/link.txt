@@ -1,2 +1,0 @@
-/usr/bin/ar cr ../../../builds/libserver_inet.a  CMakeFiles/server_inet.dir/server_inet.cpp.o
-/usr/bin/ranlib ../../../builds/libserver_inet.a
