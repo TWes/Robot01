@@ -29,6 +29,6 @@ add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/shared/joystick_node
 )
 
 # Build the Robot Monitor
-add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/remote/Robot_Monitor
-	${CMAKE_CURRENT_SOURCE_DIR}/source/remote/Robot_Monitor
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/remote/robot_monitor
+	${CMAKE_CURRENT_SOURCE_DIR}/source/remote/robot_monitor
 )
