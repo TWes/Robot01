@@ -78,6 +78,6 @@ add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/remote/robot_monitor
 add_custom_target( hard_clean )
 add_custom_command( TARGET hard_clean
 	COMMAND rm -rf ../install builds CMakeFiles source
-	COMMAND rm -f CMakeCache.txt cmake_install.cmake install_manifest.txt Makefile
+	COMMAND rm -f CMakeCache.txt cmake_install.cmake install_manifest.txt Makefile *~
 )
 
