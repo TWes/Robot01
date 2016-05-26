@@ -11,7 +11,8 @@
 #include <mutex>
 #include <string>
 
-#include "../connection_library/connection_library.hpp"
+#include "server_inet.hpp"
+#include "socket_inet.hpp"
 
 #include "Steering.hpp"
 

@@ -1,8 +1,6 @@
 #ifndef STEERING_HPP
 #define STEERING_HPP
 
-#include "../connection_library/connection_library.hpp"
-
 #include "GPIO.hpp"
 #include "GPIO_Interface.hpp"
 

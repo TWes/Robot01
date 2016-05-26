@@ -28,6 +28,11 @@ add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/shared/joystick_node
 	${CMAKE_CURRENT_SOURCE_DIR}/source/shared/joystick_node
 )
 
+# Build the GPIO Server
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/inside/gpio
+	${CMAKE_CURRENT_SOURCE_DIR}/source/inside/gpio
+)
+
 # Build the Robot Monitor
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/remote/robot_monitor
 	${CMAKE_CURRENT_SOURCE_DIR}/source/remote/robot_monitor
