@@ -15,7 +15,7 @@ set( BINARY_INSTALL_DIR
 
 set( CMAKE_CXX_FLAGS
 	${CMAKE_CXX_FLAGS}
-	" -std=gnu++11 "
+	" -std=gnu++11  -pedantic-errors "
 )
 
 ##########################
