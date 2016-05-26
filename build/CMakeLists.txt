@@ -33,6 +33,11 @@ add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/inside/gpio
 	${CMAKE_CURRENT_SOURCE_DIR}/source/inside/gpio
 )
 
+# Build the Control Server
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/inside/control
+	${CMAKE_CURRENT_SOURCE_DIR}/source/inside/control
+)
+
 # Build the Robot Monitor
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/remote/robot_monitor
 	${CMAKE_CURRENT_SOURCE_DIR}/source/remote/robot_monitor

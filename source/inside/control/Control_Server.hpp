@@ -1,7 +1,7 @@
 #ifndef CONTROL_SERVER_HPP
 #define CONTROL_SERVER_HPP
 
-#include "Server_inet.hpp"
+#include "server_inet.hpp"
 
 class Control_Server : public Server_inet
 {
