@@ -18,6 +18,10 @@ set( CMAKE_CXX_FLAGS
 	" -std=gnu++11 "
 )
 
+##########################
+## Build shared targets ##
+##########################
+
 # Build the connecton libraries
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/shared/connection_library
 	${CMAKE_CURRENT_SOURCE_DIR}/source/shared/connection_library
@@ -27,6 +31,16 @@ add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/shared/connection_librar
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/shared/joystick_node
 	${CMAKE_CURRENT_SOURCE_DIR}/source/shared/joystick_node
 )
+
+# Build the microcontroller
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/shared/micro_controller
+	${CMAKE_CURRENT_SOURCE_DIR}/source/shared/micro_controller
+)
+
+
+##########################
+## Build inside targets ##
+##########################
 
 # Build the GPIO Server
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/inside/gpio
@@ -38,6 +52,10 @@ add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/inside/control
 	${CMAKE_CURRENT_SOURCE_DIR}/source/inside/control
 )
 
+
+##########################
+## Build remote targets ##
+##########################
 # Build the Robot Monitor
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/remote/robot_monitor
 	${CMAKE_CURRENT_SOURCE_DIR}/source/remote/robot_monitor
