@@ -52,6 +52,12 @@ add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/inside/control
 	${CMAKE_CURRENT_SOURCE_DIR}/source/inside/control
 )
 
+# Build the Cam Server
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/inside/cam
+	${CMAKE_CURRENT_SOURCE_DIR}/source/inside/cam
+)
+
+
 
 ##########################
 ## Build remote targets ##
@@ -60,6 +66,7 @@ add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/inside/control
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/remote/robot_monitor
 	${CMAKE_CURRENT_SOURCE_DIR}/source/remote/robot_monitor
 )
+
 
 ###########################
 ## add real clean target ##

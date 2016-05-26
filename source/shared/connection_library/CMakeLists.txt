@@ -32,6 +32,7 @@ set( SERVER_INET_FILES
 
 add_library( server_inet ${SERVER_INET_FILES} )
 install (TARGETS server_inet DESTINATION ${LIB_INSTALL_DIR} )
+target_include_directories( server_inet PUBLIC ${LIB_INCLUDE_DIRS} )
 
 ###############################
 ## socket connection library ##
@@ -43,6 +44,7 @@ set( SOCKET_CONNECTION_FILES
 
 add_library( socket_connection ${SOCKET_CONNECTION_FILES} )
 install (TARGETS socket_connection DESTINATION ${LIB_INSTALL_DIR} )
+target_include_directories( socket_connection PUBLIC ${LIB_INCLUDE_DIRS} )
 
 #########################
 ## socket inet library ##

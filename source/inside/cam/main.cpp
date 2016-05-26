@@ -6,7 +6,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include "Server_inet.hpp"
+#include "server_inet.hpp"
 
 class cam_Server : public Server_inet
 {
