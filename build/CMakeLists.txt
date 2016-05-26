@@ -33,9 +33,9 @@ add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/shared/joystick_node
 )
 
 # Build the microcontroller
-add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/shared/micro_controller
-	${CMAKE_CURRENT_SOURCE_DIR}/source/shared/micro_controller
-)
+#add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/shared/micro_controller
+#	${CMAKE_CURRENT_SOURCE_DIR}/source/shared/micro_controller
+#)
 
 
 ##########################
@@ -60,3 +60,13 @@ add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/inside/control
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/remote/robot_monitor
 	${CMAKE_CURRENT_SOURCE_DIR}/source/remote/robot_monitor
 )
+
+###########################
+## add real clean target ##
+###########################
+add_custom_target( hard_clean )
+add_custom_command( TARGET hard_clean
+	COMMAND rm -rf ../install builds CMakeFiles source
+	COMMAND rm -f CMakeCache.txt cmake_install.cmake install_manifest.txt Makefile
+)
+
