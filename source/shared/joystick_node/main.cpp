@@ -9,7 +9,7 @@
 
 #include <fcntl.h>
 
-#include "../connection_library/connection_library.hpp"
+#include "socket_inet.hpp"
 #include "GPIO.hpp"
 
 bool end_program = false;
@@ -23,15 +23,23 @@ void sighandler(int signum)
 
 int main( int argc, char** argv )
 {
+    if( argc != 4 )
+    {
+        std::cout << "Unsufizient number of arguments: <ip> <port> <joystick>" << std::endl;
+
+        return -1;
+    }
+
+
     std::cout << "Programm startet" << std::endl;
 
     enum{ WAIT_FOR_CONNECTION, CONNECTION_ESTABLISHED} state = WAIT_FOR_CONNECTION;
 
     uint16_t data[6];
 
-    std::string joystick_name = "/dev/input/js0";
+    std::string joystick_name = argv[3];
 
-    socket_inet GPIO_socket("127.0.0.1", 2552);
+    socket_inet GPIO_socket( std::string( argv[1]), atoi( argv[2]));
 
     //open joystick
     int joystick_handle = open( joystick_name.c_str(), O_RDONLY | O_NONBLOCK );
@@ -42,9 +50,6 @@ int main( int argc, char** argv )
 
         return 1;
     }
-
-
-
 
 
     /*  Button Map:
@@ -70,7 +75,7 @@ int main( int argc, char** argv )
             int ret = GPIO_socket.start_connection();
             if( ret < 0 )
             {
-                std::cout << "Couldnt connect so GPIO server" << std::endl;
+                std::cout << "Couldnt connect so GPIO server: " << errno << std::endl;
 
                 sleep( 2 );
 
@@ -81,7 +86,7 @@ int main( int argc, char** argv )
                 std::cout << "Connection established" << std::endl;
                 state = CONNECTION_ESTABLISHED;
 
-                data[0] = 3;// MOVEMENT_INSTRUCTION;
+                data[0] = MOVEMENT_INSTRUCTION;
                 data[1] = 3* sizeof( uint16_t );
                 data[2] = 12; // Dont care
 
@@ -120,7 +125,7 @@ int main( int argc, char** argv )
             {
                 button_state[ joystick_event.number - 4 ] = joystick_event.value;
 
-                data[0] = 3; //MOVEMENT_INSTRUCTION;
+                data[0] = MOVEMENT_INSTRUCTION;
                 data[1] = 3* sizeof( uint16_t );
                 data[2] = 12; // Dont care
                 data[3] = STEER_COMMAND;
@@ -180,7 +185,7 @@ int main( int argc, char** argv )
     std::cout << "Close now" << std::endl;
 
 
-    data[0] = 3; //MOVEMENT_INSTRUCTION;
+    data[0] = MOVEMENT_INSTRUCTION;
     data[1] = 3* sizeof( uint16_t );
     data[2] = 12; // Dont care
 

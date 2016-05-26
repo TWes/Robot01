@@ -18,8 +18,14 @@ set( CMAKE_CXX_FLAGS
 	" -std=gnu++11 "
 )
 
+# Build the connecton libraries
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/shared/connection_library
 	${CMAKE_CURRENT_SOURCE_DIR}/source/shared/connection_library
+)
+
+# Build the joystic node
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/shared/joystick_node
+	${CMAKE_CURRENT_SOURCE_DIR}/source/shared/joystick_node
 )
 
 # Build the Robot Monitor
