@@ -23,6 +23,7 @@
 
 #include <errno.h>
 
+#include "message_types.hpp"
 
 class socket_connection
 {

@@ -23,6 +23,8 @@
 
 #include <errno.h>
 
+#include "message_types.hpp"
+
 typedef struct{	int socket_fh;   \
                 struct sockaddr_in name; \
                 socklen_t name_len; \

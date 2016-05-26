@@ -13,7 +13,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include "../connection_library/connection_library.hpp"
+#include "server_inet.hpp"
 #include "i2c_access.hpp"
 #include "Sensor_structs.hpp"
 #include "logfile.hpp"

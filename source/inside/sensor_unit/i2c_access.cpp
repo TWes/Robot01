@@ -12,7 +12,7 @@ i2c_access::i2c_access( int max_buffer_size )
 {
 	this->max_buffer_size = max_buffer_size;
 	this->buffer_size = this->max_buffer_size;
-	this->buffer = new ( char[this->max_buffer_size]  );
+	this->buffer = new char[this->max_buffer_size];
 	this->address_buffer = 0;
 }
 
@@ -85,7 +85,7 @@ void i2c_access::i2c_read( char address, signed int reg, signed int length, char
 			delete this->buffer;		
 		}
 
-		this->buffer = new( char[ length] );
+		this->buffer = new char[ length] ;
 		this->buffer_size = length;
 	}  
 
