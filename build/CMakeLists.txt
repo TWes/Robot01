@@ -2,11 +2,11 @@ cmake_minimum_required(VERSION 2.8)
 
 
 set( PROJECT_BUILD_DIR 
-	~/Robot01/build/builds
+	~/Robot01/build/builds/
 )
 
 set( LIB_INSTALL_DIR
-	~/Robot01/install/libraries
+	~/Robot01/install/libraries/
 )
 
 set( BINARY_INSTALL_DIR
@@ -33,9 +33,9 @@ add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/shared/joystick_node
 )
 
 # Build the microcontroller
-#add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/shared/micro_controller
-#	${CMAKE_CURRENT_SOURCE_DIR}/source/shared/micro_controller
-#)
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/shared/micro_controller
+	${CMAKE_CURRENT_SOURCE_DIR}/source/shared/micro_controller
+)
 
 
 ##########################

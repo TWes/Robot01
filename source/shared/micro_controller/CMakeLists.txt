@@ -23,11 +23,11 @@ set( MC_FILES
 # former Makefile
 #main.elf: $(CFILES)
 #	avr-gcc -Os -std=c99 -mmcu=atmega328p $(CFILES) -o main.elf
-
 add_custom_target( main.elf )
 add_custom_command( TARGET main.elf 
 	DEPENDS ${CFILES}
-	COMMAND avr-gcc -Os -std=c99 -mmcu=atmega328p ${MC_FILES} -o main.elf
+	COMMAND avr-gcc -Os -std=c99 -mmcu=atmega328p ${MC_FILES} -o ${PROJECT_BUILD_DIR}main.elf
+	WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 )
 
 #former Makefile
@@ -41,7 +41,24 @@ add_custom_target( main.hex
 add_custom_command( 
 	TARGET main.hex
 	COMMAND avr-objcopy -O ihex -j .text -j .data -j .bss main.elf main.hex
+	COMMAND rm main.elf
+	WORKING_DIRECTORY ${PROJECT_BUILD_DIR}
 )
+
+
+#Upload to bma	oard
+#upload: main.hex
+#	sudo avrdude -p m328p -c avrispmkII -P /dev/ttyACM0 -U flash:w:main.hex:a
+add_custom_target( upload
+	DEPENDS main.hex
+)
+
+add_custom_command( 
+	TARGET upload
+	COMMAND sudo avrdude -p m328p -c avrispmkII -P /dev/ttyACM0 -U flash:w:main.hex:a
+	WORKING_DIRECTORY ${PROJECT_BUILD_DIR}
+)
+
 
 # The old Makefile
 #all: main.hex
@@ -51,10 +68,6 @@ add_custom_command(
 #clean:
 #	rm -f main.elf
 #	rm -f main.hex
-
-#Upload to board
-#upload: main.hex
-#	sudo avrdude -p m328p -c avrispmkII -P /dev/ttyACM0 -U flash:w:main.hex:a
 
 #clean rebuild ald upload
 #rebuild: clean main.hex		
