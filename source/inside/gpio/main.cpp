@@ -18,6 +18,8 @@
 
 #include "GPIO_Interface.hpp"
 
+#include "gpio.hpp"
+
 class gpio_Server : public Server_inet
 {
 public:
@@ -138,10 +140,10 @@ void gpio_Server::handle_connection( int client_handle)
             }
 
 
-           // std::cout << "Got headder: " << headder[0] << " | Size: " << headder[1]
-             //         << " | ID: " << headder[2] << std::endl;
+           //std::cout << "Got headder: " << headder[0] << " | Size: " << headder[1]
+	//	 << " | ID: " << headder[2] << std::endl;
 
-            if( headder[0] == 3 /*MOVEMENT_INSTRUCTION*/ )
+            if( headder[0] == MOVEMENT_INSTRUCTION )
             {
                 uint16_t data[3];
 
@@ -157,7 +159,7 @@ void gpio_Server::handle_connection( int client_handle)
                  //            << " | " << data[1] << " | " << data[2]  << std::endl;
 
 
-                if( data[0] == STEER_COMMAND )
+                if( data[0] == MOVEMENT_INSTRUCTION )
                 {
                     std::cout << "Got a steer command: " << data[1] << " | " << data[2] << std::endl;
 
@@ -205,7 +207,7 @@ void gpio_Server::handle_connection( int client_handle)
                 // Nethertheless read the bytes
                 uint8_t data[100];
 
-                std::cout << "Unknown Command. Read " << headder[1] << " Bytes" << std::endl;
+                std::cout << "Unknown Command: " << headder[0] << ". Read " << headder[1] << " Bytes" << std::endl;
 
                 int ret = read( client_handle , data, headder[1] );
             }
