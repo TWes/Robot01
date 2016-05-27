@@ -16,6 +16,6 @@ set( GPIO_FILES
 )
 
 add_executable( gpio_server ${GPIO_FILES} )
-target_link_libraries(gpio_server server_inet socket_inet)
+target_link_libraries(gpio_server server_inet socket_inet pthread)
 
 install (TARGETS gpio_server DESTINATION ${BINARY_INSTALL_DIR} )
