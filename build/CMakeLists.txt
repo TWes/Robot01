@@ -2,15 +2,15 @@ cmake_minimum_required(VERSION 2.8)
 
 
 set( PROJECT_BUILD_DIR 
-	~/Robot01/build/builds/
+	${CMAKE_CURRENT_LIST_DIR}/builds/
 )
 
 set( LIB_INSTALL_DIR
-	~/Robot01/install/libraries/
+	${CMAKE_CURRENT_LIST_DIR}/../install/libraries/
 )
 
 set( BINARY_INSTALL_DIR
-	~/Robot01/install/
+	${CMAKE_CURRENT_LIST_DIR}/../install
 )
 
 set( CMAKE_CXX_FLAGS
