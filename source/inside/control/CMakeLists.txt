@@ -15,7 +15,7 @@ set( CONTROL_FILES
 )
 
 add_executable( control_server ${CONTROL_FILES} )
-target_link_libraries(control_server server_inet socket_inet)
+target_link_libraries(control_server server_inet socket_inet pthread)
 add_dependencies( control_server server_inet socket_inet )
 
 install (TARGETS control_server DESTINATION ${BINARY_INSTALL_DIR} )
