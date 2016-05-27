@@ -11,6 +11,7 @@
 
 #define QUIT_SERVER 0x04
 
+#define MOVEMENT_INSTRUCTION 0x01
 
 #define STEER_COMMAND 0x10
 

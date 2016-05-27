@@ -10,7 +10,7 @@
 #include <fcntl.h>
 
 #include "socket_inet.hpp"
-#include "GPIO.hpp"
+#include "gpio.hpp"
 
 bool end_program = false;
 

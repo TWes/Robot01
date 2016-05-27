@@ -1,7 +1,7 @@
 #ifndef STEERING_HPP
 #define STEERING_HPP
 
-#include "GPIO.hpp"
+#include "gpio.hpp"
 #include "GPIO_Interface.hpp"
 
 #define LEFT_WHEEL_A_PIN	16
