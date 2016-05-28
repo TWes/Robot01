@@ -88,7 +88,7 @@ ISR( ADC_vect )
           txbuffer[adc_table[mux_field].TWI_buffer + 1] = rotations[mux_field] >> 8;
 
           // Change State
-          adc_table[mux_field].last_state = WHITE;
+          adc_table[mux_field].last_state = WHITE; 
       }
 
       // Old Value white, new value black

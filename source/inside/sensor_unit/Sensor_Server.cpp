@@ -245,7 +245,7 @@ void Sensor_Server::Sonar_thread_funktion()
 
 void Sensor_Server::IMU_thread_funktion()
 {
-	 IMU_Measurement last_meas = {0.0};
+	IMU_Measurement last_meas = {0.0};
 
 	while( this->continue_server )
 	{
@@ -410,6 +410,8 @@ void Sensor_Server::Wheel_thread_funktion()
         i2c_mutex.unlock();
 
         gettimeofday( &wheel_meas.timestamp, NULL);
+
+	//std::cout << "got: " << wheel_meas.Right_Wheel_Rotations << std::endl;
 
          Wheel_queue_mutex.lock();
             this->Wheel_values.push_front(wheel_meas );
