@@ -7,6 +7,8 @@
 #include <sys/select.h>
 #include <sys/time.h>
 
+#include <string.h>
+
 #include <fcntl.h>
 
 #include "socket_inet.hpp"
@@ -75,7 +77,8 @@ int main( int argc, char** argv )
             int ret = GPIO_socket.start_connection();
             if( ret < 0 )
             {
-                std::cout << "Couldnt connect so GPIO server: " << errno << std::endl;
+                std::cout << "Couldnt connect so GPIO server: " << errno << " - " 
+				<< strerror(errno)  << std::endl;
 
                 sleep( 2 );
 
