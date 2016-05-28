@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -141,7 +142,7 @@ void gpio_Server::handle_connection( int client_handle)
 
 
            //std::cout << "Got headder: " << headder[0] << " | Size: " << headder[1]
-	//	 << " | ID: " << headder[2] << std::endl;
+		// << " | ID: " << headder[2] << std::endl;
 
             if( headder[0] == MOVEMENT_INSTRUCTION )
             {
@@ -155,13 +156,13 @@ void gpio_Server::handle_connection( int client_handle)
                     return;
                  }
 
-               // std::cout << "Got a Movement instruction: " << data[0]
-                 //            << " | " << data[1] << " | " << data[2]  << std::endl;
+                //std::cout << "Got a Movement instruction: " << data[0]
+                //             << " | " << data[1] << " | " << data[2]  << std::endl;
 
 
-                if( data[0] == MOVEMENT_INSTRUCTION )
+                if( data[0] == STEER_COMMAND )
                 {
-                    std::cout << "Got a steer command: " << data[1] << " | " << data[2] << std::endl;
+                    //std::cout << "Got a steer command: " << data[1] << " | " << data[2] << std::endl;
 
                     switch( data[1] )
                     {
