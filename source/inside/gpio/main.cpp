@@ -19,7 +19,7 @@
 
 #include "GPIO_Interface.hpp"
 
-#include "gpio.hpp"
+#include "gpio_protocol.hpp"
 
 class gpio_Server : public Server_inet
 {

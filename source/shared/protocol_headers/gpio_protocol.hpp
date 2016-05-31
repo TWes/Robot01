@@ -1,5 +1,5 @@
-#ifndef GPIO_HPP
-#define GPOP_HPP
+#ifndef GPIO_PROTOCOL_HPP
+#define GPIO_PROTOCOL_HPP
 
 #define GPIO_Port 2552
 

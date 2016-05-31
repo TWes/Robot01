@@ -15,7 +15,7 @@ set( BINARY_INSTALL_DIR
 
 set( CMAKE_CXX_FLAGS
 	${CMAKE_CXX_FLAGS}
-	" -std=gnu++11  -pedantic-errors "
+	" -std=gnu++11 -pedantic-errors "
 )
 
 ##########################
@@ -37,6 +37,10 @@ add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/shared/micro_controller
 	${CMAKE_CURRENT_SOURCE_DIR}/source/shared/micro_controller
 )
 
+# Build the protocol headers
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/shared/protocol_headers
+	${CMAKE_CURRENT_SOURCE_DIR}/source/shared/protocol_headers
+)
 
 ##########################
 ## Build inside targets ##

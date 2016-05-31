@@ -16,7 +16,7 @@ set( JOYSTICK_NODE_FILES
 )
 
 add_executable( joystick_node ${JOYSTICK_NODE_FILES} )
-target_link_libraries(joystick_node socket_inet)
-add_dependencies( joystick_node gpio_headders )
+target_link_libraries(joystick_node socket_inet protocol_headers)
+add_dependencies( joystick_node gpio_headders protocol_headers)
 
 install (TARGETS joystick_node DESTINATION ${BINARY_INSTALL_DIR} )

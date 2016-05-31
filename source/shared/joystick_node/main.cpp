@@ -12,7 +12,7 @@
 #include <fcntl.h>
 
 #include "socket_inet.hpp"
-#include "gpio.hpp"
+#include "gpio_protocol.hpp"
 
 bool end_program = false;
 
