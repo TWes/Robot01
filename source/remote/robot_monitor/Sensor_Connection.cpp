@@ -1,7 +1,7 @@
 #include "Sensor_Connection.hpp"
 
 Sensor_Connection::Sensor_Connection(std::string ip_address, int port, QWidget *parent) \
-        : socket_inet( ip_address, port)
+        : socket_inet( ip_address, port), QWidget( NULL )
 {
     this->actual_id = 1;
 
@@ -79,6 +79,7 @@ void Sensor_Connection::receiving_thread_funktion()
             }
 
 
+            emit debugOutput( "Fehler bei select: " + QString(errno) );
             std::cout << "Fehler bei select: " << errno << std::endl;
             continue;
         }
@@ -93,6 +94,7 @@ void Sensor_Connection::receiving_thread_funktion()
 
         if( ret < 0 )
         {
+            emit debugOutput( "Fehler beim lesen eines headders" );
             std::cout << "Fehler beim lesen eines headders" << std::endl;
             continue;
         }
@@ -104,6 +106,7 @@ void Sensor_Connection::receiving_thread_funktion()
 
         if( ret < 0 )
         {
+            emit debugOutput( "Fehler beim lesen der daten." );
             std::cout << "Fehler beim lesen der daten." << std::endl;
             continue;
         }
@@ -160,15 +163,22 @@ void Sensor_Connection::polling_thread_funktion()
 
     while ( this->continue_server )
     {
+        std::cout << "continue server" << std::endl;
+
         if( state == WAIT_FOR_CONNECTION )
         {
+
+            emit debugOutput( "Wait for connection: " + QString::number(errno) );
+
             std::cout << "Wair for connection: " << errno << std::endl;
 
             int ret = this->start_connection();
 
+            std::cout << "ret start connection" << std::endl;
+
             if( ret < 0 )
             {
-                sleep(1);
+                //sleep(1);
 
                 continue;
             }
@@ -178,7 +188,10 @@ void Sensor_Connection::polling_thread_funktion()
 
         else if( CONNECTION_ESTABLISHED )
         {
+            std::cout << "Connection established" << errno << std::endl;
+
             // Regulaly update the variables
+
             int ret = this->get_Pose();
 
             if( ret < 0 )
@@ -186,9 +199,11 @@ void Sensor_Connection::polling_thread_funktion()
                 continue;
             }
 
-            usleep( 1000000 );
+            //usleep( 1000000 );
         }
     }
+
+    std::cout << "End of polling thread" << std::endl;
 
     this->shutdown_connection();
 }

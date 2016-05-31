@@ -5,7 +5,10 @@
 
 #include "map_widget.hpp"
 #include "Sensor_Connection.hpp"
+#include <QtCore>
+
 #include "status_widget.hpp"
+#include "output_box.hpp"
 
 extern Sensor_Connection *sensor_connection;
 
@@ -23,6 +26,7 @@ public:
 
     map_widget *MapWidget;
     status_widget *StatusWidget;
+    output_box *debug_output;
 
     // Globaly needed
 

@@ -2,11 +2,12 @@
 
 status_widget::status_widget( QWidget *parent ) : QWidget( parent )
 {
-
+    this->setMinimumHeight( 30 );
 }
 
 void status_widget::paintEvent(QPaintEvent *event)
 {
+
     QPainter painter( this );
 
     Pose_t act_pose = {0.0,0.0,0.0};

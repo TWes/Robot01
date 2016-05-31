@@ -22,8 +22,10 @@ typedef struct {
 } request_entry_t;
 
 
-class Sensor_Connection : public socket_inet
+class Sensor_Connection : public QWidget, public socket_inet
 {
+    Q_OBJECT
+
 public:
     Sensor_Connection(std::string ip_address, int port, QWidget *parent);
     ~Sensor_Connection();
@@ -42,11 +44,13 @@ public:
     std::mutex open_requests_mutex;
     std::vector<request_entry_t> open_requests;
 
-
     void start_server();
     void end_server();
 
     QWidget *parent;
+
+signals:
+    void debugOutput( QString message );
 
 
 private:
@@ -54,10 +58,5 @@ private:
 
     int get_Pose();
 };
-
-
-
-
-
 
 #endif // SENSOR_CONNECTION_HPP
