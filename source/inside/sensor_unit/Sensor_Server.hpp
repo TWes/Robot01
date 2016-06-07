@@ -34,6 +34,11 @@ class Sensor_Server : public Server_inet
         signed char left_direction;
         signed char right_direction;
 
+		// Members for the i2c communication
+		void I2C_thread_funktion();
+		std::thread I2C_thread;
+
+
 		// Members for ADC
 		void ADC_thread_funktion();
 		std::thread ADC_thread;

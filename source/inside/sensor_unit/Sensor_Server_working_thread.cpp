@@ -30,7 +30,7 @@ void Sensor_Server::working_thread_function()
 	// No new measurements
         if( delta_t == 0.0 )
         {
-	   std::cout << "delta_t = " << delta_t << std::endl;
+	   //std::cout << "delta_t = " << delta_t << std::endl;
 		
             continue;
         }
@@ -70,9 +70,9 @@ void Sensor_Server::working_thread_function()
             left_velocity > max_velocity  || left_velocity < -max_velocity )
         {	
 
-		std::cout << "velocity out of bound" << std::endl;
-		std::cout << "count diff: " << left_steps_since_last 
-			<< "; " << left_steps_since_last << std::endl;
+		//std::cout << "velocity out of bound" << std::endl;
+		//std::cout << "count diff: " << left_steps_since_last 
+			//<< "; " << left_steps_since_last << std::endl;
 
 		last_wheel_meas = act_wheel_meas;
 
@@ -82,15 +82,15 @@ void Sensor_Server::working_thread_function()
         }
 
 	
-	std::cout << "Decoder: " << std::endl;
+	//std::cout << "Decoder: " << std::endl;
 
-	std::cout << "Steps: " << left_steps_since_last
-		<< "; " << right_steps_since_last << std::endl;
+	//std::cout << "Steps: " << left_steps_since_last
+		//<< "; " << right_steps_since_last << std::endl;
 
-	std::cout << "Distance: " << left_distance_since_last 
-		<< "; " << right_distance_since_last << std::endl;		
+	//std::cout << "Distance: " << left_distance_since_last 
+		//<< "; " << right_distance_since_last << std::endl;		
 
-	std::cout << "Velocity; " << left_velocity << "; " <<  right_velocity << std::endl;
+	//std::cout << "Velocity; " << left_velocity << "; " <<  right_velocity << std::endl;
 
 
         /*************
