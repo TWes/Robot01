@@ -48,15 +48,16 @@ void Sensor_Server::working_thread_function()
 
         // in Meter
         const double wheel_circumference = 0.124;
+	const double decoder_steps_to_m = 0.007920792;
 
         // Throuought test we found out, that the robot
         // couldnt move faster than that
         const double max_velocity = 1.0;
 
         double right_distance_since_last = (right_direction ? right_direction : 1) * \
-                    right_steps_since_last * (wheel_circumference / 8.0);
+                    right_steps_since_last * decoder_steps_to_m;
         double left_distance_since_last = (left_direction ? left_direction : 1) * \
-                    left_steps_since_last * (wheel_circumference / 8.0);
+                    left_steps_since_last * decoder_steps_to_m;
 
         // the direction variable depends on the direction send by the GPIO Server
         // -1 back; 0 - No movement; 1 foreward
@@ -67,10 +68,9 @@ void Sensor_Server::working_thread_function()
         // last_measurement is not updated
         if( right_velocity > max_velocity ||  right_velocity < -max_velocity ||
             left_velocity > max_velocity  || left_velocity < -max_velocity )
-        {
-		
+        {	
 
-	    std::cout << "velocity out of bound" << std::endl;
+		std::cout << "velocity out of bound" << std::endl;
 		std::cout << "count diff: " << left_steps_since_last 
 			<< "; " << left_steps_since_last << std::endl;
 
@@ -82,8 +82,14 @@ void Sensor_Server::working_thread_function()
         }
 
 	
-	std::cout << "Decoder: \n" << "Distance: " << left_distance_since_last 
-		<< "; " << right_distance_since_last << std::endl;
+	std::cout << "Decoder: " << std::endl;
+
+	std::cout << "Steps: " << left_steps_since_last
+		<< "; " << right_steps_since_last << std::endl;
+
+	std::cout << "Distance: " << left_distance_since_last 
+		<< "; " << right_distance_since_last << std::endl;		
+
 	std::cout << "Velocity; " << left_velocity << "; " <<  right_velocity << std::endl;
 
 
