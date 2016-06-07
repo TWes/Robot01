@@ -20,6 +20,7 @@ set( ROBOT_MONITOR_FILES
 	map_widget.cpp
 	Sensor_Connection.cpp
 	status_widget.cpp
+	output_box.cpp
 )
 
 add_executable( robot_monitor ${ROBOT_MONITOR_FILES} )
