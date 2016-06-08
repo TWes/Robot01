@@ -43,29 +43,26 @@ void Sensor_Server::cleanup()
 	CAM_thread.join();
 	I2C_thread.join();
 
-    IMU_thread.join();
-    Wheel_thread.join();
+    	i2c_bus.close_connection();
 
-    i2c_bus.close_connection();
+	log_file << "Sensor Server cleanup compleded (closing logfile now)";
 
-    log_file << "Sensor Server cleanup compleded (closing logfile now)";
-
-    log_file.close();
+	log_file.close();
 }
 
 void Sensor_Server::handle_connection( int client_handle )
 {
-    int16_t headder[3];
+	int16_t headder[3];
 	
-    int ret = read( client_handle, headder, 3*sizeof(int16_t) );
+	int ret = read( client_handle, headder, 3*sizeof(int16_t) );
 	if( ret <= 0 )
 	{
 		sleep(1);
 		return;
 	}
 
-    if( headder[0] == SET_VARIABLE )
-    {
+	if( headder[0] == SET_VARIABLE )
+    	{
         uint16_t data;
 
         // Look if there ist something to read
@@ -98,10 +95,10 @@ void Sensor_Server::handle_connection( int client_handle )
 
             switch( new_value[1])
             {
-            case 1: right_direction = 0; break;
-            case 2: right_direction = 1; break;
-            case 4: right_direction = -1; break;
-            default: break;
+		case 1: right_direction = 0; break;
+		case 2: right_direction = 1; break;
+            	case 4: right_direction = -1; break;
+            	default: break;
             }
 
             break;
@@ -254,9 +251,9 @@ void Sensor_Server::I2C_thread_funktion()
 		gettimeofday( &act_time, NULL);
 
 
-		std::cout << "Thread function" << std::endl;
+		//std::cout << "Thread function" << std::endl;
 		
-		std::cout << "Read complete content of microcontroller" << std::endl;
+		//std::cout << "Read complete content of microcontroller" << std::endl;
 
 		/****************************
 		 *  I2C Register Map
@@ -354,7 +351,7 @@ void Sensor_Server::I2C_thread_funktion()
 		}
         	Wheel_queue_mutex.unlock();
 
-		std::cout << "Read content of the imu" << std::endl;
+		//std::cout << "Read content of the imu" << std::endl;
 
 
 		// Get the IMU Values
