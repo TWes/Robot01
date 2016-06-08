@@ -16,6 +16,8 @@
 
 bool end_program = false;
 
+bool debug_mode = false;
+
 void sighandler(int signum)
 {
         if( signum == SIGINT )
@@ -25,13 +27,25 @@ void sighandler(int signum)
 
 int main( int argc, char** argv )
 {
-    if( argc != 4 )
+    if( argc < 4 )
     {
-        std::cout << "Unsufizient number of arguments: <ip> <port> <joystick>" << std::endl;
+        std::cout << "Unsufizient number of arguments: <ip> <port> <joystick> [<options>]" << std::endl;
 
         return -1;
     }
 
+	for( int i = 4; i < argc; i++ )
+	{
+		// Enter verbose mode
+		if( std::string( argv[i] ).compare( "-v" ) == 0 )
+		{
+			debug_mode = true;
+		}
+		else
+		{
+			std::cout << "Ignoring unknown argument: " << std::string( argv[i] ) << std::endl;
+		}
+	}
 
     std::cout << "Programm startet" << std::endl;
 
@@ -121,8 +135,13 @@ int main( int argc, char** argv )
 
         if( joystick_event.type == JS_EVENT_BUTTON )
         {
-            std::cout << "Button " << int( joystick_event.number) << " pressed, got value " <<
+
+			if( debug_mode )
+			{
+				std::cout << "Button " << int( joystick_event.number) << " pressed, got value " <<
                          joystick_event.value << std::endl;
+			}
+            
 
             if( button_state[ joystick_event.number - 4 ] != joystick_event.value  )
             {
