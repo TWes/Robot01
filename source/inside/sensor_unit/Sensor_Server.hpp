@@ -30,36 +30,28 @@ class Sensor_Server : public Server_inet
 
 		bool start_up;
 
-        /* Variables need for calcualtation */
-        signed char left_direction;
-        signed char right_direction;
+      		/* Variables need for calcualtation */
+	        signed char left_direction;
+        	signed char right_direction;
 
 		// Members for the i2c communication
 		void I2C_thread_funktion();
 		std::thread I2C_thread;
 
 
-		// Members for ADC
-		void ADC_thread_funktion();
-		std::thread ADC_thread;
+		// Members for ADC		
 		std::mutex adc_queue_mutex;
 		std::queue<ADC_Measurement> adc_values;
 
 		// Members for Sonar
-		void Sonar_thread_funktion();
-		std::thread Sonar_thread;
 		std::mutex Sonar_queue_mutex;
 		std::queue<Sonar_Measurement> Sonar_values;
 
-        // Members for Wheelencoder
-        void Wheel_thread_funktion();
-        std::thread Wheel_thread;
-        std::mutex Wheel_queue_mutex;
-        std::list<Wheel_Measurement> Wheel_values;
+        	// Members for Wheelencoder
+	        std::mutex Wheel_queue_mutex;
+	        std::list<Wheel_Measurement> Wheel_values;
 
 		// Members for IMU
-		void IMU_thread_funktion();
-		std::thread IMU_thread;
 		std::mutex IMU_queue_mutex;
 		std::list<IMU_Measurement> IMU_values;	
 		static const int IMU_Buffer_Size = 1;	

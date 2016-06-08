@@ -33,14 +33,12 @@ void Sensor_Server::working_thread_function()
 	   //std::cout << "delta_t = " << delta_t << std::endl;
 		
             continue;
-        }
-	
+        }	
 	
 	/*****************************
          * Calculate the new Position out of
          * the decoder
-         ****************************/
-	
+         ****************************/	
         // Process the wheel encoder
         // 1. Calculate the distance driven
         int right_steps_since_last = act_wheel_meas.Right_Wheel_Rotations - last_wheel_meas.Right_Wheel_Rotations;
@@ -82,15 +80,15 @@ void Sensor_Server::working_thread_function()
         }
 
 	
-	//std::cout << "Decoder: " << std::endl;
+	/*std::cout << "Decoder: " << std::endl;
 
-	//std::cout << "Steps: " << left_steps_since_last
-		//<< "; " << right_steps_since_last << std::endl;
+	std::cout << "Steps: " << left_steps_since_last
+		<< "; " << right_steps_since_last << std::endl;
 
-	//std::cout << "Distance: " << left_distance_since_last 
-		//<< "; " << right_distance_since_last << std::endl;		
+	std::cout << "Distance: " << left_distance_since_last 
+		<< "; " << right_distance_since_last << std::endl;		
 
-	//std::cout << "Velocity; " << left_velocity << "; " <<  right_velocity << std::endl;
+	std::cout << "Velocity; " << left_velocity << "; " <<  right_velocity << std::endl;*/
 
 
         /*************
@@ -99,8 +97,11 @@ void Sensor_Server::working_thread_function()
         double acceleration_IMU = act_imu_meas.acc[1]; // Beschleunigung in y- Richtung
         double rotation_IMU = act_imu_meas.gyro[2]; // rotation um die z- Achse
 
-       
+	double IMU_velocity = acceleration_IMU * delta_t;
 
+	/*std::cout << "IMU Velo: " << IMU_velocity << std::endl;
+	std::cout << "IMU Rotation: " << rotation_IMU << std::endl;*/
+	
 
         last_wheel_meas = act_wheel_meas;
         last_left_velocity = left_velocity;
