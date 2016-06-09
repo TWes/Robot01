@@ -18,8 +18,8 @@ void Sensor_Server::working_thread_function()
 		act_adc_measurment = *(adc_values.begin());
 	adc_queue_mutex.unlock();
 
-	std::cout << "ADC L: " << act_adc_measurment.ADC_low << std::endl;
-	std::cout << "ADC H: " << act_adc_measurment.ADC_high << std::endl;
+	/*std::cout << "ADC L: " << act_adc_measurment.ADC_low << std::endl;
+	std::cout << "ADC H: " << act_adc_measurment.ADC_high << std::endl;*/
 
 
 	// The imu measurement

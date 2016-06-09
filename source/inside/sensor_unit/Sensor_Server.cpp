@@ -279,12 +279,12 @@ void Sensor_Server::I2C_thread_funktion()
 		
 
 		// Read ADC Values
-		ADC_Measurement voltage;		
+		ADC_Measurement voltage;		 
 
 		voltage.ADC_low = (uint16_t) (buffer[0] | ( buffer[1] << 8 ));
-		voltage.ADC_low /= 204.6;
+		voltage.ADC_low *= 0.007; // Konvert to voltage
 		voltage.ADC_high = (uint16_t) (buffer[2] | ( buffer[3] << 8 ));
-		voltage.ADC_high /= 204.6;
+		voltage.ADC_high *= 0.007;
 
 		voltage.timestamp = act_time;
 
@@ -367,7 +367,7 @@ void Sensor_Server::I2C_thread_funktion()
 
 		for( int i = 0; i<3; i++ )
 		{	
-			mag_values[i] = (uint16_t) (IMU_buffer[2*i] | ( IMU_buffer[2*i+1] << 8 ));	
+			mag_values[i] = (uint16_t) (IMU_buffer[2*i+1] | ( IMU_buffer[2*i] << 8 ));	
 			IMU_meas.mag[i] = (1- influence) * last_meas.mag[i] + influence * (mag_values[i] * 0.3001221) ;
 		}
 
@@ -378,7 +378,7 @@ void Sensor_Server::I2C_thread_funktion()
 		
 		for( int i = 0; i<3; i++ )
 		{
-			acc_values[i] = (uint16_t) (IMU_buffer[2*i] | ( IMU_buffer[2*i+1] << 8 ));
+			acc_values[i] = (uint16_t) (IMU_buffer[2*i+1] | ( IMU_buffer[2*i] << 8 ));
 			IMU_meas.acc[i] = acc_values[i] / 16384.0 ;
 		}
 
@@ -387,7 +387,7 @@ void Sensor_Server::I2C_thread_funktion()
 		i2c_bus.i2c_read( 0x24, 0x41, 6, IMU_buffer );
 		
 		int16_t temp_value;
-		temp_value = (int16_t) (IMU_buffer[0] | ( IMU_buffer[1] << 8 ));
+		temp_value = (int16_t) (IMU_buffer[1] | ( IMU_buffer[0] << 8 ));
 		IMU_meas.temp = (temp_value - 521) / 340;
 
 
@@ -395,7 +395,7 @@ void Sensor_Server::I2C_thread_funktion()
 	
 		for( int i = 1; i<4; i++ )
 		{
-			gyro_values[i] = (uint16_t) (IMU_buffer[2*i] | ( IMU_buffer[2*i+1] << 8 ));
+			gyro_values[i] = (uint16_t) (IMU_buffer[2*i+1] | ( IMU_buffer[2*i] << 8 ));
 			IMU_meas.gyro[i] = gyro_values[i] / 131.;
 		}
 
