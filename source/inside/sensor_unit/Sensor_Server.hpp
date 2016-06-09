@@ -41,7 +41,7 @@ class Sensor_Server : public Server_inet
 
 		// Members for ADC		
 		std::mutex adc_queue_mutex;
-		std::queue<ADC_Measurement> adc_values;
+		std::list<ADC_Measurement> adc_values;
 
 		// Members for Sonar
 		std::mutex Sonar_queue_mutex;

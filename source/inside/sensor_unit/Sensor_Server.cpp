@@ -289,10 +289,10 @@ void Sensor_Server::I2C_thread_funktion()
 		voltage.timestamp = act_time;
 
 		adc_queue_mutex.lock();
-			this->adc_values.push(voltage);
+			this->adc_values.push_front(voltage);
 			while( this->adc_values.size() > 5 )
 			{
-				this->adc_values.pop();
+				this->adc_values.pop_back();
 			}
 		adc_queue_mutex.unlock();
 		
