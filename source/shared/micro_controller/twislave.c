@@ -104,6 +104,8 @@ ISR (TWI_vect)
 		{
 			TWDR=0; //Kein Daten mehr im Buffer
 		}
+		
+		_delay_us(3);
 		TWCR_ACK;
 	break;
 	
