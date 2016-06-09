@@ -59,7 +59,7 @@ void init_adc_module()
 
 ISR( ADC_vect )
 {
-    txbuffer[0x00] = 0xbe;
+    i2cdata[0x00] = 0xbe;
 
     // handle the ADC Value
     uint16_t adc_value = ADC;
@@ -71,8 +71,8 @@ ISR( ADC_vect )
    if( adc_table[mux_field].last_state != NO_WHEEL )
    {
        // Kopiere Wert in transmiter buffer
-      txbuffer[adc_table[mux_field].TWI_buffer + 2] = adc_value;
-      txbuffer[adc_table[mux_field].TWI_buffer + 3] = (adc_value >> 8);
+      i2cdata[adc_table[mux_field].TWI_buffer + 2] = adc_value;
+      i2cdata[adc_table[mux_field].TWI_buffer + 3] = (adc_value >> 8);
 
       // Interpret the values
       // A good threshhold is 3 V (= 0,6 * max = 0x265 )
@@ -84,8 +84,8 @@ ISR( ADC_vect )
       {
           // Incement rotations
           rotations[mux_field]++;
-          txbuffer[adc_table[mux_field].TWI_buffer] = rotations[mux_field];
-          txbuffer[adc_table[mux_field].TWI_buffer + 1] = rotations[mux_field] >> 8;
+          i2cdata[adc_table[mux_field].TWI_buffer] = rotations[mux_field];
+          i2cdata[adc_table[mux_field].TWI_buffer + 1] = rotations[mux_field] >> 8;
 
           // Change State
           adc_table[mux_field].last_state = WHITE; 
@@ -96,8 +96,8 @@ ISR( ADC_vect )
       {
           // Incement rotations
           rotations[mux_field]++;
-          txbuffer[adc_table[mux_field].TWI_buffer] = rotations[mux_field];
-          txbuffer[adc_table[mux_field].TWI_buffer + 1] = rotations[mux_field] >> 8;
+          i2cdata[adc_table[mux_field].TWI_buffer] = rotations[mux_field];
+          i2cdata[adc_table[mux_field].TWI_buffer + 1] = rotations[mux_field] >> 8;
 
           // Change State
           adc_table[mux_field].last_state = BLACK;
@@ -112,8 +112,8 @@ ISR( ADC_vect )
    else
    {
        // Set the transmiter buffer value;
-       txbuffer[adc_table[mux_field].TWI_buffer] = adc_value;
-       txbuffer[adc_table[mux_field].TWI_buffer + 1] = (adc_value >> 8);
+       i2cdata[adc_table[mux_field].TWI_buffer] = adc_value;
+       i2cdata[adc_table[mux_field].TWI_buffer + 1] = (adc_value >> 8);
    }
 
    // Until now, this valuie is not needed

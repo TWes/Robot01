@@ -27,10 +27,6 @@
  *  0x16 - 0x17 Left Wheel Sensor Resistance
  ****************************/
 
-volatile uint8_t rxbuffer[buffer_size];
-volatile uint8_t txbuffer[buffer_size];
-volatile uint8_t buffer_adr;
-
 void main()
 {
 	cli();
@@ -45,17 +41,14 @@ void main()
 
     sei();	
 
-    for( int i = 0; i < buffer_size; i++ )
+    for( int i = 0; i < i2c_buffer_size; i++ )
     {
-        txbuffer[i] = 0x00;
+        i2cdata[i] = 0x00;
     }
 
 	while( 1 )
 	{
-        //txbuffer[0x10] = TCNT1;
-        //txbuffer[0x11] = TCNT1 >> 8;
-
-        _delay_ms(20);
+    	_delay_ms(20);
 
     } // End of while loop
 }

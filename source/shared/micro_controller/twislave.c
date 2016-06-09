@@ -1,140 +1,124 @@
-/*#################################################################################################
-	Title	: TWI SLave
-	Author	: Martin Junghans <jtronics@gmx.de>
-	Hompage	: www.jtronics.de
-	Software: AVR-GCC / Programmers Notpad 2
-	License	: GNU General Public License 
-	
-	Aufgabe	:
-	Betrieb eines AVRs mit Hardware-TWI-Schnittstelle als Slave. 
-	Zu Beginn muss init_twi_slave mit der gewünschten Slave-Adresse als Parameter aufgerufen werden. 
-	Der Datenaustausch mit dem Master erfolgt über die Buffer rxbuffer und txbuffer, auf die von Master und Slave zugegriffen werden kann. 
-	rxbuffer und txbuffer sind globale Variablen (Array aus uint8_t).
-	
-	Ablauf:
-	Die Ansteuerung des rxbuffers, in den der Master schreiben kann, erfolgt ähnlich wie bei einem normalen I2C-EEPROM.
-	Man sendet zunächst die Bufferposition, an die man schreiben will, und dann die Daten. Die Bufferposition wird 
-	automatisch hochgezählt, sodass man mehrere Datenbytes hintereinander schreiben kann, ohne jedesmal
-	die Bufferadresse zu schreiben.
-	Um den txbuffer vom Master aus zu lesen, überträgt man zunächst in einem Schreibzugriff die gewünschte Bufferposition und
-	liest dann nach einem repeated start die Daten aus. Die Bufferposition wird automatisch hochgezählt, sodass man mehrere
-	Datenbytes hintereinander lesen kann, ohne jedesmal die Bufferposition zu schreiben.
+#include <util/twi.h> 	    //enthÃ¤lt z.B. die Bezeichnungen fÃ¼r die Statuscodes in TWSR
+#include <avr/interrupt.h>  //dient zur Behandlung der Interrupts
+#include <stdint.h>         //definiert den Datentyp uint8_t       
+#include "twislave.h"
 
-	Abgefangene Fehlbedienung durch den Master:
-	- Lesen über die Grenze des txbuffers hinaus
-	- Schreiben über die Grenzen des rxbuffers hinaus
-	- Angabe einer ungültigen Schreib/Lese-Adresse
-	- Lesezuggriff, ohne vorher Leseadresse geschrieben zu haben
-	
-	LICENSE:
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    any later version.
+//%%%%%%%% Globale Variablen, die vom Hauptprogramm genutzt werden %%%%%%%%
+/*Der Buffer, in dem die Daten gespeichert werden. 
+Aus Sicht des Masters lÃ¤uft der Zugrif auf den Buffer genau wie bei einem I2C-EEPROm ab.
+FÃ¼r den Slave ist es eine globale Variable
+*/
+volatile uint8_t buffer_adr; //"Adressregister" fÃ¼r den Buffer
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+volatile uint8_t i2cdata[i2c_buffer_size];
 
-//#################################################################################################*/
 
-#include <util/twi.h> 								// Bezeichnungen für Statuscodes in TWSR
-#include <avr/interrupt.h> 							// behandlung der Interrupts
-#include <stdint.h> 								// definiert Datentyp uint8_t
-#include "twislave.h" 								
-
-//#################################### Macros
-//ACK nach empfangenen Daten senden/ ACK nach gesendeten Daten erwarten
-#define TWCR_ACK 	TWCR = (1<<TWEN)|(1<<TWIE)|(1<<TWINT)|(1<<TWEA)|(0<<TWSTA)|(0<<TWSTO)|(0<<TWWC);  
-
-//NACK nach empfangenen Daten senden/ NACK nach gesendeten Daten erwarten     
-#define TWCR_NACK 	TWCR = (1<<TWEN)|(1<<TWIE)|(1<<TWINT)|(0<<TWEA)|(0<<TWSTA)|(0<<TWSTO)|(0<<TWWC);
-
-//switched to the non adressed slave mode...
-#define TWCR_RESET 	TWCR = (1<<TWEN)|(1<<TWIE)|(1<<TWINT)|(1<<TWEA)|(0<<TWSTA)|(0<<TWSTO)|(0<<TWWC);  
-
-//########################################################################################## init_twi_slave 
+/*Initaliserung des TWI-Inteface. Muss zu Beginn aufgerufen werden, sowie bei einem Wechsel der Slave Adresse
+Parameter adr: gewÃ¼nschte Slave-Adresse
+*/
 void init_twi_slave(uint8_t adr)
 {
-	TWAR= adr; //Adresse setzen
+    TWAR= adr; //Adresse setzen
 	TWCR &= ~(1<<TWSTA)|(1<<TWSTO);
 	TWCR|= (1<<TWEA) | (1<<TWEN)|(1<<TWIE); 	
 	buffer_adr=0xFF;  
 	sei();
 }
 
-//########################################################################################## ISR (TWI_vect) 
-//ISR, die bei einem Ereignis auf dem Bus ausgelöst wird. Im Register TWSR befindet sich dann 
-//ein Statuscode, anhand dessen die Situation festgestellt werden kann.
+
+//Je nach Statuscode in TWSR mÃ¼ssen verschiedene Bitmuster in TWCR geschreiben werden(siehe Tabellen im Datenblatt!). 
+//Makros fÃ¼r die verwendeten Bitmuster:
+
+//ACK nach empfangenen Daten senden/ ACK nach gesendeten Daten erwarten
+#define TWCR_ACK TWCR = (1<<TWEN)|(1<<TWIE)|(1<<TWINT)|(1<<TWEA)|(0<<TWSTA)|(0<<TWSTO)|(0<<TWWC);  
+
+//NACK nach empfangenen Daten senden/ NACK nach gesendeten Daten erwarten     
+#define TWCR_NACK TWCR = (1<<TWEN)|(1<<TWIE)|(1<<TWINT)|(0<<TWEA)|(0<<TWSTA)|(0<<TWSTO)|(0<<TWWC);
+
+//switch to the non adressed slave mode...
+#define TWCR_RESET TWCR = (1<<TWEN)|(1<<TWIE)|(1<<TWINT)|(1<<TWEA)|(0<<TWSTA)|(1<<TWSTO)|(0<<TWWC);  
+
+
+/*ISR, die bei einem Ereignis auf dem Bus ausgelÃ¶st wird. Im Register TWSR befindet sich dann 
+ein Statuscode, anhand dessen die Situation festgestellt werden kann.
+*/
 ISR (TWI_vect)  
 {
 	uint8_t data=0;
-	switch (TW_STATUS) 								// TWI-Statusregister prüfen und nötige Aktion bestimmen 
+
+	switch (TW_STATUS) //TWI-Statusregister prÃ¼fen und nÃ¶tige Aktion bestimmen 
+	{
+
+	// Slave Receiver 
+
+	case TW_SR_SLA_ACK: // 0x60 Slave Receiver, Slave wurde adressiert	
+		TWCR_ACK; // nÃ¤chstes Datenbyte empfangen, ACK danach senden	
+		buffer_adr=0xFF; //Bufferposition ist undefiniert
+	break;
+	
+	case TW_SR_DATA_ACK: // 0x80 Slave Receiver, ein Datenbyte wurde empfangen
+		data=TWDR; //Empfangene Daten auslesen
+		if (buffer_adr == 0xFF) //erster Zugriff, Bufferposition setzen
 		{
-		case TW_SR_SLA_ACK: 						// 0x60 Slave Receiver, wurde adressiert	
-            //Disable interrupts
-
-            TWCR_ACK; 								// nächstes Datenbyte empfangen, ACK danach
-			buffer_adr=0xFF; 						// Bufferposition ist undefiniert
-            break;
-
-		case TW_SR_DATA_ACK: 						// 0x80 Slave Receiver,Daten empfangen
-			data=TWDR; 								// Empfangene Daten auslesen
-			if (buffer_adr == 0xFF) 				// erster Zugriff, Bufferposition setzen
-				{
-					if(data<=buffer_size)			// Kontrolle ob gewünschte Adresse im erlaubten bereich
-						{
-							buffer_adr= data; 		// Bufferposition wie adressiert setzen
-						}
-					else
-						{
-						buffer_adr=0; 				// Adresse auf Null setzen. Ist das sinnvoll?
-						}				
-					TWCR_ACK;						// nächstes Datenbyte empfangen, ACK danach, um nächstes Byte anzufordern
-				}
-			else 									// weiterer Zugriff, Daten empfangen
-				{
-					rxbuffer[buffer_adr]=data; 		// Daten in Buffer schreiben
-					buffer_adr++; 					// Buffer-Adresse weiterzählen für nächsten Schreibzugriff
-					if(buffer_adr<(buffer_size-1)) // im Buffer ist noch Platz für mehr als ein Byte
-						{
-							TWCR_ACK;				// nächstes Datenbyte empfangen, ACK danach, um nächstes Byte anzufordern
-						}
-					else   							// es kann nur noch ein Byte kommen, dann ist der Buffer voll
-						{
-							TWCR_NACK;				// letztes Byte lesen, dann NACK, um vollen Buffer zu signaliseren
-						}
-				}
-			break;
-
-		case TW_ST_SLA_ACK: 						//
-		case TW_ST_DATA_ACK: 						// 0xB8 Slave Transmitter, weitere Daten wurden angefordert
-
-			if (buffer_adr == 0xFF) 				// zuvor keine Leseadresse angegeben! 
-				{
-					buffer_adr=0;
-				}	
-			TWDR = txbuffer[buffer_adr]; 			// Datenbyte senden 
-			buffer_adr++; 							// bufferadresse für nächstes Byte weiterzählen
-                _delay_us(3);
-				if(buffer_adr<(buffer_size-1)) 		// im Buffer ist mehr als ein Byte, das gesendet werden kann
-				{
-					TWCR_ACK; 						// nächstes Byte senden, danach ACK erwarten
-				}
+			//Kontrolle ob gewÃ¼nschte Adresse im erlaubten bereich
+			if(data<i2c_buffer_size+1)
+			{
+				buffer_adr= data; //Bufferposition wie adressiert setzen
+			}
 			else
-				{
-					TWCR_NACK; 						// letztes Byte senden, danach NACK erwarten
-				}
-			break;
+			{
+				buffer_adr=0; //Adresse auf Null setzen. Ist das sinnvoll? TO DO!
+			}				
+			TWCR_ACK;	// nÃ¤chstes Datenbyte empfangen, ACK danach, um nÃ¤chstes Byte anzufordern
+		}
+		else //weiterer Zugriff, nachdem die Position im Buffer gesetzt wurde. NUn die Daten empfangen und speichern
+		{
+		
+			if(buffer_adr<i2c_buffer_size+1)
+			{
+				i2cdata[buffer_adr]=data; //Daten in Buffer schreibe	
+			}
+			buffer_adr++; //Buffer-Adresse weiterzÃ¤hlen fÃ¼r nÃ¤chsten Schreibzugriff
+			TWCR_ACK;	
+		}
+	break;
 
-		case TW_ST_DATA_NACK: 						// 0xC0 Keine Daten mehr gefordert 
-        case TW_SR_DATA_NACK: 						// 0x88
-		case TW_ST_LAST_DATA: 						// 0xC8  Last data byte in TWDR has been transmitted (TWEA = “0”); ACK has been received
-		case TW_SR_STOP: 							// 0xA0 STOP empfangen
-		default: 	
-			TWCR_RESET; 							// Übertragung beenden, warten bis zur nächsten Adressierung
-            // schalte interrupts wieder ein
-			break;	
-		} //end.switch (TW_STATUS)
+
+	//Slave transmitter
+	case TW_ST_SLA_ACK: //0xA8 Slave wurde im Lesemodus adressiert und hat ein ACK zurÃ¼ckgegeben.
+	//Hier steht kein break! Es wird also der folgende Code ebenfalls ausgefÃ¼hrt!
+	
+	case TW_ST_DATA_ACK: //0xB8 Slave Transmitter, Daten wurden angefordert
+
+		if (buffer_adr == 0xFF) //zuvor keine Leseadresse angegeben! 
+		{
+			buffer_adr=0;
+		}	
+		
+		if(buffer_adr<i2c_buffer_size+1)	
+		{
+			TWDR = i2cdata[buffer_adr]; //Datenbyte senden
+			buffer_adr++; //bufferadresse fÃ¼r nÃ¤chstes Byte weiterzÃ¤hlen
+		}
+		else
+		{
+			TWDR=0; //Kein Daten mehr im Buffer
+		}
+		TWCR_ACK;
+	break;
+	
+	case TW_SR_STOP:
+	    TWCR_ACK;
+	break;
+	
+	case TW_ST_DATA_NACK: // 0xC0 Keine Daten mehr gefordert 
+	case TW_SR_DATA_NACK: // 0x88 
+	case TW_ST_LAST_DATA: // 0xC8  Last data byte in TWDR has been transmitted (TWEA = â€œ0â€); ACK has been received
+	default: 	
+    	TWCR_RESET;
+	break;
+	
+	} //end.switch (TW_STATUS)
 } //end.ISR(TWI_vect)
+
+////Ende von twislave.c////

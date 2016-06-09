@@ -1,7 +1,5 @@
 #include "sonar.h"
 
-extern volatile uint8_t txbuffer[30];
-
 volatile uint8_t state_of_PD = 0;
 volatile uint8_t state_of_PB = 0;
 
@@ -156,8 +154,8 @@ ISR( PCINT0_vect )
                     meas_length = sonar_table[4].meas_end - sonar_table[4].meas_start;
                 }
 
-                txbuffer[sonar_table[4].TWI_buffer] = meas_length;
-                txbuffer[sonar_table[4].TWI_buffer +1 ] = (meas_length >> 8);
+                i2cdata[sonar_table[4].TWI_buffer] = meas_length;
+                i2cdata[sonar_table[4].TWI_buffer +1 ] = (meas_length >> 8);
             }
 
 
@@ -177,9 +175,6 @@ ISR( PCINT2_vect )
     uint8_t port_d = PIND;
     uint8_t change_vector = port_d ^ state_of_PD;
 
-
-    //txbuffer[0x18] = state_of_PD;
-    //txbuffer[0x19] = port_d;
 
     for( uint8_t active_entry = 0; active_entry <= 3; active_entry++)
     {
@@ -217,8 +212,8 @@ ISR( PCINT2_vect )
                         meas_length = sonar_table[active_entry].meas_end - sonar_table[active_entry].meas_start;
                     }
 
-                    txbuffer[sonar_table[active_entry].TWI_buffer] = meas_length;
-                    txbuffer[sonar_table[active_entry].TWI_buffer +1 ] = (meas_length >> 8);
+                    i2cdata[sonar_table[active_entry].TWI_buffer] = meas_length;
+                    i2cdata[sonar_table[active_entry].TWI_buffer +1 ] = (meas_length >> 8);
                 }
 
 

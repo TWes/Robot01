@@ -1,7 +1,5 @@
 #include "timer.h"
 
-extern volatile uint8_t txbuffer[30];
-
 void init_timer_module()
 {
     // Disable PORT invokation
@@ -38,7 +36,7 @@ ISR( TIMER1_OVF_vect )
 
             uint8_t error_entry = (0x0f & last_sonar_measured);
             error_entry |= (error_counter << 4);
-            txbuffer[0x0E] = error_entry;
+            i2cdata[0x0E] = error_entry;
         }
 
         // "Warn" the Software

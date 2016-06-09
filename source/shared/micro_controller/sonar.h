@@ -3,6 +3,7 @@
 
 #include "avr/io.h"
 #include "avr/interrupt.h"
+#include "twislave.h"
 
 #define F_CPU 8000000
 
