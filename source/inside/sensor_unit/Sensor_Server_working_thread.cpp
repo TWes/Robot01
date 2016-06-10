@@ -11,6 +11,17 @@ void Sensor_Server::working_thread_function()
         static double last_right_velocity = 0.0;
         static double last_left_velocity = 0.0;
 
+	// The ADC Measurement
+	ADC_Measurement act_adc_measurment;
+		
+	adc_queue_mutex.lock();
+		act_adc_measurment = *(adc_values.begin());
+	adc_queue_mutex.unlock();
+
+	/*std::cout << "ADC L: " << act_adc_measurment.ADC_low << std::endl;
+	std::cout << "ADC H: " << act_adc_measurment.ADC_high << std::endl;*/
+
+
 	// The imu measurement
         IMU_Measurement act_imu_meas;
 
@@ -88,7 +99,7 @@ void Sensor_Server::working_thread_function()
 	std::cout << "Distance: " << left_distance_since_last 
 		<< "; " << right_distance_since_last << std::endl;		
 
-	std::cout << "Velocity; " << left_velocity << "; " <<  right_velocity << std::endl;*/
+	std::cout << "Velocity; " << left_velocity << "; " <<  right_velocity << std::endl;*
 
 
         /*************

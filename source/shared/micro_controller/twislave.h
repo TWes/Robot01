@@ -1,6 +1,9 @@
 #ifndef _TWISLAVE_H
 #define _TWISLAVE_H
 
+#define F_CPU 8000000
+#include<util/delay.h>
+
 #include <util/twi.h> 		  //enthaelt z.B. die Bezeichnungen fuer die Statuscodes in TWSR
 #include <avr/interrupt.h>  //dient zur behandlung der Interrupts
 #include <stdint.h> 		    //definiert den Datentyp uint8_t
