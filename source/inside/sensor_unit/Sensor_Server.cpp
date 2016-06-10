@@ -61,6 +61,9 @@ void Sensor_Server::handle_connection( int client_handle )
 		return;
 	}
 
+	/*std::cout << "Headder: " << headder[0] << " size: " 
+		<< headder[1] << " id: " << headder[2] << std::endl;*/
+
 	if( headder[0] == SET_VARIABLE )
     	{
         uint16_t data;
@@ -107,7 +110,38 @@ void Sensor_Server::handle_connection( int client_handle )
             break;
         }
 
-    }
+	}
+
+	// GET VARIABLE
+	else if( headder[0] == GET_VARIABLE )
+	{		
+		uint32_t buffer;
+            	ret = read( client_handle , &buffer, headder[1] );
+
+	        if( ret <= 0 )
+            	{
+                	return;
+		}
+
+		// look, which variable should be read
+		if( buffer == GET_POSE )
+		{
+			int16_t answer_header[3];
+			answer_header[0] = headder[0];
+			answer_header[2] = headder[2];
+
+			//std::cout << "get Pose" << std::endl;
+			Position_t pose_buffer = this->act_position;
+			answer_header[1] = sizeof(pose_buffer);
+		
+			char message[ 3*sizeof(uint16_t) + 1 * sizeof(Position_t ) ];
+			memcpy( message, answer_header, 3*sizeof(uint16_t) );
+			memcpy( (message + 3*sizeof(uint16_t) ), &pose_buffer, 1 * sizeof(Position_t ) );  
+
+
+			ret = write( client_handle, &message, sizeof(message) );
+		}
+	}
 
     else
     {
@@ -121,7 +155,7 @@ void Sensor_Server::handle_connection( int client_handle )
 
 
 
-    if( headder[0] == 1 )
+    	if( headder[0] == 1222 )// Outcommented
 	{
 		// Should Send image
 

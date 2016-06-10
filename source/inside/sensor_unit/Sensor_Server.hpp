@@ -68,6 +68,9 @@ class Sensor_Server : public Server_inet
 		std::thread working_thread;
 		void working_thread_function();
 
+		Position_t act_position;
+
+
 		void setup();
 		void handle_connection( int client_handle );
 		void cleanup();
