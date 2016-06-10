@@ -56,11 +56,6 @@ add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/inside/control
 	${CMAKE_CURRENT_SOURCE_DIR}/source/inside/control
 )
 
-# Build the Cam Server
-add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/inside/cam
-	${CMAKE_CURRENT_SOURCE_DIR}/source/inside/cam
-)
-
 # Build the Sensor Server
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/inside/sensor_unit
 	${CMAKE_CURRENT_SOURCE_DIR}/source/inside/sensor_unit
