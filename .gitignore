@@ -4,6 +4,7 @@
 *.config
 *.creator
 *.creator.user
+*.autosave
 
 #exlude object files
 *.o
