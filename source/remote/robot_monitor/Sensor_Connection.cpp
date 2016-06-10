@@ -85,6 +85,8 @@ void Sensor_Connection::receiving_thread_funktion()
         }
         else if (ret == 0) // timeout
         {
+            emit debugOutput( "Timeout bei select" );
+
             continue;
         }
 
@@ -145,6 +147,7 @@ void Sensor_Connection::receiving_thread_funktion()
         {
         case WRITE_POSE:
             this->act_pose = *((Pose_t*) buffer);
+            emit debugOutput( "GotPose: " + QString::number( this->act_pose.theta ) );
             this->parent->update();
             break;
         default:
@@ -163,18 +166,15 @@ void Sensor_Connection::polling_thread_funktion()
 
     while ( this->continue_server )
     {
-        std::cout << "continue server" << std::endl;
-
         if( state == WAIT_FOR_CONNECTION )
         {
 
             emit debugOutput( "Wait for connection: " + QString::number(errno) );
-
-            std::cout << "Wair for connection: " << errno << std::endl;
+            //std::cout << "Wair for connection: " << errno << std::endl;
 
             int ret = this->start_connection();
 
-            std::cout << "ret start connection" << std::endl;
+            //std::cout << "ret start connection" << std::endl;
 
             if( ret < 0 )
             {
@@ -183,12 +183,14 @@ void Sensor_Connection::polling_thread_funktion()
                 continue;
             }
 
+            emit debugOutput( "Connection established");
+
             state = CONNECTION_ESTABLISHED;
         }
 
         else if( CONNECTION_ESTABLISHED )
         {
-            std::cout << "Connection established" << errno << std::endl;
+            //std::cout << "Connection established: " << errno << std::endl;
 
             // Regulaly update the variables
 
