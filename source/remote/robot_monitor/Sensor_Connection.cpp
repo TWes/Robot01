@@ -81,7 +81,7 @@ void Sensor_Connection::receiving_thread_funktion()
 
 
             emit debugOutput( "Fehler bei select: " + QString(errno) );
-            std::cout << "Fehler bei select: " << errno << std::endl;
+            //std::cout << "Fehler bei select: " << errno << std::endl;
             continue;
         }
         else if (ret == 0) // timeout
@@ -202,7 +202,7 @@ void Sensor_Connection::polling_thread_funktion()
                 continue;
             }
 
-            //usleep( 1000000 );
+            usleep( 100000 );
         }
     }
 
