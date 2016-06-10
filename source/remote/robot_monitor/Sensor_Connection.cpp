@@ -56,10 +56,25 @@ int Sensor_Connection::get_Pose()
     return 0;
 }
 
+int Sensor_Connection::init_UDP_Pose()
+{
+    emit debugOutput( "Init UDP Pose" );
+
+    return 0;
+}
+
+
+
 void Sensor_Connection::receiving_thread_funktion()
 {
     while( this->continue_server )
     {
+        if( this->state == WAIT_FOR_CONNECTION )
+        {
+            sleep(1);
+            continue;
+        }
+
         fd_set clients_to_watch;
         FD_ZERO( &clients_to_watch );
         FD_SET( this->socket_fd, &clients_to_watch  );
@@ -79,9 +94,7 @@ void Sensor_Connection::receiving_thread_funktion()
                 continue;
             }
 
-
             emit debugOutput( "Fehler bei select: " + QString(errno) );
-            //std::cout << "Fehler bei select: " << errno << std::endl;
             continue;
         }
         else if (ret == 0) // timeout
@@ -101,7 +114,15 @@ void Sensor_Connection::receiving_thread_funktion()
             std::cout << "Fehler beim lesen eines headders" << std::endl;
             continue;
         }
+        // If the socket is readable, but could not read
+        // anithing, the server is down
+        else if( ret == 0 )
+        {
+            emit debugOutput( "Server is down" );
 
+            this->shutdown_connection();
+            this->state = WAIT_FOR_CONNECTION;
+        }
 
         char* buffer = (char*) malloc( headder[1] );
 
@@ -162,47 +183,34 @@ void Sensor_Connection::receiving_thread_funktion()
 
 void Sensor_Connection::polling_thread_funktion()
 {
-
     this->state = WAIT_FOR_CONNECTION;
 
     while ( this->continue_server )
     {
         if( state == WAIT_FOR_CONNECTION )
         {
-
             emit debugOutput( "Wait for connection: " + QString::number(errno) );
-            //std::cout << "Wair for connection: " << errno << std::endl;
 
             int ret = this->start_connection();
 
-            //std::cout << "ret start connection" << std::endl;
-
             if( ret < 0 )
             {
-                //sleep(1);
+                sleep(1);
 
                 continue;
             }
 
-            emit debugOutput( "Connection established");
+            emit debugOutput( "Connection established" );
+
+            this->init_UDP_Pose();
 
             state = CONNECTION_ESTABLISHED;
         }
 
         else if( CONNECTION_ESTABLISHED )
         {
-            //std::cout << "Connection established: " << errno << std::endl;
 
-            // Regulaly update the variables
-
-            int ret = this->get_Pose();
-
-            if( ret < 0 )
-            {
-                continue;
-            }
-
-            usleep( 100000 );
+            sleep( 1 );
         }
     }
 

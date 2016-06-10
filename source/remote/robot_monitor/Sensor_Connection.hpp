@@ -58,6 +58,7 @@ private:
     int actual_id;
 
     int get_Pose();
+    int init_UDP_Pose();
 };
 
 #endif // SENSOR_CONNECTION_HPP
