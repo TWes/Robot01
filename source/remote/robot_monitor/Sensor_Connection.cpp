@@ -32,8 +32,9 @@ int Sensor_Connection::get_Pose()
     headder[1] = sizeof( uint32_t );
     headder[2] = new_entry.id;
 
+    // receive the pose
     uint32_t data[1];
-    data[0] = 1;
+    data[0] = GET_POSE;
 
     char message[ 3*sizeof(uint16_t) + 1 * sizeof(uint32_t ) ];
 

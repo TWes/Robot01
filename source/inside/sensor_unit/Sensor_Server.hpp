@@ -17,7 +17,7 @@
 #include "i2c_access.hpp"
 #include "Sensor_structs.hpp"
 #include "logfile.hpp"
-
+#include "sensor_protocol.hpp"
 
 class Sensor_Server : public Server_inet
 {

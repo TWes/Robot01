@@ -7,6 +7,7 @@
 
 #include "socket_inet.hpp"
 #include "Sensor_structs.hpp"
+#include "sensor_protocol.hpp"
 
 typedef enum{
     WRITE_POSE

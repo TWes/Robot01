@@ -20,7 +20,7 @@ set( SENSOR_UNIT_FILES
 )
 
 add_executable( sensor_server ${SENSOR_UNIT_FILES} )
-target_link_libraries(sensor_server server_inet ${OpenCV_LIBS} )
+target_link_libraries(sensor_server server_inet ${OpenCV_LIBS} protocol_headers )
 add_dependencies( sensor_server server_inet )
 
 install (TARGETS sensor_server DESTINATION ${BINARY_INSTALL_DIR} )
