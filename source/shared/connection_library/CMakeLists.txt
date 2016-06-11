@@ -15,8 +15,7 @@ include_directories( ${LIB_INCLUDE_DIRS} )
 set( LIB_INCLUDE_FILES
 	server_inet.hpp
 	socket_inet.hpp
-	server_inet_udp.hpp
-	socket_inet_udp.hpp
+	udp_connection_inet.hpp
 )
 
 install (FILES ${LIB_INCLUDE_FILES} DESTINATION ${LIB_INSTALL_DIR})
@@ -48,27 +47,14 @@ install (TARGETS socket_inet DESTINATION ${LIB_INSTALL_DIR} )
 
 
 #############################
-## socket inet udp library ##
+## Inet Library udp ##
 #############################
 
 set( SOCKET_INET_FILES
-	socket_inet_udp.cpp
+	udp_connection_inet.cpp
 )
 
-add_library( socket_inet_udp ${SOCKET_INET_FILES} )
-target_include_directories( socket_inet_udp PUBLIC ${LIB_INCLUDE_DIRS} )
-install (TARGETS socket_inet_udp DESTINATION ${LIB_INSTALL_DIR} )
-
-
-#############################
-## Server Inet Library udp ##
-#############################
-
-set( SOCKET_INET_FILES
-	server_inet_udp.cpp
-)
-
-add_library( server_inet_udp ${SOCKET_INET_FILES} )
-target_include_directories( server_inet_udp PUBLIC ${LIB_INCLUDE_DIRS} )
-install (TARGETS server_inet_udp DESTINATION ${LIB_INSTALL_DIR} )
+add_library( inet_udp ${SOCKET_INET_FILES} )
+target_include_directories( inet_udp PUBLIC ${LIB_INCLUDE_DIRS} )
+install (TARGETS inet_udp DESTINATION ${LIB_INSTALL_DIR} )
 
