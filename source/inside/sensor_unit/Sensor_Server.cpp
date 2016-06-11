@@ -7,10 +7,17 @@ logfile log_file;
 Sensor_Server::Sensor_Server( int portnr ) : Server_inet( portnr )
 {
 	this->start_up =true;
+
+	this->udp_sending_thread = NULL;
 }
 
 Sensor_Server::~Sensor_Server()
-{}
+{
+	if( this->udp_sending_thread != NULL )
+	{
+		delete this->udp_sending_thread;
+	}
+}
 
 void Sensor_Server::setup()
 {
@@ -31,6 +38,9 @@ void Sensor_Server::setup()
 
 	// Create the udp socket, port doesn't matter
 	udp_connection.createSocket(0);
+
+	this->udp_sending_thread = new std::thread( &Sensor_Server::udp_sending_function, this);
+
 
      log_file << "Sensor_server setup completed.";
 }
@@ -149,7 +159,7 @@ void Sensor_Server::handle_connection( int client_handle )
     else if( headder[0] == SUBSCRIBE_UDP )
 	{
 		//std::cout << "Subscribed to udp" << std::endl;
-		uint32_t data[2];
+		uint32_t data[3];
 		ret = read( client_handle , &data, headder[1] );
 
 	        if( ret <= 0 )
@@ -158,22 +168,21 @@ void Sensor_Server::handle_connection( int client_handle )
 		}
 
 		struct sockaddr_in adress = getSocketAdressByFh( client_handle );
-		std::cout << "Client: " << std::string(inet_ntoa( adress.sin_addr )) << " and port " << data[1] << std::endl;
+		//std::cout << "Client: " << std::string(inet_ntoa( adress.sin_addr )) << " and port " << data[1]
+		//<< " im intervall von " << data[2] << "ms" << std::endl;
 		
 		udp_connection_information_t client( inet_ntoa( adress.sin_addr ),
 				 (int) data[1] );
 
-		
-		std::string tmp = "HAllo";	
 
+		UDP_subscriber_entry_t new_entry;
+		new_entry.next_sending_time = -1.0;
+		new_entry.sending_interval = data[2];
+		new_entry.sending_object = data[0];
+		new_entry.client_info = client;
+		new_entry.seq_number = headder[2];
 
-		int send_ret = udp_connection.send( tmp.c_str(), sizeof(tmp.c_str()),
-                                        client );
-
-       		if( send_ret < 0 )
-	        {
-        	    std::cout << "Fehler beim senden" << std::endl;
-	        }
+		this->UDP_subscriber.push_back(new_entry);		
 	}
 
     else
@@ -236,6 +245,62 @@ void Sensor_Server::handle_connection( int client_handle )
 						buffer_image.cols * buffer_image.channels() * bytes_per_pixel );
 		}
 	}
+}
+
+void Sensor_Server::udp_sending_function()
+{
+	
+	while( this->continue_server )
+	{
+		// get actual time in ms
+		struct timeval act_time_struct;
+		gettimeofday( &act_time_struct, NULL);
+		float act_time = act_time_struct.tv_sec * 1000 + 
+				act_time_struct.tv_usec / 1000;		
+
+		//std::cout << "udp sending: " << act_time << std::endl;
+
+		for( UDP_subscriber_entry_t &entry : UDP_subscriber )
+		{
+			// Do we have to send already?
+			if( act_time >= entry.next_sending_time )
+			{			
+
+				switch( entry.sending_object )
+				{
+				// Send the position
+				case GET_POSE:
+					//std::cout << "get Pose" << std::endl;
+					int16_t answer_header[3];
+					answer_header[0] = SUBSCRIBE_UDP;
+					answer_header[2] = entry.seq_number;
+
+					Position_t pose_buffer = this->act_position;
+					answer_header[1] = sizeof(pose_buffer);
+		
+					char message[ 3*sizeof(uint16_t) + 1 * sizeof(Position_t ) ];
+					memcpy( message, answer_header, 3*sizeof(uint16_t) );
+					memcpy( (message + 3*sizeof(uint16_t) ), &pose_buffer, 1 * sizeof(Position_t ) );  
+
+					this->udp_connection.send( message, sizeof(message),
+								entry.client_info);			
+
+
+					break;
+				}
+
+
+
+				// update nex timestamp
+				entry.next_sending_time = act_time + entry.sending_interval;
+			}
+		}
+
+
+		usleep( 1000000 );
+	}
+	
+
 }
 
 void Sensor_Server::CAM_thread_funktion()

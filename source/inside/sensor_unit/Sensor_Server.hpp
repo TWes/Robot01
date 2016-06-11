@@ -20,6 +20,17 @@
 #include "sensor_protocol.hpp"
 #include "udp_connection_inet.hpp"
 
+typedef struct{
+
+	float next_sending_time;
+	float sending_interval;
+	uint32_t sending_object;
+	udp_connection_information_t client_info;
+	int seq_number;
+
+} UDP_subscriber_entry_t;
+
+
 class Sensor_Server : public Server_inet
 {
 	public:
@@ -78,7 +89,11 @@ class Sensor_Server : public Server_inet
 private:
 	struct sockaddr_in getSocketAdressByFh( int fh );
 
-	udp_connection_inet udp_connection;	
+	udp_connection_inet udp_connection;
+	std::vector<UDP_subscriber_entry_t> UDP_subscriber;
+	std::thread *udp_sending_thread;
+	void udp_sending_function();
+	
 
 };
 
