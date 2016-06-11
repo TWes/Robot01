@@ -6,9 +6,13 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <thread>
+#include <iostream>
 
-typedef struct
+typedef struct udp_connection_information
 {
+    udp_connection_information();
+    udp_connection_information( char *ip, int port);
+
     struct in_addr adress;
     int port_nr;
 
@@ -27,8 +31,13 @@ public:
     void start_reveiving();
     void end_receiving();
 
+    int receive( char* buffer, int buffer_size );
+    int receive( char* buffer, int buffer_size, udp_connection_information_t &sender );
+    int send( const char* message, int message_lenght, udp_connection_information_t receiver);
+
     virtual void setup();
-    virtual void handle_connection( udp_connection_information_t other ) = 0;
+    virtual void handle_connection( char* message, int message_lenght,
+                                    udp_connection_information_t other );
     virtual void cleanup();
 
 private:
