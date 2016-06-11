@@ -18,6 +18,7 @@
 #include "Sensor_structs.hpp"
 #include "logfile.hpp"
 #include "sensor_protocol.hpp"
+#include "udp_connection_inet.hpp"
 
 class Sensor_Server : public Server_inet
 {
@@ -74,6 +75,11 @@ class Sensor_Server : public Server_inet
 		void setup();
 		void handle_connection( int client_handle );
 		void cleanup();
+private:
+	struct sockaddr_in getSocketAdressByFh( int fh );
+
+	udp_connection_inet udp_connection;	
+
 };
 
 #endif

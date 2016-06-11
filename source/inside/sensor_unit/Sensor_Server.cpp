@@ -29,6 +29,9 @@ void Sensor_Server::setup()
 	// enable IMU
 	 i2c_bus.i2c_write<uint8_t>( 0x68, 0x6B, 0x00  ); //disable sleep mode
 
+	// Create the udp socket, port doesn't matter
+	udp_connection.createSocket(0);
+
      log_file << "Sensor_server setup completed.";
 }
 
@@ -145,7 +148,32 @@ void Sensor_Server::handle_connection( int client_handle )
 
     else if( headder[0] == SUBSCRIBE_UDP )
 	{
-		std::cout << "Subscribed to udp" << std::endl;
+		//std::cout << "Subscribed to udp" << std::endl;
+		uint32_t data[2];
+		ret = read( client_handle , &data, headder[1] );
+
+	        if( ret <= 0 )
+            	{
+                	return;
+		}
+
+		struct sockaddr_in adress = getSocketAdressByFh( client_handle );
+		std::cout << "Client: " << std::string(inet_ntoa( adress.sin_addr )) << " and port " << data[1] << std::endl;
+		
+		udp_connection_information_t client( inet_ntoa( adress.sin_addr ),
+				 (int) data[1] );
+
+		
+		std::string tmp = "HAllo";	
+
+
+		int send_ret = udp_connection.send( tmp.c_str(), sizeof(tmp.c_str()),
+                                        client );
+
+       		if( send_ret < 0 )
+	        {
+        	    std::cout << "Fehler beim senden" << std::endl;
+	        }
 	}
 
     else
@@ -457,6 +485,17 @@ void Sensor_Server::I2C_thread_funktion()
 		usleep( 10000 );
 
 	} // End of while loop
+}
+
+struct sockaddr_in Sensor_Server::getSocketAdressByFh( int fh )
+{
+	for( client_socket_entry iter : *clients )
+	{
+		if( iter.socket_fh ) return iter.name;
+	}
+
+	struct sockaddr_in ret;
+	return ret;
 }
 
 
