@@ -16,7 +16,7 @@ int main( int argc, char **argv )
 
     struct sockaddr_in own_addr;
     own_addr.sin_family = AF_INET;
-    own_addr.sin_port = htons( 6392 );
+    own_addr.sin_port = htons( 0 ); // 6392
     own_addr.sin_addr.s_addr = htonl( INADDR_ANY );
 
     // bind the socket
@@ -26,6 +26,17 @@ int main( int argc, char **argv )
     {
         std::cout << "couldn't bind" << std::endl;
     }
+
+    struct sockaddr_in tmp;
+    socklen_t tmp_len = sizeof( tmp );
+
+    int info_ret = getsockname( socket_fh, (struct sockaddr*) &tmp, &tmp_len );
+    if( info_ret < 0 )
+    {
+	std::cout << "Error getting socket information" << std::endl;
+    }
+
+    std::cout << "Server Port: " << ntohs(tmp.sin_port) << std::endl;
 
     while(1)
     {
@@ -44,7 +55,7 @@ int main( int argc, char **argv )
         }
 
         std::cout << "Empfangen von " << inet_ntoa( client_addr.sin_addr )
-                     << ":" << ntohl( client_addr.sin_port) << std::endl;
+                     << ":" << ntohs( client_addr.sin_port) << std::endl;
         std::cout << "Data: " << buffer << std::endl;
 
         int send_ret = sendto( socket_fh, buffer, rec_ret, 0,
