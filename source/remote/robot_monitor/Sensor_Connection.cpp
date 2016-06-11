@@ -90,18 +90,19 @@ int Sensor_Connection::init_UDP_Pose()
     new_entry.todo_action = WRITE_POSE;
 
     headder[0] = SUBSCRIBE_UDP;
-    headder[1] = 2 * sizeof( uint32_t );
+    headder[1] = 3 * sizeof( uint32_t );
     headder[2] = new_entry.id;
 
     // receive the pose
-    uint32_t data[2];
+    uint32_t data[3];
     data[0] = GET_POSE;
     data[1] = udp_socket_information.port_nr;
+    data[2] = 1000; // intervall in ms
 
-    char message[ 3*sizeof(uint16_t) + 2 * sizeof(uint32_t ) ];
+    char message[ 3*sizeof(uint16_t) + 3 * sizeof(uint32_t ) ];
 
     memcpy( message, headder, 3*sizeof(uint16_t) );
-    memcpy( (message + 3*sizeof(uint16_t) ), data, 2 * sizeof( uint32_t ) );
+    memcpy( (message + 3*sizeof(uint16_t) ), data, 3 * sizeof( uint32_t ) );
 
     open_requests_mutex.lock();
         this->open_requests.push_back( new_entry );
@@ -300,7 +301,21 @@ void Sensor_Connection::end_server()
 
 void udp_connection::handle_connection(char *message, int message_lenght, udp_connection_information_t other)
 {
-    std::cout << "UDP receive: " << message << std::endl;
+    uint16_t headder[3];
+
+    //std::cout << "UDP receive: " << message << std::endl;
+    // get Headders
+    if( message_lenght >= sizeof(headder) )
+    {
+        memcpy( headder, message, sizeof(headder) );
+
+        std::cout << "h(0): " << headder[0] << "\n"
+                  << "h(0): " << headder[1] << "\n"
+                  << "h(0): " << headder[2] << std::endl;
+    }
+    else
+    { return; }
+
 
     return;
 }
