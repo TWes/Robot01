@@ -5,20 +5,21 @@
 #include <unistd.h>
 #include <string>
 
+#include <stdio.h>
+#include <stdlib.h>
+
 int main( int argc, char **argv )
 {
-    if( argc < 2 )
+    if( argc < 3 )
     {
-        std::cout << "Missing Parameter: <ip>" << std::endl;
+        std::cout << "Missing Parameter: <ip> <port>" << std::endl;
     }
-
-    std::cout << "ip: " << argv[1] << std::endl;
 
     int socket_fh = socket( AF_INET, SOCK_DGRAM, 0 );
 
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons( 6392 );
+    server_addr.sin_port = htons( atoi( argv[2]) );
 
     inet_aton( argv[1], &server_addr.sin_addr );
 
