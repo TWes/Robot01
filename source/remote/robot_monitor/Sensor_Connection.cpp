@@ -3,6 +3,8 @@
 Sensor_Connection::Sensor_Connection(std::string ip_address, int port, QWidget *parent) \
         : socket_inet( ip_address, port), QWidget( NULL )
 {
+    this->udp_socket = NULL;
+
     this->actual_id = 1;
 
     this->continue_server = false;
@@ -12,6 +14,10 @@ Sensor_Connection::Sensor_Connection(std::string ip_address, int port, QWidget *
 
 Sensor_Connection::~Sensor_Connection()
 {
+    if( this->udp_socket != NULL )
+    {
+        delete this->udp_socket;
+    }
 }
 
 
@@ -59,6 +65,58 @@ int Sensor_Connection::get_Pose()
 int Sensor_Connection::init_UDP_Pose()
 {
     emit debugOutput( "Init UDP Pose" );
+
+    // Erstelle den udp socket
+    if( this->udp_socket == NULL )
+    {
+        udp_connection_information_t socket_info;
+        this->udp_socket = new udp_connection();
+
+        this->udp_socket->createSocket( 0, socket_info );
+        udp_socket_information = socket_info;
+
+        this->udp_socket->start_reveiving();
+    }
+
+    uint16_t headder[3];
+
+    request_entry_t new_entry;
+
+    new_entry.id = this->actual_id++;
+    new_entry.stream = true;
+    gettimeofday( &new_entry.timestamp, NULL );
+    new_entry.time_lo_live.tv_sec = 3;
+    new_entry.time_lo_live.tv_usec = 0;
+    new_entry.todo_action = WRITE_POSE;
+
+    headder[0] = SUBSCRIBE_UDP;
+    headder[1] = 2 * sizeof( uint32_t );
+    headder[2] = new_entry.id;
+
+    // receive the pose
+    uint32_t data[2];
+    data[0] = GET_POSE;
+    data[1] = udp_socket_information.port_nr;
+
+    char message[ 3*sizeof(uint16_t) + 2 * sizeof(uint32_t ) ];
+
+    memcpy( message, headder, 3*sizeof(uint16_t) );
+    memcpy( (message + 3*sizeof(uint16_t) ), data, 2 * sizeof( uint32_t ) );
+
+    open_requests_mutex.lock();
+        this->open_requests.push_back( new_entry );
+    open_requests_mutex.unlock();
+
+    int ret = this->sendData( message, sizeof(message) );
+
+    if( ret < 0 )
+    {
+        // Fehler
+        return -1;
+    }
+
+
+
 
     return 0;
 }
@@ -238,4 +296,11 @@ void Sensor_Connection::end_server()
 
     this->polling_thread.join();
     this->receiving_thread.join();
+}
+
+void udp_connection::handle_connection(char *message, int message_lenght, udp_connection_information_t other)
+{
+    std::cout << "UDP receive: " << message << std::endl;
+
+    return;
 }

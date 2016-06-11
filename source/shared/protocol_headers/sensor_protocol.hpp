@@ -7,7 +7,7 @@ typedef enum{
 	SET_VARIABLE = 1, // client wants to set a variable on the server
 	GET_VARIABLE = 2, // client wants to get a variable from the server
 	MOVEMENT_INSTRUCTION = 4, // client sends a movement instruction
-	SUBSCRIBE_MOVEMENT_UDP =5 // client subscribe to movement information (pose, velocity)
+	SUBSCRIBE_UDP =5 // client subscribe to movement information (pose, velocity)
 } sensor_request_enum_t;
 
 

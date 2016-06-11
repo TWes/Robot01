@@ -143,7 +143,7 @@ void Sensor_Server::handle_connection( int client_handle )
 		}
 	}
 
-	else if( headder[0] == SUBSCRIBE_MOVEMENT_UDP )
+    else if( headder[0] == SUBSCRIBE_UDP )
 	{
 		std::cout << "Subscribed to udp" << std::endl;
 	}

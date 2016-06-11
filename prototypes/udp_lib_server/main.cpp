@@ -12,7 +12,7 @@ class udp_connection : public udp_connection_inet
                            udp_connection_information_t other)
     {
 
-        std::cout << "Empfangen von " << inet_ntoa( other.adress )
+         std::cout << "Empfangen von " << inet_ntoa( other.adress )
                      << ":" << ntohs( other.port_nr ) << std::endl;
         std::cout << "Data: " << message << std::endl;
 

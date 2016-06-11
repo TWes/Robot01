@@ -8,6 +8,7 @@
 #include "socket_inet.hpp"
 #include "Sensor_structs.hpp"
 #include "sensor_protocol.hpp"
+#include "udp_connection_inet.hpp"
 
 typedef enum{
     WRITE_POSE
@@ -21,6 +22,11 @@ typedef struct {
     timeval timestamp;
     timeval time_lo_live;
 } request_entry_t;
+
+class udp_connection : public udp_connection_inet
+{
+    void handle_connection(char *message, int message_lenght, udp_connection_information_t other);
+};
 
 
 class Sensor_Connection : public QWidget, public socket_inet
@@ -44,6 +50,9 @@ public:
     void receiving_thread_funktion();
     std::mutex open_requests_mutex;
     std::vector<request_entry_t> open_requests;
+
+    udp_connection *udp_socket;
+    udp_connection_information_t udp_socket_information;
 
     void start_server();
     void end_server();

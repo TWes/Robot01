@@ -24,6 +24,6 @@ set( ROBOT_MONITOR_FILES
 )
 
 add_executable( robot_monitor ${ROBOT_MONITOR_FILES} )
-target_link_libraries(robot_monitor Qt4::QtGui Qt4::QtCore socket_inet protocol_headers)
+target_link_libraries(robot_monitor Qt4::QtGui Qt4::QtCore socket_inet protocol_headers inet_udp)
 
 install (TARGETS robot_monitor DESTINATION ${BINARY_INSTALL_DIR} )

@@ -47,7 +47,6 @@ private:
     std::thread *polling_thread;
     void polling_function();
 
-
 };
 
 #endif
