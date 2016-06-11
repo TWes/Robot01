@@ -4,6 +4,19 @@
 #include <iostream>
 #include <unistd.h>
 
+#include "udp_connection_inet.hpp"
+
+class udp_connection : public udp_connection_inet
+{
+    void handle_connection(char *message, int message_lenght,
+                           udp_connection_information_t other)
+    {
+
+
+
+    }
+};
+
 int main( int argc, char **argv )
 {
     // create a socket

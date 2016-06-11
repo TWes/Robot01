@@ -10,14 +10,27 @@
 
 #include "udp_connection_inet.hpp"
 
+class udp_connection : public udp_connection_inet
+{
+    void handle_connection(char *message, int message_lenght,
+                           udp_connection_information_t other)
+    {
+        std::cout << "Nachricht: " << message << std::endl;
+    }
+};
+
 int main( int argc, char **argv )
 {
     if( argc < 3 )
     {
         std::cout << "Missing Parameter: <ip> <port>" << std::endl;
+
+        return -1;
     }
 
-    udp_connection_inet udp_socket;
+    udp_connection udp_socket;
+
+    udp_socket.start_reveiving();
 
     // Create the socket
     udp_socket.createSocket(0);
@@ -37,18 +50,9 @@ int main( int argc, char **argv )
         {
             std::cout << "Fehler beim senden" << std::endl;
         }
-
-        char buffer[255];
-
-        int rec_ret = udp_socket.receive( buffer, 255 );
-
-        if( rec_ret < 0 )
-        {
-            std::cout << "Errer receiving data" << std::endl;
-        }
-
-        std::cout << "Nachricht: " << buffer << std::endl;
     }
+
+    udp_socket.end_receiving();
 
     return 0;
 }
