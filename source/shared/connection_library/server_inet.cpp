@@ -13,6 +13,40 @@ Server_inet::~Server_inet()
 	clients = NULL;
 }
 
+void Server_inet::close_client( int fh )
+{
+	// erase from clients vector and set new max_fh
+	int max_fh = -1;
+	std::vector<client_socket_entry>::iterator element_to_erase;
+
+        clients_mutex.lock();
+	for( auto iter = this->clients->begin();
+		iter != this->clients->end(); iter++ )
+	{
+		int act_fh = (*iter).socket_fh;
+
+		if( act_fh == fh )
+		{
+			element_to_erase = iter;
+		}
+		else if( act_fh > max_fh )
+		{
+			max_fh = act_fh;
+		}
+	}
+	
+	this->max_client_fh = max_fh;	
+	this->clients->erase(  element_to_erase );
+
+        clients_mutex.unlock();	
+
+	// erase from df_set
+	FD_CLR( fh, &client_handles );
+
+	// close socket
+	close( fh );	
+}
+
 
 void Server_inet::polling_function()
 {
@@ -39,23 +73,33 @@ void Server_inet::polling_function()
             continue;
         }
 
-        int client_to_process = 0;
+
+	std::vector<int> clients_to_process;
 
         clients_mutex.lock();
-
         for( client_socket_entry iter : *clients )
         {
             if( FD_ISSET(iter.socket_fh, &clients_to_watch ) )
             {
-                client_to_process = iter.socket_fh;
-
-                break;
+		clients_to_process.push_back( iter.socket_fh );
             }
         }
-
         clients_mutex.unlock();
 
-        this->handle_connection( client_to_process );
+
+	for( int fh_to_handle : clients_to_process )
+	{
+		char buf;
+		if( recv( fh_to_handle, &buf, 1, MSG_PEEK) == 0 )
+		{
+			this->close_client( fh_to_handle );
+		}
+		else
+		{
+			this->handle_connection( fh_to_handle );	
+		}
+		
+	}
     }
 
 	this->cleanup();
@@ -67,17 +111,6 @@ void Server_inet::run()
     this->continue_server = true;
 
     FD_ZERO( &(this->client_handles) );
-
-    /*fd_set *socket_handle_set;
-    socket_handle_set = (fd_set*) malloc( sizeof(fd_set) );
-
-    if(socket_handle_set < 0)
-    {
-        std::cout << "Couldnt allocat enought memory" << std::endl;
-    }
-
-    FD_ZERO( socket_handle_set );
-    FD_SET( this->socket_fh, socket_handle_set ); */
 
     std::thread polling_thread( &Server_inet::polling_function, this);
 
@@ -101,21 +134,10 @@ void Server_inet::run()
 	listen(this->socket_fh, 5);
 
 	do {
-       // std::cout << "Waiting for connection" << std::endl;
 
 		client_socket_entry new_connection;
 		
 		new_connection.name_len = sizeof( struct sockaddr_in );		
-
-
-        /*int ret  = select( this->socket_fh + 1, &socket_handle_set, NULL, &socket_handle_set, NULL );
-
-        if( ret < 0 )
-        {
-
-            std::cout << "Main loop: select error" << std::endl;
-            continue;
-        } */
 
 		new_connection.socket_fh = accept( this->socket_fh, \
 					(struct sockaddr *) &new_connection.name, \
@@ -134,16 +156,17 @@ void Server_inet::run()
 			std::cout << "Fehler beim Annehmen der Verbindung: " 
 							<< errno << std::endl;
 			continue;
-		}			
+		}
+			
 		std::cout << "Neue Verbindung"  << std::endl;
 
 
-        if( new_connection.socket_fh > this->max_client_fh )
-        {
-            this->max_client_fh = new_connection.socket_fh;
-        }
+        	if( new_connection.socket_fh > this->max_client_fh )
+        	{
+	            this->max_client_fh = new_connection.socket_fh;
+	        }
 
-        FD_SET( new_connection.socket_fh, &this->client_handles );
+        	FD_SET( new_connection.socket_fh, &this->client_handles );
 
 		this->clients_mutex.lock();
 			this->clients->push_back( new_connection );

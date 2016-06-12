@@ -45,6 +45,8 @@ class Server_inet
         fd_set client_handles;
         int max_client_fh;
 
+	void close_client( int fh );
+
         bool continue_server;
 
         void polling_function();
