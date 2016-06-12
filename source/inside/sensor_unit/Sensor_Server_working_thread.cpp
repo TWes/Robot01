@@ -8,8 +8,6 @@ void Sensor_Server::working_thread_function()
 	// of the wheel encoder
         Wheel_Measurement act_wheel_meas;
         static Wheel_Measurement last_wheel_meas;
-        static double last_right_velocity = 0.0;
-        static double last_left_velocity = 0.0;
 
 	// The ADC Measurement
 	ADC_Measurement act_adc_measurment;
@@ -22,34 +20,25 @@ void Sensor_Server::working_thread_function()
 	std::cout << "ADC H: " << act_adc_measurment.ADC_high << std::endl;*/
 
 
-	// The imu measurement
-        IMU_Measurement act_imu_meas;
-
-
-        Wheel_queue_mutex.lock();
+	/*****************************
+         * Calculate the new Position out of
+         * the decoder
+         ****************************/	
+	Wheel_queue_mutex.lock();
             act_wheel_meas = *(Wheel_values.begin());
         Wheel_queue_mutex.unlock();
 
 
-        IMU_queue_mutex.lock();
-            act_imu_meas = *(IMU_values.begin());
-        IMU_queue_mutex.unlock();
-
-        // Get Time Difference and convert it to seconds
+	// Get Time Difference and convert it to seconds
         double delta_t = time_difference( act_wheel_meas.timestamp, last_wheel_meas.timestamp) / 1000.0;
 
 	// No new measurements
         if( delta_t == 0.0 )
         {
-	   //std::cout << "delta_t = " << delta_t << std::endl;
-		
-            continue;
-        }	
-	
-	/*****************************
-         * Calculate the new Position out of
-         * the decoder
-         ****************************/	
+	   std::cout << " Wheel delta_t = " << delta_t << std::endl;
+        }
+	else
+	{
         // Process the wheel encoder
         // 1. Calculate the distance driven
         int right_steps_since_last = act_wheel_meas.Right_Wheel_Rotations - last_wheel_meas.Right_Wheel_Rotations;
@@ -83,12 +72,7 @@ void Sensor_Server::working_thread_function()
 		//std::cout << "count diff: " << left_steps_since_last 
 			//<< "; " << left_steps_since_last << std::endl;
 
-		last_wheel_meas = act_wheel_meas;
-
-		usleep(500000);
-
-            continue;
-        }
+	}
 
 	
 	/*std::cout << "Decoder: " << std::endl;
@@ -99,24 +83,53 @@ void Sensor_Server::working_thread_function()
 	std::cout << "Distance: " << left_distance_since_last 
 		<< "; " << right_distance_since_last << std::endl;		
 
-	std::cout << "Velocity; " << left_velocity << "; " <<  right_velocity << std::endl;*
+	std::cout << "Velocity; " << left_velocity << "; " <<  right_velocity << std::endl;*/
+	}
 
+	
 
-        /*************
-         * Calculate IMU measurement
-         ************/
+	/*****************************
+         * Calculate the new Position out of
+         * the decoder
+         ****************************/
+	static IMU_Measurement last_imu_meas;
+
+        IMU_Measurement act_imu_meas;  
+
+        IMU_queue_mutex.lock();
+            act_imu_meas = *(IMU_values.begin());
+        IMU_queue_mutex.unlock();     
+	
+	// Get Time Difference and convert it to seconds
+        double imu_delta_t = time_difference( act_imu_meas.timestamp, last_imu_meas.timestamp) / 1000.0;
+
+	if( delta_t == 0.0 )
+	{
+		std::cout << " IMU delta_t = " <<imu_delta_t << std::endl;		
+	}
+	else
+	{
+
         double acceleration_IMU = act_imu_meas.acc[1]; // Beschleunigung in y- Richtung
-        double rotation_IMU = act_imu_meas.gyro[2]; // rotation um die z- Achse
+        
+	// Calc to °/s
+	double rotation_IMU = act_imu_meas.gyro[2] /131.0; // rotation um die z- Achse
 
-	double IMU_velocity = acceleration_IMU * delta_t;
+	double IMU_velocity = acceleration_IMU * imu_delta_t;
 
+	//float acc_z = act_imu_meas.acc[2];
+	std::cout << "x: " << act_imu_meas.acc[0] << std::endl;
+	std::cout << "y: " << act_imu_meas.acc[1] << std::endl;
+	std::cout << "z: " << act_imu_meas.acc[2] << std::endl;
+
+	
 	/*std::cout << "IMU Velo: " << IMU_velocity << std::endl;
-	std::cout << "IMU Rotation: " << rotation_IMU << std::endl;*/
+	std::cout << "IMU Rotation: " << rotation_IMU << std::endl; */
+	}
 	
 
         last_wheel_meas = act_wheel_meas;
-        last_left_velocity = left_velocity;
-        last_right_velocity = right_velocity;
+	last_imu_meas = act_imu_meas;
 
         usleep(500000);
     }

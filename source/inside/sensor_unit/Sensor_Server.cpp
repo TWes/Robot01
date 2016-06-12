@@ -1,8 +1,30 @@
 #include "Sensor_Server.hpp"
 
 #include <fstream>
+#include <bitset>
 
 logfile log_file;
+
+std::string toBinaryString( int16_t number )
+{
+	std::string ret;
+
+	for( int i = 15; i>=0; i--)
+	{
+		if( number & (1<<i) )
+		{
+			ret += "1";
+		}
+		else
+		{
+			ret += "0";
+		}
+	}
+
+	return ret;
+}
+
+
 
 Sensor_Server::Sensor_Server( int portnr ) : Server_inet( portnr )
 {
@@ -384,10 +406,6 @@ void Sensor_Server::I2C_thread_funktion()
 		gettimeofday( &act_time, NULL);
 
 
-		//std::cout << "Thread function" << std::endl;
-		
-		//std::cout << "Read complete content of microcontroller" << std::endl;
-
 		/****************************
 		 *  I2C Register Map
 		 *----------------------------
@@ -514,7 +532,7 @@ void Sensor_Server::I2C_thread_funktion()
 		
 		do
 		{
-			imu1_read_ret = i2c_bus.i2c_read( 0x24, 0x03, 6, IMU_buffer );
+			imu1_read_ret = i2c_bus.i2c_read( 0x68, 0x03, 6, IMU_buffer );
 			
 		} while( imu1_read_ret < 0 && ++retry_counter < 3 );
 
@@ -544,7 +562,7 @@ void Sensor_Server::I2C_thread_funktion()
 		
 		do
 		{	
-			imu2_read_ret = i2c_bus.i2c_read( 0x24, 0x3B, 6, IMU_buffer );
+			imu2_read_ret = i2c_bus.i2c_read( 0x68, 0x3B, 6, IMU_buffer );
 		} while( imu2_read_ret < 0 && ++retry_counter < 3 );
 
 		if( imu2_read_ret < 0 )
@@ -554,12 +572,12 @@ void Sensor_Server::I2C_thread_funktion()
 		}
 		else
 		{
-			uint16_t acc_values[3];
+			int16_t acc_values[3];
 		
 			for( int i = 0; i<3; i++ )
-			{
-				acc_values[i] = (uint16_t) (IMU_buffer[2*i+1] | ( IMU_buffer[2*i] << 8 ));
-				IMU_meas.acc[i] = acc_values[i] / 16384.0 ;
+			{				
+				acc_values[i] =  (IMU_buffer[2*i+1] | (((int8_t)IMU_buffer[2*i]) << 8 ));
+				IMU_meas.acc[i] = acc_values[i] / 16384.0;
 			}
 		}
 
@@ -570,7 +588,7 @@ void Sensor_Server::I2C_thread_funktion()
 		
 		do
 		{	
-			imu3_read_ret = i2c_bus.i2c_read( 0x24, 0x41, 6, IMU_buffer );
+			imu3_read_ret = i2c_bus.i2c_read( 0x68, 0x41, 6, IMU_buffer );
 
 		} while( imu3_read_ret < 0 && ++retry_counter < 3 );
 
@@ -583,7 +601,7 @@ void Sensor_Server::I2C_thread_funktion()
 		else
 		{
 			int16_t temp_value;
-			temp_value = (int16_t) (IMU_buffer[1] | ( IMU_buffer[0] << 8 ));
+			temp_value = (int16_t) (IMU_buffer[1] | ( ((uint8_t)IMU_buffer[0]) << 8 ));
 			IMU_meas.temp = (temp_value - 521) / 340;
 
 
@@ -591,8 +609,8 @@ void Sensor_Server::I2C_thread_funktion()
 		
 			for( int i = 1; i<4; i++ )
 			{
-				gyro_values[i] = (uint16_t) (IMU_buffer[2*i+1] | ( IMU_buffer[2*i] << 8 ));
-				IMU_meas.gyro[i] = gyro_values[i] / 131.;
+				gyro_values[i-1] = (uint16_t) (IMU_buffer[2*i+1] | ((uint8_t) IMU_buffer[2*i]) << 8 );
+				IMU_meas.gyro[i-1] = gyro_values[i] / 131.;
 			}
 
 
