@@ -16,6 +16,7 @@ set( LIB_INCLUDE_FILES
 	server_inet.hpp
 	socket_inet.hpp
 	udp_connection_inet.hpp
+	connection_library.hpp
 )
 
 install (FILES ${LIB_INCLUDE_FILES} DESTINATION ${LIB_INSTALL_DIR})
