@@ -375,6 +375,7 @@ void Sensor_Server::I2C_thread_funktion()
 {
 
 	IMU_Measurement last_meas = {0.0};
+	int retry_counter = 0;		
 
 	while( this->continue_server )
 	{
@@ -406,82 +407,99 @@ void Sensor_Server::I2C_thread_funktion()
 		 ****************************/
 
 		// Read every register in the microcontroller
-		char buffer[24];		
-		i2c_bus.i2c_read( 0x24, 0x00, 24, buffer );
+		char buffer[24];
+		int uc_read_ret = -1;
+		retry_counter = 0;
+
+		do
+		{
+			uc_read_ret = i2c_bus.i2c_read( 0x24, 0x00, 24, buffer );
+			
+		} while( uc_read_ret < 0 && ++retry_counter < 3 );
 		
+		if( uc_read_ret < 0 )
+		{
+			std::cout << "Fehler beim lesen des uc: " << uc_read_ret 
+				<< "; " << errno << ": " << strerror( errno) << std::endl;	
+		}		
 
-		// Read ADC Values
-		ADC_Measurement voltage;		 
+		// only process, if reading was succesfull
+		else
+		{
+			// Read ADC Values
+			ADC_Measurement voltage;		 
+	
+			voltage.ADC_low = (uint16_t) (buffer[0] | ( buffer[1] << 8 ));
+			voltage.ADC_low *= 0.007; // Konvert to voltage
+			voltage.ADC_high = (uint16_t) (buffer[2] | ( buffer[3] << 8 ));
+			voltage.ADC_high *= 0.007;
 
-		voltage.ADC_low = (uint16_t) (buffer[0] | ( buffer[1] << 8 ));
-		voltage.ADC_low *= 0.007; // Konvert to voltage
-		voltage.ADC_high = (uint16_t) (buffer[2] | ( buffer[3] << 8 ));
-		voltage.ADC_high *= 0.007;
+			voltage.timestamp = act_time;
 
-		voltage.timestamp = act_time;
-
-		adc_queue_mutex.lock();
+			adc_queue_mutex.lock();
 			this->adc_values.push_front(voltage);
 			while( this->adc_values.size() > 5 )
 			{
 				this->adc_values.pop_back();
 			}
-		adc_queue_mutex.unlock();
+			adc_queue_mutex.unlock();
 		
 		
-		// Calculate the distances
-		uint16_t sonar_value[5];
-		Sonar_Measurement Sonar_meas;
+			// Calculate the distances
+			uint16_t sonar_value[5];
+			Sonar_Measurement Sonar_meas;
 
-		sonar_value[0] = (uint16_t) (buffer[4] | ( buffer[5] << 8 ));
-		sonar_value[1] = (uint16_t) (buffer[6] | ( buffer[7] << 8 ));
-		sonar_value[2] = (uint16_t) (buffer[8] | ( buffer[9] << 8 ));
-		sonar_value[3] = (uint16_t) (buffer[10] | ( buffer[11] << 8 ));
-		sonar_value[4] = (uint16_t) (buffer[12] | ( buffer[13] << 8 ));
+			sonar_value[0] = (uint16_t) (buffer[4] | ( buffer[5] << 8 ));
+			sonar_value[1] = (uint16_t) (buffer[6] | ( buffer[7] << 8 ));
+			sonar_value[2] = (uint16_t) (buffer[8] | ( buffer[9] << 8 ));
+			sonar_value[3] = (uint16_t) (buffer[10] | ( buffer[11] << 8 ));
+			sonar_value[4] = (uint16_t) (buffer[12] | ( buffer[13] << 8 ));
 
-		Sonar_meas.BackRight = 3. + 0.1715 * sonar_value[0];
-		Sonar_meas.FrontRight = 3. + 0.1715 * sonar_value[1];	
-		Sonar_meas.Front = 3. + 0.1715 * sonar_value[2];	
-		Sonar_meas.FrontLeft = 3. + 0.1715 * sonar_value[3];	
-		Sonar_meas.BackLeft = 3. + 0.1715 * sonar_value[4];	
-		Sonar_meas.timestamp = act_time;
+			Sonar_meas.BackRight = 3. + 0.1715 * sonar_value[0];
+			Sonar_meas.FrontRight = 3. + 0.1715 * sonar_value[1];	
+			Sonar_meas.Front = 3. + 0.1715 * sonar_value[2];	
+			Sonar_meas.FrontLeft = 3. + 0.1715 * sonar_value[3];	
+			Sonar_meas.BackLeft = 3. + 0.1715 * sonar_value[4];	
+			Sonar_meas.timestamp = act_time;
 
-		Sonar_queue_mutex.lock();
+			Sonar_queue_mutex.lock();
 			Sonar_values.push(Sonar_meas);
 			while( Sonar_values.size() > 5 )
 			{
 				Sonar_values.pop();
 			}
-		Sonar_queue_mutex.unlock();	
+			Sonar_queue_mutex.unlock();	
 		
-		//std::cout << "Front: " << Sonar_meas.Front << std::endl;
+			//std::cout << "Front: " << Sonar_meas.Front << std::endl;
 		
 		
-		// Cals the wheel decoder messages
-		Wheel_Measurement wheel_meas;
-		// 0 - right, 1 - left
-		uint16_t wheel_decoder_resistance[2];
-		uint16_t wheel_decoder_counter[2];
+			// Cals the wheel decoder messages
+			Wheel_Measurement wheel_meas;
+			// 0 - right, 1 - left
+			uint16_t wheel_decoder_resistance[2];
+			uint16_t wheel_decoder_counter[2];
 
-		wheel_decoder_resistance[0] = (uint16_t) (buffer[18] | ( buffer[19] << 8 ));
-		wheel_decoder_resistance[1] = (uint16_t) (buffer[22] | ( buffer[23] << 8 ));
+			wheel_decoder_resistance[0] = (uint16_t) (buffer[18] | ( buffer[19] << 8 ));
+			wheel_decoder_resistance[1] = (uint16_t) (buffer[22] | ( buffer[23] << 8 ));
 
-		wheel_decoder_counter[0] = (uint16_t) (buffer[16] | ( buffer[17] << 8 ));
-		wheel_decoder_counter[1] = (uint16_t) (buffer[20] | ( buffer[21] << 8 ));
+			wheel_decoder_counter[0] = (uint16_t) (buffer[16] | ( buffer[17] << 8 ));
+			wheel_decoder_counter[1] = (uint16_t) (buffer[20] | ( buffer[21] << 8 ));
 
 		
-		wheel_meas.Right_Wheel_Rotations = wheel_decoder_counter[0];
-		wheel_meas.Left_Wheel_Rotations = wheel_decoder_counter[1];
-		wheel_meas.timestamp = act_time;
+			wheel_meas.Right_Wheel_Rotations = wheel_decoder_counter[0];
+			wheel_meas.Left_Wheel_Rotations = wheel_decoder_counter[1];
+			wheel_meas.timestamp = act_time;
 
 
-	        Wheel_queue_mutex.lock();
-        	this->Wheel_values.push_front(wheel_meas );
-	        while( this->Wheel_values.size() > 5 )
-        	{
-                	this->Wheel_values.pop_back();
+		        Wheel_queue_mutex.lock();
+	        	this->Wheel_values.push_front(wheel_meas );
+		        while( this->Wheel_values.size() > 5 )
+	        	{
+	                	this->Wheel_values.pop_back();
+			}
+        		Wheel_queue_mutex.unlock();
+		
 		}
-        	Wheel_queue_mutex.unlock();
 
 		//std::cout << "Read content of the imu" << std::endl;
 
@@ -489,50 +507,97 @@ void Sensor_Server::I2C_thread_funktion()
 		// Get the IMU Values
 		IMU_Measurement IMU_meas;
 
-
 		// Magnetometer
 		char IMU_buffer[8];
-		i2c_bus.i2c_read( 0x24, 0x03, 6, IMU_buffer );
-		int16_t mag_values[3];
+		retry_counter = 0;
+		int imu1_read_ret = -1;
+		
+		do
+		{
+			imu1_read_ret = i2c_bus.i2c_read( 0x24, 0x03, 6, IMU_buffer );
+			
+		} while( imu1_read_ret < 0 && ++retry_counter < 3 );
 
-		const float influence = 0.02;
+		
+		if( imu1_read_ret < 0 )
+		{
+			std::cout << "Fehler beim 1. lesen dere IMU: " << imu1_read_ret
+				<< "; " << errno << ": " << strerror( errno) << std::endl;
+		}
+		else
+		{
+			int16_t mag_values[3];
 
-		for( int i = 0; i<3; i++ )
-		{	
-			mag_values[i] = (uint16_t) (IMU_buffer[2*i+1] | ( IMU_buffer[2*i] << 8 ));	
-			IMU_meas.mag[i] = (1- influence) * last_meas.mag[i] + influence * (mag_values[i] * 0.3001221) ;
+			const float influence = 0.02;
+
+			for( int i = 0; i<3; i++ )
+			{	
+				mag_values[i] = (uint16_t) (IMU_buffer[2*i+1] | ( IMU_buffer[2*i] << 8 ));	
+				IMU_meas.mag[i] = (1- influence) * last_meas.mag[i] + influence * (mag_values[i] * 0.3001221) ;
+			}
 		}
 
-
+	
 		// Accelerometer
-		i2c_bus.i2c_read( 0x24, 0x3B, 6, IMU_buffer );
-		uint16_t acc_values[3];
+		retry_counter = 0;
+		int imu2_read_ret = -1;
 		
-		for( int i = 0; i<3; i++ )
+		do
+		{	
+			imu2_read_ret = i2c_bus.i2c_read( 0x24, 0x3B, 6, IMU_buffer );
+		} while( imu2_read_ret < 0 && ++retry_counter < 3 );
+
+		if( imu2_read_ret < 0 )
 		{
-			acc_values[i] = (uint16_t) (IMU_buffer[2*i+1] | ( IMU_buffer[2*i] << 8 ));
-			IMU_meas.acc[i] = acc_values[i] / 16384.0 ;
+			std::cout << "Fehler beim 2. lesen dere IMU: " << imu2_read_ret
+				<< "; " << errno << ": " << strerror( errno) << std::endl;
+		}
+		else
+		{
+			uint16_t acc_values[3];
+		
+			for( int i = 0; i<3; i++ )
+			{
+				acc_values[i] = (uint16_t) (IMU_buffer[2*i+1] | ( IMU_buffer[2*i] << 8 ));
+				IMU_meas.acc[i] = acc_values[i] / 16384.0 ;
+			}
 		}
 
 
 		// Gyroskope and Temperature
-		i2c_bus.i2c_read( 0x24, 0x41, 6, IMU_buffer );
+		retry_counter = 0;
+		int imu3_read_ret = -1;
 		
-		int16_t temp_value;
-		temp_value = (int16_t) (IMU_buffer[1] | ( IMU_buffer[0] << 8 ));
-		IMU_meas.temp = (temp_value - 521) / 340;
+		do
+		{	
+			imu3_read_ret = i2c_bus.i2c_read( 0x24, 0x41, 6, IMU_buffer );
+
+		} while( imu3_read_ret < 0 && ++retry_counter < 3 );
 
 
-		int16_t gyro_values[3];	
-	
-		for( int i = 1; i<4; i++ )
+		if( imu3_read_ret < 0 )
 		{
-			gyro_values[i] = (uint16_t) (IMU_buffer[2*i+1] | ( IMU_buffer[2*i] << 8 ));
-			IMU_meas.gyro[i] = gyro_values[i] / 131.;
+			std::cout << "Fehler beim 3. lesen dere IMU: " << imu3_read_ret
+				<< "; " << errno << ": " << strerror( errno) << std::endl;
 		}
+		else
+		{
+			int16_t temp_value;
+			temp_value = (int16_t) (IMU_buffer[1] | ( IMU_buffer[0] << 8 ));
+			IMU_meas.temp = (temp_value - 521) / 340;
 
 
-		IMU_meas.timestamp = act_time;
+			int16_t gyro_values[3];	
+		
+			for( int i = 1; i<4; i++ )
+			{
+				gyro_values[i] = (uint16_t) (IMU_buffer[2*i+1] | ( IMU_buffer[2*i] << 8 ));
+				IMU_meas.gyro[i] = gyro_values[i] / 131.;
+			}
+
+
+			IMU_meas.timestamp = act_time;
+		}
 
 
 		IMU_queue_mutex.lock();

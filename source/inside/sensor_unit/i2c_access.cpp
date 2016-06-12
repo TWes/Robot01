@@ -41,14 +41,16 @@ void i2c_access::close_connection()
 	close( this->i2c_fh );
 }
 
-void i2c_access::i2c_read( char address, signed int reg, signed int length, char* buffer_out )
+int i2c_access::i2c_read( char address, signed int reg, signed int length, char* buffer_out )
 {
 	if( this->max_buffer_size != 0 &&
 			this->max_buffer_size < length )
 	{
-		std::cerr << "Buffer is not big enought to read " << length 
+		/*std::cerr << "Buffer is not big enought to read " << length 
 					<<" Bytes, only " << this->max_buffer_size
-					<< " are provided" << std::endl;
+					<< " are provided" << std::endl; */
+		return -1;
+
 	}
 
 
@@ -56,9 +58,10 @@ void i2c_access::i2c_read( char address, signed int reg, signed int length, char
 	{
 		if (ioctl( this->i2c_fh, I2C_SLAVE, address) < 0)
 		{
-			std::cerr << "Konnt Addresse " << (int) address_buffer
-					  << " nicht öffnen." << std::endl;	
- 			return;
+			/*std::cerr << "Konnt Addresse " << (int) address_buffer
+					<< " nicht öffnen. Fehler: " << errno
+					<< ": " << strerror(errno) << std::endl; */
+ 			return -2;
 		}
 		else
 		{
@@ -69,9 +72,11 @@ void i2c_access::i2c_read( char address, signed int reg, signed int length, char
 	// Write designated register to device
 	if( write( this->i2c_fh, &reg, 1) != 1 )
 	{
-       std::cerr << "i2c_access: Konnte Register nicht schreiben: " << errno << std::endl;
-
-    }
+       		/*std::cerr << "i2c_access: Konnte Register nicht schreiben: " << errno
+			<< ": " << strerror(errno) << std::endl; */
+		
+		return -3;
+   	 }
 
 
 	// buffer is not big enougth
@@ -92,11 +97,15 @@ void i2c_access::i2c_read( char address, signed int reg, signed int length, char
 
 	if( read( this->i2c_fh, this->buffer, length) != length )
 	{
-		std::cout << "Konnte nicht lesen" << std::endl;
+		/*std::cout << "i2c_access: Konnte nicht lesen: " << errno
+			<< ": " << strerror(errno) << std::endl;*/
+		return -4;
 	}
 
 	for( int i=0;  i < length; i++ ) 
 	{
 		buffer_out[i] = this->buffer[i];
 	}
+
+	return 0;
 }

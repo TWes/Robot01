@@ -34,7 +34,7 @@ public:
 	template <typename T>
 	void i2c_write(char address, signed int reg, T value);
 
-	void i2c_read( char address, signed int reg, signed int length, char* buffer_out ); 
+	int i2c_read( char address, signed int reg, signed int length, char* buffer_out ); 
 
 private: 
 	int max_buffer_size;
