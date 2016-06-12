@@ -70,7 +70,7 @@ int Sensor_Connection::init_UDP_Pose()
     if( this->udp_socket == NULL )
     {
         udp_connection_information_t socket_info;
-        this->udp_socket = new udp_connection();
+        this->udp_socket = new udp_connection( this );
 
         this->udp_socket->createSocket( 0, socket_info );
         udp_socket_information = socket_info;
@@ -122,6 +122,27 @@ int Sensor_Connection::init_UDP_Pose()
     return 0;
 }
 
+request_entry_t* Sensor_Connection::getEntryById( int id )
+{
+    request_entry_t* ret = NULL;
+
+    std::vector<request_entry_t>::iterator iter;
+    for( iter = this->open_requests.begin(); iter != this->open_requests.end(); iter++ )
+    {
+        if( iter->id == id )
+        {
+            ret = new request_entry_t;
+            *ret = *iter;
+
+            if( !ret->stream )
+                this->open_requests.erase( iter++ );
+
+            break;
+        }
+    }
+
+    return ret;
+}
 
 
 void Sensor_Connection::receiving_thread_funktion()
@@ -299,6 +320,11 @@ void Sensor_Connection::end_server()
     this->receiving_thread.join();
 }
 
+udp_connection::udp_connection( Sensor_Connection *sensor ) : udp_connection_inet()
+{
+    this->connection = sensor;
+}
+
 void udp_connection::handle_connection(char *message, int message_lenght, udp_connection_information_t other)
 {
     uint16_t headder[3];
@@ -314,8 +340,24 @@ void udp_connection::handle_connection(char *message, int message_lenght, udp_co
                   << "h(0): " << headder[2] << std::endl;
     }
     else
-    { return; }
+    { return; }    
 
+    request_entry_t *act = this->connection->getEntryById( headder[2] );
+
+    if( act->todo_action == WRITE_POSE )
+    {
+        if( headder[1] == sizeof( Pose_t ))
+        {
+            Pose_t recv_pose;
+
+            memcpy( &recv_pose, (message + sizeof(headder)), sizeof( Pose_t ) );
+
+            this->connection->act_pose = recv_pose;
+        }
+
+    }
+
+    delete act;
 
     return;
 }
