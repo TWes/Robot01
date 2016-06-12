@@ -118,8 +118,6 @@ void Sensor_Server::working_thread_function()
         last_left_velocity = left_velocity;
         last_right_velocity = right_velocity;
 
-	this->act_position.theta = 230.0;
-
         usleep(500000);
     }
 }
