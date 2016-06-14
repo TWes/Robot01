@@ -521,57 +521,28 @@ void Sensor_Server::I2C_thread_funktion()
 
 		//std::cout << "Read content of the imu" << std::endl;
 
-
 		// Get the IMU Values
 		IMU_Measurement IMU_meas;
 
-		// Magnetometer
-		char IMU_buffer[8];
+		
+		// IMU
+		char IMU_buffer[14];
 		retry_counter = 0;
-		int imu1_read_ret = -1;
-		
-		do
-		{
-			imu1_read_ret = i2c_bus.i2c_read( 0x68, 0x03, 6, IMU_buffer );
-			
-		} while( imu1_read_ret < 0 && ++retry_counter < 3 );
+		int imu1_read_ret = -1;		
 
-		
-		if( imu1_read_ret < 0 )
-		{
-			std::cout << "Fehler beim 1. lesen dere IMU: " << imu1_read_ret
-				<< "; " << errno << ": " << strerror( errno) << std::endl;
-		}
-		else
-		{
-			int16_t mag_values[3];
-
-			const float influence = 0.02;
-
-			for( int i = 0; i<3; i++ )
-			{	
-				mag_values[i] = (uint16_t) (IMU_buffer[2*i+1] | ( IMU_buffer[2*i] << 8 ));	
-				IMU_meas.mag[i] = (1- influence) * last_meas.mag[i] + influence * (mag_values[i] * 0.3001221) ;
-			}
-		}
-
-	
-		// Accelerometer
-		retry_counter = 0;
-		int imu2_read_ret = -1;
-		
 		do
 		{	
-			imu2_read_ret = i2c_bus.i2c_read( 0x68, 0x3B, 6, IMU_buffer );
-		} while( imu2_read_ret < 0 && ++retry_counter < 3 );
+			imu1_read_ret = i2c_bus.i2c_read( 0x68, 0x3B, 14, IMU_buffer );
 
-		if( imu2_read_ret < 0 )
+		} while( imu1_read_ret < 0 && ++retry_counter < 3 );
+
+		if( imu1_read_ret < 0 )
 		{
-			std::cout << "Fehler beim 2. lesen dere IMU: " << imu2_read_ret
+			std::cout << "Fehler beim lesen dere IMU: " << imu1_read_ret
 				<< "; " << errno << ": " << strerror( errno) << std::endl;
 		}
 		else
-		{
+		{	// Accerleration
 			int16_t acc_values[3];
 		
 			for( int i = 0; i<3; i++ )
@@ -579,54 +550,48 @@ void Sensor_Server::I2C_thread_funktion()
 				acc_values[i] =  (IMU_buffer[2*i+1] | (((int8_t)IMU_buffer[2*i]) << 8 ));
 				IMU_meas.acc[i] = acc_values[i] / 16384.0;
 			}
-		}
 
 
-		// Gyroskope and Temperature
-		retry_counter = 0;
-		int imu3_read_ret = -1;
-		
-		do
-		{	
-			imu3_read_ret = i2c_bus.i2c_read( 0x68, 0x41, 6, IMU_buffer );
-
-		} while( imu3_read_ret < 0 && ++retry_counter < 3 );
+			// Temperature
+			uint16_t temp_value;
+			temp_value = ( IMU_buffer[7] | (IMU_buffer[6] << 8) );
+			IMU_meas.temp = (temp_value - 521) / 316.0;
 
 
-		if( imu3_read_ret < 0 )
-		{
-			std::cout << "Fehler beim 3. lesen dere IMU: " << imu3_read_ret
-				<< "; " << errno << ": " << strerror( errno) << std::endl;
-		}
-		else
-		{
-			int16_t temp_value;
-			temp_value = (int16_t) (IMU_buffer[1] | ( ((uint8_t)IMU_buffer[0]) << 8 ));
-			IMU_meas.temp = (temp_value - 521) / 340;
-
-
+			// Gyroskope
 			int16_t gyro_values[3];	
 		
-			for( int i = 1; i<4; i++ )
+			for( int i = 0; i<3; i++ )
 			{
-				gyro_values[i-1] = (uint16_t) (IMU_buffer[2*i+1] | ((uint8_t) IMU_buffer[2*i]) << 8 );
-				IMU_meas.gyro[i-1] = gyro_values[i] / 131.;
+				gyro_values[i] = (IMU_buffer[2*i+9] | ((int8_t) IMU_buffer[2*i+8]) << 8 );
+				IMU_meas.gyro[i] = gyro_values[i] / 131.;
 			}
 
-
 			IMU_meas.timestamp = act_time;
-		}
 
 
-		IMU_queue_mutex.lock();
-			IMU_values.push_back( IMU_meas );
-			while( IMU_values.size() > IMU_Buffer_Size )
+			IMU_queue_mutex.lock();
+				IMU_values.push_back( IMU_meas );
+				while( IMU_values.size() > IMU_Buffer_Size )
+				{
+					IMU_values.pop_front();
+				}	
+			IMU_queue_mutex.unlock();
+
+			last_meas = IMU_meas;
+
+			static float lastXVal = acc_values[0];
+			if( acc_values[0] == lastXVal )
 			{
-				IMU_values.pop_front();
-			}	
-		IMU_queue_mutex.unlock();
+				// Reset internal buffer
+				i2c_bus.i2c_write<uint8_t>( 0x68, 0x6B, 0x80  );
+				i2c_bus.i2c_write<uint8_t>( 0x68, 0x6B, 0x00  );
 
-		last_meas = IMU_meas;
+			}
+
+			lastXVal  = acc_values[0];
+
+		}
 
 
 		//usleep( 500000 );

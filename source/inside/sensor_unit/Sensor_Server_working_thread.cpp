@@ -112,20 +112,33 @@ void Sensor_Server::working_thread_function()
 
         double acceleration_IMU = act_imu_meas.acc[1]; // Beschleunigung in y- Richtung
         
-	// Calc to °/s
-	double rotation_IMU = act_imu_meas.gyro[2] /131.0; // rotation um die z- Achse
+	double rotation_IMU = act_imu_meas.gyro[2]; // rotation um die z- Achse
+
+	float velocity[2];
+	velocity[0] = act_imu_meas.acc[0] * imu_delta_t;
+	velocity[1] = act_imu_meas.acc[1] * imu_delta_t;
 
 	double IMU_velocity = acceleration_IMU * imu_delta_t;
 
-	//float acc_z = act_imu_meas.acc[2];
 	std::cout << "x: " << act_imu_meas.acc[0] << std::endl;
 	std::cout << "y: " << act_imu_meas.acc[1] << std::endl;
 	std::cout << "z: " << act_imu_meas.acc[2] << std::endl;
 
-	
+	std::cout << "IMU velo x: " << velocity[0] << std::endl;
+	std::cout << "IMU velo y: " << velocity[1] << std::endl;
+
+
+
+
+	/*std::cout << "x: " << act_imu_meas.gyro[0] << std::endl;
+	std::cout << "y: " << act_imu_meas.gyro[1] << std::endl;
+	std::cout << "z: " << act_imu_meas.gyro[2] << std::endl; */
+
 	/*std::cout << "IMU Velo: " << IMU_velocity << std::endl;
 	std::cout << "IMU Rotation: " << rotation_IMU << std::endl; */
-	}
+
+
+}
 	
 
         last_wheel_meas = act_wheel_meas;
