@@ -79,6 +79,8 @@ int i2c_access::i2c_read( char address, signed int reg, signed int length, char*
    	 }
 
 
+	usleep( 100 );
+
 	// buffer is not big enougth
 	if( this->max_buffer_size == 0 &&
  			this->buffer_size < length )

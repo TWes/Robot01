@@ -118,21 +118,36 @@ void Sensor_Server::working_thread_function()
 	velocity[0] = act_imu_meas.acc[0] * imu_delta_t;
 	velocity[1] = act_imu_meas.acc[1] * imu_delta_t;
 
-	double IMU_velocity = acceleration_IMU * imu_delta_t;
+	static double IMU_velocity;
+
+	IMU_velocity = velocity[0] * 0.4 + 0.6 * IMU_velocity;
+	
+	if( IMU_velocity < 0.01 ) 
+	{
+		IMU_velocity = 0.0;
+	}
+
+
+	std::cout << "IMU_velocity" << IMU_velocity << std::endl;
+
 
 	std::cout << "x: " << act_imu_meas.acc[0] << std::endl;
 	std::cout << "y: " << act_imu_meas.acc[1] << std::endl;
 	std::cout << "z: " << act_imu_meas.acc[2] << std::endl;
 
-	std::cout << "IMU velo x: " << velocity[0] << std::endl;
-	std::cout << "IMU velo y: " << velocity[1] << std::endl;
-
-
-
 
 	/*std::cout << "x: " << act_imu_meas.gyro[0] << std::endl;
 	std::cout << "y: " << act_imu_meas.gyro[1] << std::endl;
 	std::cout << "z: " << act_imu_meas.gyro[2] << std::endl; */
+
+
+	static float x_pos = 0.0;
+
+	x_pos += IMU_velocity * imu_delta_t;
+
+	//std::cout << "X Pos: " << x_pos << std::endl;
+
+	
 
 	/*std::cout << "IMU Velo: " << IMU_velocity << std::endl;
 	std::cout << "IMU Rotation: " << rotation_IMU << std::endl; */
@@ -144,7 +159,7 @@ void Sensor_Server::working_thread_function()
         last_wheel_meas = act_wheel_meas;
 	last_imu_meas = act_imu_meas;
 
-        usleep(500000);
+        usleep(50000);
     }
 }
 

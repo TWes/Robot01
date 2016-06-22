@@ -583,9 +583,11 @@ void Sensor_Server::I2C_thread_funktion()
 			static float lastXVal = acc_values[0];
 			if( acc_values[0] == lastXVal )
 			{
+				std::cout << "Reset sensor" << std::endl;
+
 				// Reset internal buffer
-				i2c_bus.i2c_write<uint8_t>( 0x68, 0x6B, 0x80  );
-				i2c_bus.i2c_write<uint8_t>( 0x68, 0x6B, 0x00  );
+				//i2c_bus.i2c_write<uint8_t>( 0x68, 0x6B, 0x80  );
+				//i2c_bus.i2c_write<uint8_t>( 0x68, 0x6B, 0x00  );
 
 			}
 
