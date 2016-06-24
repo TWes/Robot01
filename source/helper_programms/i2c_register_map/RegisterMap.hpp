@@ -1,5 +1,5 @@
-#ifndef REGISTERMAP_H
-#define REGISTERMAP_H
+#ifndef REGISTERMAP_HPP
+#define REGISTERMAP_HPP
 
 #include "map"
 

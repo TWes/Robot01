@@ -60,9 +60,6 @@ void ControlWidget::readRegisters()
     // Read Registers
     RegisterMapper::readRegisters(registerAdddress, startRegister, registersToRead );
 
-    RegisterMapper::generateTestData( startRegister, registersToRead );
-
-
     // emit Redraw
     emit redrawTable();
 

@@ -20,10 +20,62 @@ RegisterMapper* RegisterMapper::getInstance()
 void RegisterMapper::readRegisters( unsigned int device, unsigned int firstRegister,
                     unsigned int nmbOfRegisters )
 {
-    // get instance here
+    // During Debug
+    RegisterMapper::generateTestData(firstRegister, nmbOfRegisters );
+    return;
 
+
+    // open device
+    int fh = open( "/dev/i2c-1", O_RDWR);
+    if( fh < 0 )
+    {
+        std::cerr << "Fehler beim öffnen des i2c Devices" << std::endl;
+        std::cerr << "Fehlercode: " << errno << std::endl;
+
+        return;
+    }
+
+    if (ioctl( fh, I2C_SLAVE, device) < 0)
+    {
+        std::cerr << "Konnt Addresse " << (int) device
+            << " nicht öffnen. Fehler: " << errno
+            << ": " << strerror(errno) << std::endl;
+
+        return;
+    }
+
+    char register_to_read_from = firstRegister;
+    if( write( fh, &register_to_read_from, 1) != 1 )
+    {
+        std::cerr << "i2c_access: Konnte Zielregister nicht schreiben: " << errno
+            << ": " << strerror(errno) << std::endl;
+
+        return;
+    }
+
+    char* buffer = new char[nmbOfRegisters];
+    if( read( fh, buffer, nmbOfRegisters) != nmbOfRegisters )
+    {
+        std::cout << "i2c_access: Konnte nicht lesen: " << errno
+                << ": " << strerror(errno) << std::endl;
+        return;
+    }
 
     // Read the registers and put it in the list
+    RegisterMap MapToInsert( firstRegister, nmbOfRegisters );
+
+    for( int i = 0; i< nmbOfRegisters; i++ )
+    {
+        unsigned int register_to_add;
+        register_to_add = firstRegister + i;
+
+        MapToInsert.addElement( register_to_add, buffer[i] );
+    }
+
+    RegisterMapper::getInstance()->maps.push_back( MapToInsert );
+
+    delete buffer;
+    close( fh );
 }
 
 void RegisterMapper::generateTestData( unsigned int firstRegister,
@@ -113,6 +165,17 @@ char RegisterMapper::getItem( int row, int column)
     return act_map.getContent( row );
 }
 
+char RegisterMapper::compareRegister(unsigned int register_address, int col1, int col2 )
+{
+    char char1, char2;
+
+    char1 = getItem(register_address, col1 );
+    char2 = getItem(register_address, col2 );
+
+    char diff = char1 ^ char2;
+
+    return diff;
+}
 
 RegisterMapper::~RegisterMapper()
 {

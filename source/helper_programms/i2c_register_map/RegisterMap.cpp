@@ -1,4 +1,4 @@
-#include "RegisterMap.h"
+#include "RegisterMap.hpp"
 
 RegisterMap::RegisterMap()
 {

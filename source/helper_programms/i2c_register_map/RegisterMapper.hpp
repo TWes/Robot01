@@ -4,11 +4,20 @@
 #include <iostream>
 #include <vector>
 
+#include <linux/i2c-dev.h>
+#include <sys/ioctl.h>
+#include <errno.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <string.h>
+
 // used for random number generation
 #include <stdlib.h>
 #include <time.h>
 
-#include "RegisterMap.h"
+#include "RegisterMap.hpp"
 
 class RegisterMapper
 {
@@ -28,6 +37,8 @@ public:
     static int getFirstRegister();
     static int getLastRegister();
     static char getItem( int row, int column);
+    static char compareRegister( unsigned int register_address, int col1, int col2 );
+
 
 
 private:

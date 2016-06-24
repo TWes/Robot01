@@ -109,7 +109,25 @@ void TableWidget::fillTabel()
         }
         else
         {
-            // Berechne den Untershcied zweier benachtbarter zellen
+            for( int r = firstRegister; r <= lastRegister; r++ )
+            {
+                int row = r - firstRegister;
+
+                char cToInsert = RegisterMapper::compareRegister( r, c/2, (c+1)/2);
+
+                QString toInsert;
+
+                toInsert.setNum( (uchar) cToInsert, 2);
+
+                while( toInsert.size() < 8 )
+                {
+                    toInsert = "0" + toInsert;
+                }
+
+                toInsert = "0b" + toInsert;
+
+                this->setItem(row, c, new QTableWidgetItem(toInsert)) ;
+            }
 
 
         }
