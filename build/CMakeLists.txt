@@ -70,6 +70,13 @@ add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/remote/robot_monitor
 	${CMAKE_CURRENT_SOURCE_DIR}/source/remote/robot_monitor
 )
 
+###########################
+## Build helper programs ##
+###########################
+# Build the i2c register map
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/helper_programms/i2c_register_map
+	${CMAKE_CURRENT_SOURCE_DIR}/source/helper_programms/i2c_register_map
+)
 
 ###########################
 ## add real clean target ##
