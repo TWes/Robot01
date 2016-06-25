@@ -103,7 +103,7 @@ void RegisterMapper::saveMap( QString filename)
     }
 
     std::ofstream archive_to_save( filename.toStdString() );
-    boost::archive::binary_oarchive archive(archive_to_save);
+    boost::archive::text_oarchive  archive(archive_to_save);
 
     archive << RegisterMapper::getInstance()->maps ;
 
@@ -113,7 +113,7 @@ void RegisterMapper::saveMap( QString filename)
 void RegisterMapper::openMap( QString filename )
 {
     std::ifstream archive_to_read( filename.toStdString() );
-    boost::archive::binary_iarchive archive(archive_to_read);
+    boost::archive::text_iarchive archive(archive_to_read);
 
     archive >> RegisterMapper::getInstance()->maps ;
 
