@@ -16,13 +16,12 @@ RegisterMapper* RegisterMapper::getInstance()
     return instance;
 }
 
-
 void RegisterMapper::readRegisters( unsigned int device, unsigned int firstRegister,
-                    unsigned int nmbOfRegisters )
+                     unsigned int nmbOfRegisters )
 {
     // During Debug
-    //RegisterMapper::generateTestData(firstRegister, nmbOfRegisters );
-    //return;
+    RegisterMapper::generateTestData(firstRegister, nmbOfRegisters );
+    return;
 
 
     // open device
@@ -94,6 +93,31 @@ void RegisterMapper::generateTestData( unsigned int firstRegister,
 
 
     RegisterMapper::getInstance()->maps.push_back( mapToInsert );
+}
+
+void RegisterMapper::saveMap( QString filename)
+{
+    if( !filename.endsWith(".rm") )
+    {
+        filename += ".rm";
+    }
+
+    std::ofstream archive_to_save( filename.toStdString() );
+    boost::archive::binary_oarchive archive(archive_to_save);
+
+    archive << RegisterMapper::getInstance()->maps ;
+
+    archive_to_save.close();
+}
+
+void RegisterMapper::openMap( QString filename )
+{
+    std::ifstream archive_to_read( filename.toStdString() );
+    boost::archive::binary_iarchive archive(archive_to_read);
+
+    archive >> RegisterMapper::getInstance()->maps ;
+
+    archive_to_read.close();
 }
 
 int RegisterMapper::getFirstRegister()

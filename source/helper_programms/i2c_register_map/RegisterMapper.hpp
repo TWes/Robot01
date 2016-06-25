@@ -17,7 +17,14 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include <qt4/Qt/QtCore>
 #include "RegisterMap.hpp"
+
+#include <fstream>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/serialization/split_member.hpp>
+#include <boost/serialization/vector.hpp>
 
 class RegisterMapper
 {
@@ -39,13 +46,15 @@ public:
     static char getItem( int row, int column);
     static char compareRegister( unsigned int register_address, int col1, int col2 );
 
-
+    static void saveMap( QString filename);
+    static void openMap( QString filename);
 
 private:
     static RegisterMapper *instance;
     static RegisterMapper *getInstance();
 
     std::vector<RegisterMap> maps;
+
 
 };
 

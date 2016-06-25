@@ -2,6 +2,7 @@
 #define REGISTERMAP_HPP
 
 #include "map"
+#include "boost/serialization/map.hpp"
 
 class RegisterMap
 {
@@ -19,11 +20,20 @@ public:
 
     bool doesRegisterExist( unsigned int register_address);
 
-private:
-    unsigned int first_register;
-    unsigned int size;
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version)
+    {
+        ar & first_register;
+        ar & size;
+        ar & registers;
+    }
 
-    std::map<unsigned int, char> registers;
+
+private:
+    u_int32_t first_register;
+    u_int32_t size;
+
+    std::map<u_int32_t, u_char> registers;
 };
 
 

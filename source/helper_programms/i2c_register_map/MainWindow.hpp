@@ -5,6 +5,7 @@
 
 #include "ControlWidget.hpp"
 #include "TableWidget.hpp"
+#include "RegisterMapper.hpp"
 
 class MainWindow : public QMainWindow
 {
@@ -21,6 +22,13 @@ private:
 
     ControlWidget *controlWidget;
     TableWidget *tableWidget;
+
+    QAction *openFile;
+    QAction *saveFile;
+
+private slots:
+    void openFileFunktion();
+    void saveFileFunktion();
 
 
 };
