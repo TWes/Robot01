@@ -20,8 +20,8 @@ void RegisterMapper::readRegisters( unsigned int device, unsigned int firstRegis
                      unsigned int nmbOfRegisters )
 {
     // During Debug
-    RegisterMapper::generateTestData(firstRegister, nmbOfRegisters );
-    return;
+    //RegisterMapper::generateTestData(firstRegister, nmbOfRegisters );
+    //return;
 
 
     // open device
