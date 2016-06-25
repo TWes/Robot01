@@ -31,6 +31,7 @@ void RegisterMapper::readRegisters( unsigned int device, unsigned int firstRegis
         std::cerr << "Fehler beim öffnen des i2c Devices" << std::endl;
         std::cerr << "Fehlercode: " << errno << std::endl;
 
+        close( fh );
         return;
     }
 
@@ -40,6 +41,7 @@ void RegisterMapper::readRegisters( unsigned int device, unsigned int firstRegis
             << " nicht öffnen. Fehler: " << errno
             << ": " << strerror(errno) << std::endl;
 
+        close( fh );
         return;
     }
 
@@ -49,6 +51,7 @@ void RegisterMapper::readRegisters( unsigned int device, unsigned int firstRegis
         std::cerr << "i2c_access: Konnte Zielregister nicht schreiben: " << errno
             << ": " << strerror(errno) << std::endl;
 
+        close( fh );
         return;
     }
 
@@ -57,6 +60,9 @@ void RegisterMapper::readRegisters( unsigned int device, unsigned int firstRegis
     {
         std::cout << "i2c_access: Konnte nicht lesen: " << errno
                 << ": " << strerror(errno) << std::endl;
+
+        delete buffer;
+        close( fh );
         return;
     }
 
@@ -119,6 +125,100 @@ void RegisterMapper::openMap( QString filename )
 
     archive_to_read.close();
 }
+
+void RegisterMapper::saveToCVS( QString filename )
+{
+    std::cout << "Write csv file: " << filename.toStdString() << std::endl;
+    if( !filename.endsWith(".cvs") )
+    {
+        filename += ".cvs";
+    }
+
+    std::ofstream filestream( filename.toStdString() );
+
+    // Make headder
+    int maps = RegisterMapper::NmbOfMaps();
+    int columns = 2*maps -1;
+
+    int firstRegister = RegisterMapper::getFirstRegister();
+    int lastRegister = RegisterMapper::getLastRegister();
+
+
+    filestream << "\"\",Content";
+
+    for( int i = 1; i < maps; i++)
+    {
+        filestream << ",Diff";
+        filestream << ",Content";
+    }
+    filestream << "\n";
+
+    // Fill in the values
+    for( int r = firstRegister; r <= lastRegister; r++ )
+    {
+         QString registerName;
+         registerName.setNum( (uchar) r, 16);
+
+         if( registerName.size() == 1 )
+         {
+             registerName = "0" + registerName;
+         }
+
+         registerName = "0x" + registerName;
+
+         filestream << registerName.toStdString();
+
+
+        for( int c = 0; c < columns; c++)
+        {
+            bool even = !(c % 2);
+
+            if( even )
+            {
+                char cToInsert = RegisterMapper::getItem(r, c/2);
+
+                QString toInsert;
+
+                toInsert.setNum( (uchar) cToInsert, 16);
+
+                if( toInsert.size() == 1 )
+                {
+                    toInsert = "0" + toInsert;
+                }
+
+                toInsert = ",0x" + toInsert;
+
+                filestream << toInsert.toStdString();
+            }
+            else
+            {
+                char cToInsert = RegisterMapper::compareRegister( r, c/2, (c+1)/2);
+
+                QString toInsert;
+
+                toInsert.setNum( (uchar) cToInsert, 2);
+
+                while( toInsert.size() < 8 )
+                {
+                    toInsert = "0" + toInsert;
+                }
+
+                toInsert = ",0b" + toInsert;
+
+                filestream << toInsert.toStdString();
+            }
+        }
+
+        filestream << "\n";
+
+    }
+
+
+
+
+    filestream.close();
+}
+
 
 int RegisterMapper::getFirstRegister()
 {

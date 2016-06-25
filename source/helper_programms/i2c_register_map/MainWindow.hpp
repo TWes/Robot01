@@ -25,10 +25,12 @@ private:
 
     QAction *openFile;
     QAction *saveFile;
+    QAction *exportToCVS;
 
 private slots:
     void openFileFunktion();
     void saveFileFunktion();
+    void exportToCVSFunktion();
 
 
 };

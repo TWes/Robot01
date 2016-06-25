@@ -30,11 +30,15 @@ MainWindow::MainWindow() : QMainWindow()
     QObject::connect( this->openFile, SIGNAL(triggered()),
                      this, SLOT(openFileFunktion()) );
 
+    this->exportToCVS = new QAction( "Export to CVS", this );
+    QObject::connect( this->exportToCVS, SIGNAL(triggered()),
+                      this, SLOT(exportToCVSFunktion()) );
 
     // Add Menu
     QMenu *dataMenu = this->menuBar()->addMenu( "File" );
     dataMenu->addAction( this->openFile );
     dataMenu->addAction( this->saveFile );
+    dataMenu->addAction( this->exportToCVS );
 }
 
 void MainWindow::openFileFunktion()
@@ -56,6 +60,16 @@ void MainWindow::saveFileFunktion()
 
     RegisterMapper::saveMap( filepath );
 }
+
+void MainWindow::exportToCVSFunktion()
+{
+    QString filepath = QFileDialog::getSaveFileName( this, "Chose file to save", "~/", "Comma-separated values (*.cvs)");
+
+    if( filepath.size() == 0 ) return;
+
+    RegisterMapper::saveToCVS( filepath );
+}
+
 
 MainWindow::~MainWindow()
 {

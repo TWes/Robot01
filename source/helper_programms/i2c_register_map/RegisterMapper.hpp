@@ -49,6 +49,8 @@ public:
     static void saveMap( QString filename);
     static void openMap( QString filename);
 
+    static void saveToCVS( QString filename );
+
 private:
     static RegisterMapper *instance;
     static RegisterMapper *getInstance();
