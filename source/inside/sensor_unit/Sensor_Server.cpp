@@ -55,8 +55,12 @@ void Sensor_Server::setup()
 
 	working_thread = std::thread( &Sensor_Server::working_thread_function, this );
 
-	// enable IMU
-	 i2c_bus.i2c_write<uint8_t>( 0x68, 0x6B, 0x00  ); //disable sleep mode
+
+	// activate Gyro and acc
+	i2c_bus.i2c_write<uint8_t>( 0x6B, 0x10, 0x20  ); //disable sleep mode
+
+	//activate magnetometer
+	i2c_bus.i2c_write<uint8_t>( 0x1e, 0x22, 0x00  ); //disable sleep mode
 
 	// Create the udp socket, port doesn't matter
 	udp_connection.createSocket(0);
@@ -70,6 +74,7 @@ void Sensor_Server::setup()
 void Sensor_Server::cleanup()
 {
 	std::cout << "Wait for threads to end" << std::endl;
+
 
 	webcam.release();
 
@@ -395,6 +400,10 @@ void Sensor_Server::CAM_thread_funktion()
 
 void Sensor_Server::I2C_thread_funktion()
 {
+	logfile logger;
+	logger.open("senser_connection_logfile");
+
+	logger << "Start thread function";
 
 	IMU_Measurement last_meas = {0.0};
 	int retry_counter = 0;		
@@ -432,13 +441,21 @@ void Sensor_Server::I2C_thread_funktion()
 		do
 		{
 			uc_read_ret = i2c_bus.i2c_read( 0x24, 0x00, 24, buffer );
+
+			if( uc_read_ret < 0 )
+			{
+				std::string errormsg = "Error while reading µC: 0x24, 0x00 -> ";
+				errormsg += std::string( std::to_string(uc_read_ret) );
+				logger << errormsg;
+			}
+
 			
 		} while( uc_read_ret < 0 && ++retry_counter < 3 );
 		
 		if( uc_read_ret < 0 )
 		{
 			std::cout << "Fehler beim lesen des uc: " << uc_read_ret 
-				<< "; " << errno << ": " << strerror( errno) << std::endl;	
+				<< "; " << errno << ": " << strerror( errno) << std::endl;
 		}		
 
 		// only process, if reading was succesfull
@@ -524,15 +541,58 @@ void Sensor_Server::I2C_thread_funktion()
 		// Get the IMU Values
 		IMU_Measurement IMU_meas;
 
+
+		// Read Temperature
+		int16_t temp_values;
+		retry_counter = 0;
+		int imu0_read_ret = -1;		
+
+		do
+		{	
+			imu0_read_ret = i2c_bus.i2c_read( 0x6b, 0x15, 2, (char*) &temp_values );
+
+			//std::cout << "Read: " << (int) IMU_buffer << std::endl;
+
+			if( imu0_read_ret < 0 )
+			{
+				std::string errormsg = "Error while reading imu: 0x68, 0x3B -> ";
+				errormsg += std::string( std::to_string(imu0_read_ret) );
+				logger << errormsg;
+			}
+
+		} while( imu0_read_ret < 0 && ++retry_counter < 3 );
+
+		if( imu0_read_ret < 0 )
+		{
+			std::cout << "Fehler beim lesen dere IMU: " << imu0_read_ret
+				<< "; " << errno << ": " << strerror( errno) << std::endl;
+		}
+		else
+		{	
+			/*std::cout << (temp_values / 16.0) + 25.0  << std::endl;*/
+			
+			IMU_meas.temp = (temp_values / 16.0) + 25.0;
+
+		}
+
 		
-		// IMU
-		char IMU_buffer[14];
+		// Read Gyroscope
+		int16_t gyro_values[3];
 		retry_counter = 0;
 		int imu1_read_ret = -1;		
 
 		do
 		{	
-			imu1_read_ret = i2c_bus.i2c_read( 0x68, 0x3B, 14, IMU_buffer );
+			imu1_read_ret = i2c_bus.i2c_read( 0x6b, 0x18, 6, (char*) gyro_values );
+
+			//std::cout << "Read: " << (int) IMU_buffer << std::endl;
+
+			if( imu1_read_ret < 0 )
+			{
+				std::string errormsg = "Error while reading imu: 0x68, 0x3B -> ";
+				errormsg += std::string( std::to_string(imu1_read_ret) );
+				logger << errormsg;
+			}
 
 		} while( imu1_read_ret < 0 && ++retry_counter < 3 );
 
@@ -542,64 +602,111 @@ void Sensor_Server::I2C_thread_funktion()
 				<< "; " << errno << ": " << strerror( errno) << std::endl;
 		}
 		else
-		{	// Accerleration
-			int16_t acc_values[3];
-		
-			for( int i = 0; i<3; i++ )
-			{				
-				acc_values[i] =  (IMU_buffer[2*i+1] | (((int8_t)IMU_buffer[2*i]) << 8 ));
-				IMU_meas.acc[i] = acc_values[i] / 16384.0;
-			}
+		{	//Gyroscope
+
+			/*std::cout 	<< "x: " << (gyro_values[0] * 8.75)/1000.0 << "\n"
+					<< "y: " << (gyro_values[1] * 8.75)/1000.0 << "\n"
+					<< "z: " << (gyro_values[2] * 8.75)/1000.0 << std::endl;*/
+
+			
+			IMU_meas.gyro[0] = (gyro_values[0] * 8.75)/1000.0;
+			IMU_meas.gyro[1] = (gyro_values[1] * 8.75)/1000.0;
+			IMU_meas.gyro[2] = (gyro_values[2] * 8.75)/1000.0;
+		}
 
 
-			// Temperature
-			uint16_t temp_value;
-			temp_value = ( IMU_buffer[7] | (IMU_buffer[6] << 8) );
-			IMU_meas.temp = (temp_value - 521) / 316.0;
+		// Read Accelerometer
+		int16_t acc_buffer[3];
+		retry_counter = 0;
+		int imu2_read_ret = -1;		
 
+		do
+		{	
+			imu2_read_ret = i2c_bus.i2c_read( 0x6b, 0x28, 6, (char*) acc_buffer );
 
-			// Gyroskope
-			int16_t gyro_values[3];	
-		
-			for( int i = 0; i<3; i++ )
+			//std::cout << "Read: " << (int) IMU_buffer << std::endl;
+
+			if( imu2_read_ret < 0 )
 			{
-				gyro_values[i] = (IMU_buffer[2*i+9] | ((int8_t) IMU_buffer[2*i+8]) << 8 );
-				IMU_meas.gyro[i] = gyro_values[i] / 131.;
+				std::string errormsg = "Error while reading imu: 0x68, 0x3B -> ";
+				errormsg += std::string( std::to_string(imu1_read_ret) );
+				logger << errormsg;
 			}
 
-			IMU_meas.timestamp = act_time;
 
 
-			IMU_queue_mutex.lock();
-				IMU_values.push_back( IMU_meas );
-				while( IMU_values.size() > IMU_Buffer_Size )
-				{
-					IMU_values.pop_front();
-				}	
-			IMU_queue_mutex.unlock();
+		} while( imu2_read_ret < 0 && ++retry_counter < 3 );
 
-			last_meas = IMU_meas;
+		if( imu2_read_ret < 0 )
+		{
+			std::cout << "Fehler beim lesen dere IMU: " << imu1_read_ret
+				<< "; " << errno << ": " << strerror( errno) << std::endl;
+		}
+		else
+		{
+			/*std::cout 	<< "x: " << (acc_buffer[0] * 0.068)/1000.0 << "\n"
+					<< "y: " << (acc_buffer[1] * 0.068)/1000.0 << "\n"
+					<< "z: " << (acc_buffer[2] * 0.068)/1000.0 << std::endl;*/
 
-			static float lastXVal = acc_values[0];
-			if( acc_values[0] == lastXVal )
-			{
-				std::cout << "Reset sensor" << std::endl;
-
-				// Reset internal buffer
-				//i2c_bus.i2c_write<uint8_t>( 0x68, 0x6B, 0x80  );
-				//i2c_bus.i2c_write<uint8_t>( 0x68, 0x6B, 0x00  );
-
-			}
-
-			lastXVal  = acc_values[0];
+			IMU_meas.acc[0] = (acc_buffer[0] * 0.068)/1000.0;
+			IMU_meas.acc[1] = (acc_buffer[1] * 0.068)/1000.0;
+			IMU_meas.acc[2] = (acc_buffer[2] * 0.068)/1000.0;
 
 		}
 
 
-		//usleep( 500000 );
-		usleep( 10000 );
+		// Read Magnetometer
+		int16_t magn_buffer[3];
+		retry_counter = 0;
+		int imu3_read_ret = -1;	
+
+		do
+		{	
+			imu3_read_ret = i2c_bus.i2c_read( 0x1e, 0x28, 6, (char*) magn_buffer );
+
+			//std::cout << "Read: " << (int) IMU_buffer << std::endl;
+
+			if( imu3_read_ret < 0 )
+			{
+				std::string errormsg = "Error while reading imu: 0x68, 0x3B -> ";
+				errormsg += std::string( std::to_string(imu1_read_ret) );
+				logger << errormsg;
+			}
+
+		} while( imu3_read_ret < 0 && ++retry_counter < 3 );
+
+		if( imu3_read_ret < 0 )
+		{
+			std::cout << "Fehler beim lesen dere IMU: " << imu3_read_ret
+				<< "; " << errno << ": " << strerror( errno) << std::endl;
+		}
+		else
+		{
+			/*std::cout 	<< "x: " << (magn_buffer[0] * 0.14)/1000.0 << "\n"
+					<< "y: " << (magn_buffer[1] * 0.14)/1000.0 << "\n"
+					<< "z: " << (magn_buffer[2] * 0.14)/1000.0 << std::endl;*/
+
+			IMU_meas.mag[0] = (magn_buffer[0] * 0.14)/1000.0;
+			IMU_meas.mag[1] = (magn_buffer[1] * 0.14)/1000.0;
+			IMU_meas.mag[2] = (magn_buffer[2] * 0.14)/1000.0;
+		}
+
+		IMU_queue_mutex.lock();
+		this->IMU_values.push_front( IMU_meas );
+		while( this->IMU_values.size() > 5 )
+		{
+			this->IMU_values.pop_back();
+		}
+		IMU_queue_mutex.unlock();
+
+
+		usleep( 50000 );
 
 	} // End of while loop
+
+	logger << "End thread function";
+	logger.close();
+
 }
 
 struct sockaddr_in Sensor_Server::getSocketAdressByFh( int fh )
