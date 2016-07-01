@@ -16,7 +16,12 @@ logfile::~logfile()
 
 void logfile::open()
 {
-    this->file.open( this->address );
+    this->file.open( this->address , std::fstream::out | std::fstream::trunc  );
+
+	if( !this->file.is_open() )
+    {
+        std::cout << "Konnte \"" << filename << "\"nicht öffnen!" << std::endl;
+    }
 }
 
 void logfile::open( std::string filename )
