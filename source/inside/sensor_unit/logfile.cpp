@@ -20,7 +20,7 @@ void logfile::open()
 
 	if( !this->file.is_open() )
     {
-        std::cout << "Konnte \"" << filename << "\"nicht öffnen!" << std::endl;
+        std::cout << "Konnte \"" << this->address << "\"nicht öffnen!" << std::endl;
     }
 }
 
