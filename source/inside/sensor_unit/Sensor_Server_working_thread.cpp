@@ -128,12 +128,12 @@ void Sensor_Server::working_thread_function()
 	}
 
 
-	std::cout << "IMU_velocity" << IMU_velocity << std::endl;
+	/*std::cout << "IMU_velocity" << IMU_velocity << std::endl;
 
 
 	std::cout << "x: " << act_imu_meas.acc[0] << std::endl;
 	std::cout << "y: " << act_imu_meas.acc[1] << std::endl;
-	std::cout << "z: " << act_imu_meas.acc[2] << std::endl;
+	std::cout << "z: " << act_imu_meas.acc[2] << std::endl; */
 
 
 	/*std::cout << "x: " << act_imu_meas.gyro[0] << std::endl;
@@ -159,7 +159,7 @@ void Sensor_Server::working_thread_function()
         last_wheel_meas = act_wheel_meas;
 	last_imu_meas = act_imu_meas;
 
-        usleep(50000);
+        usleep(5000000);
     }
 }
 

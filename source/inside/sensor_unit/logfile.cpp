@@ -58,4 +58,6 @@ void logfile::operator <<(std::string message)
     gettimeofday( &tv, NULL );
 
     this->file << tv.tv_sec << "." << tv.tv_usec << ": "<< message << std::endl;
+
+    return;
 }
