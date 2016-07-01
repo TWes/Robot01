@@ -691,6 +691,8 @@ void Sensor_Server::I2C_thread_funktion()
 			IMU_meas.mag[2] = (magn_buffer[2] * 0.14)/1000.0;
 		}
 
+		IMU_meas.timestamp = act_time;
+
 		IMU_queue_mutex.lock();
 		this->IMU_values.push_front( IMU_meas );
 		while( this->IMU_values.size() > 5 )
