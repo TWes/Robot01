@@ -18,6 +18,8 @@ set( SENSOR_UNIT_FILES
 	Sensor_Server.cpp
 	Sensor_Server_working_thread.cpp
 	Sensor_Server_analyse_functions.cpp
+	magnetometer_interface.cpp
+	magnetometer_lsm9ds1.cpp
 )
 
 add_executable( sensor_server ${SENSOR_UNIT_FILES} )

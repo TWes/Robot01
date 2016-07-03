@@ -5,6 +5,11 @@
 
 logfile log_file;
 
+/**
+ * @brief toBinaryString - Converts number to binary string
+ * @param number - number which should be converted
+ * @return string containing the binary representation of number
+ */
 std::string toBinaryString( int16_t number )
 {
 	std::string ret;
@@ -24,13 +29,13 @@ std::string toBinaryString( int16_t number )
 	return ret;
 }
 
-
-
 Sensor_Server::Sensor_Server( int portnr ) : Server_inet( portnr )
 {
 	this->start_up =true;
 
 	this->udp_sending_thread = NULL;
+
+    this->magnetometer = NULL;
 }
 
 Sensor_Server::~Sensor_Server()
@@ -39,6 +44,11 @@ Sensor_Server::~Sensor_Server()
 	{
 		delete this->udp_sending_thread;
 	}
+
+    if( this->magnetometer != NULL )
+    {
+        delete this->magnetometer;
+    }
 }
 
 void Sensor_Server::setup()
@@ -59,8 +69,10 @@ void Sensor_Server::setup()
 	// activate Gyro and acc
 	i2c_bus.i2c_write<uint8_t>( 0x6B, 0x10, 0x20  ); //disable sleep mode
 
-	//activate magnetometer
-	i2c_bus.i2c_write<uint8_t>( 0x1e, 0x22, 0x00  ); //disable sleep mode
+	//activate magnetometer   
+    this->magnetometer = new magnetometer_lsm9ds1( &i2c_bus );
+    this->magnetometer->activateSensor();
+    this->magnetometer->configureSensor();
 
 	// Create the udp socket, port doesn't matter
 	udp_connection.createSocket(0);
@@ -656,40 +668,14 @@ void Sensor_Server::I2C_thread_funktion()
 
 
 		// Read Magnetometer
-		int16_t magn_buffer[3];
-		retry_counter = 0;
-		int imu3_read_ret = -1;	
-
-		do
-		{	
-			imu3_read_ret = i2c_bus.i2c_read( 0x1e, 0x28, 6, (char*) magn_buffer );
-
-			//std::cout << "Read: " << (int) IMU_buffer << std::endl;
-
-			if( imu3_read_ret < 0 )
-			{
-				std::string errormsg = "Error while reading imu: 0x68, 0x3B -> ";
-				errormsg += std::string( std::to_string(imu1_read_ret) );
-				logger << errormsg;
-			}
-
-		} while( imu3_read_ret < 0 && ++retry_counter < 3 );
-
-		if( imu3_read_ret < 0 )
-		{
-			std::cout << "Fehler beim lesen dere IMU: " << imu3_read_ret
-				<< "; " << errno << ": " << strerror( errno) << std::endl;
-		}
-		else
-		{
-			/*std::cout 	<< "x: " << (magn_buffer[0] * 0.14)/1000.0 << "\n"
-					<< "y: " << (magn_buffer[1] * 0.14)/1000.0 << "\n"
-					<< "z: " << (magn_buffer[2] * 0.14)/1000.0 << std::endl;*/
-
-			IMU_meas.mag[0] = (magn_buffer[0] * 0.14)/1000.0;
-			IMU_meas.mag[1] = (magn_buffer[1] * 0.14)/1000.0;
-			IMU_meas.mag[2] = (magn_buffer[2] * 0.14)/1000.0;
-		}
+        if( this->magnetometer->readValues() >= 0 )
+        {
+            IMU_meas.mag = this->magnetometer->getValues();
+        }
+        else
+        {
+            std::cout << "Error reading magnetometer" << std::endl;
+        }
 
 		IMU_meas.timestamp = act_time;
 
@@ -721,7 +707,6 @@ struct sockaddr_in Sensor_Server::getSocketAdressByFh( int fh )
 	struct sockaddr_in ret;
 	return ret;
 }
-
 
 struct timeval timeval_difference( struct timeval end, struct timeval begin )
 {

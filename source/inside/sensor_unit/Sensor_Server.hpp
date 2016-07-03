@@ -20,17 +20,26 @@
 #include "sensor_protocol.hpp"
 #include "udp_connection_inet.hpp"
 
+#include "magnetometer_interface.hpp"
+#include "magnetometer_lsm9ds1.hpp"
+
+/** Struct that contains every information needed
+    to handle an udp subscription */
 typedef struct{
 
-	float next_sending_time;
-	float sending_interval;
-	uint32_t sending_object;
-	udp_connection_information_t client_info;
-	int seq_number;
+    float next_sending_time;                    /// The next time a message has to be send
+    float sending_interval;                     /// The intervall between to sendings
+    uint32_t sending_object;                    /// what should be send
+    udp_connection_information_t client_info;   /// client connection info
+    int seq_number;                             /// id of subscription
 
 } UDP_subscriber_entry_t;
 
 
+/**
+ * @brief The Sensor_Server class
+ * The sensor server which reads and evaluates the sensors
+ */
 class Sensor_Server : public Server_inet
 {
 	public:
@@ -50,6 +59,7 @@ class Sensor_Server : public Server_inet
 		void I2C_thread_funktion();
 		std::thread I2C_thread;
 
+        magnetometer_interface *magnetometer;
 
 		// Members for ADC		
 		std::mutex adc_queue_mutex;
@@ -59,9 +69,9 @@ class Sensor_Server : public Server_inet
 		std::mutex Sonar_queue_mutex;
 		std::queue<Sonar_Measurement> Sonar_values;
 
-        	// Members for Wheelencoder
-	        std::mutex Wheel_queue_mutex;
-	        std::list<Wheel_Measurement> Wheel_values;
+        // Members for Wheelencoder
+        std::mutex Wheel_queue_mutex;
+        std::list<Wheel_Measurement> Wheel_values;
 
 		// Members for IMU
 		std::mutex IMU_queue_mutex;

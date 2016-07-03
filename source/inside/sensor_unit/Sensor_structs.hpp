@@ -3,31 +3,47 @@
 
 #include <opencv2/imgproc/imgproc.hpp>
 
+/** One measurement from the CAM  */
 typedef struct
 {
-	cv::Mat image;
+    cv::Mat image; /// The image taken in this measurement
 	
-	struct timeval timestamp;
+    struct timeval timestamp; /// Timestamp
 
 } CAM_image;
 
+
+/** One measurement from the voltage decoder */
 typedef struct
 {
-	float ADC_low;
-	float ADC_high;
+    float ADC_low;  /// The measurement of half the batteries
+    float ADC_high; /// The measurement of the whole batterie pack
 
-	struct timeval timestamp;
+    struct timeval timestamp; /// Timestamp
 
 } ADC_Measurement;
 
+
+/** Struct containing the one magnetometer meas */
+typedef struct
+{
+    float x_val; /// x-axis measurement
+    float y_val; /// z-axis measurement
+    float z_val; /// z-axis measurement
+
+} magnetometer_val_t;
+
+
+
+/** One IMU Measurement */
 typedef struct
 {
 	float gyro[3];
 	float acc[3];
-	float mag[3];
+    magnetometer_val_t mag; /// The magnetometer masurement
 	float temp;
 
-	struct timeval timestamp;
+    struct timeval timestamp; /// timestamp
 
 } IMU_Measurement;
 
