@@ -17,6 +17,7 @@ set( SENSOR_UNIT_FILES
 	logfile.cpp
 	Sensor_Server.cpp
 	Sensor_Server_working_thread.cpp
+	Sensor_Server_analyse_functions.cpp
 )
 
 add_executable( sensor_server ${SENSOR_UNIT_FILES} )

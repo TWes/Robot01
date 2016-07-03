@@ -48,7 +48,7 @@ void Sensor_Server::setup()
     i2c_bus.open_connection();
 
 	this->cam_state = 0;
-	
+
 	CAM_thread = std::thread( &Sensor_Server::CAM_thread_funktion, this);
 	I2C_thread = std::thread( &Sensor_Server::I2C_thread_funktion, this); 
 
@@ -79,7 +79,7 @@ void Sensor_Server::cleanup()
 	webcam.release();
 
 	working_thread.join();
-	
+
 	CAM_thread.join();
 	I2C_thread.join();
 

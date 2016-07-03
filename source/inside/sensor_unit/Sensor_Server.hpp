@@ -97,4 +97,8 @@ private:
 
 };
 
+
+float calcMagnetometerOrientation( float x_val, float y_val, float z_val );
+
+
 #endif

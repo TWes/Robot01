@@ -9,6 +9,8 @@ void Sensor_Server::working_thread_function()
         Wheel_Measurement act_wheel_meas;
         static Wheel_Measurement last_wheel_meas;
 
+	static IMU_Measurement last_imu_meas;
+
 	// The ADC Measurement
 	ADC_Measurement act_adc_measurment;
 		
@@ -19,6 +21,23 @@ void Sensor_Server::working_thread_function()
 	/*std::cout << "ADC L: " << act_adc_measurment.ADC_low << std::endl;
 	std::cout << "ADC H: " << act_adc_measurment.ADC_high << std::endl;*/
 
+	/***********************************
+	* Calgulate the orientation change 
+	* out of the magnetometer
+	************************************/
+        IMU_Measurement act_imu_meas;  
+
+        IMU_queue_mutex.lock();
+            act_imu_meas = *(IMU_values.begin());
+        IMU_queue_mutex.unlock();  
+
+	float act_magn_orientation = calcMagnetometerOrientation
+					( act_imu_meas.mag[0], act_imu_meas.mag[1], act_imu_meas.mag[2] );
+
+	
+	std::cout << "Magn Orientation: " << act_magn_orientation << std::endl;
+
+
 
 	/*****************************
          * Calculate the new Position out of
@@ -26,8 +45,7 @@ void Sensor_Server::working_thread_function()
          ****************************/	
 	Wheel_queue_mutex.lock();
             act_wheel_meas = *(Wheel_values.begin());
-        Wheel_queue_mutex.unlock();
-
+       Wheel_queue_mutex.unlock();
 
 	// Get Time Difference and convert it to seconds
         double delta_t = time_difference( act_wheel_meas.timestamp, last_wheel_meas.timestamp) / 1000.0;
@@ -91,15 +109,7 @@ void Sensor_Server::working_thread_function()
 	/*****************************
          * Calculate the new Position out of
          * the decoder
-         ****************************/
-	static IMU_Measurement last_imu_meas;
-
-        IMU_Measurement act_imu_meas;  
-
-        IMU_queue_mutex.lock();
-            act_imu_meas = *(IMU_values.begin());
-        IMU_queue_mutex.unlock();     
-	
+         ****************************/	
 	// Get Time Difference and convert it to seconds
         double imu_delta_t = time_difference( act_imu_meas.timestamp, last_imu_meas.timestamp) / 1000.0;
 
@@ -152,14 +162,13 @@ void Sensor_Server::working_thread_function()
 	/*std::cout << "IMU Velo: " << IMU_velocity << std::endl;
 	std::cout << "IMU Rotation: " << rotation_IMU << std::endl; */
 
-
-}
+	}
 	
 
         last_wheel_meas = act_wheel_meas;
 	last_imu_meas = act_imu_meas;
 
-        usleep(5000000);
+        usleep(500000);
     }
 }
 
