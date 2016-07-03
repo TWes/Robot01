@@ -36,16 +36,17 @@ int magnetometer_lsm9ds1::configureSensor()
 
         do
         {
+
             read_ret = i2c_bus->i2c_read( 0x1e, 0x28, 6, (char*) magn_buffer );
 
         } while( read_ret < 0 && ++retry_counter < 3 );
 
-        if( read_ret > 0 )
+        if( read_ret >= 0 )
         {
-            for( int i = 0; i < 3; i++)
+            for( int j = 0; j < 3; j++)
             {
-                if(  max_magn_val[i] < magn_buffer[i] ) max_magn_val[i] = magn_buffer[i];
-                if(  min_magn_val[i] > magn_buffer[i] ) min_magn_val[i] = magn_buffer[i];
+                if(  max_magn_val[j] < magn_buffer[j] ) max_magn_val[j] = magn_buffer[j];
+                if(  min_magn_val[j] > magn_buffer[j] ) min_magn_val[j] = magn_buffer[j];
             }
         }
 
@@ -63,7 +64,7 @@ int magnetometer_lsm9ds1::configureSensor()
     this->i2c_bus->i2c_write<int16_t>( 0x1e, 0x07, mean_magn_val[1] );
     this->i2c_bus->i2c_write<int16_t>( 0x1e, 0x09, mean_magn_val[2] );
 
-    return -1;
+    return 0;
 }
 
 int magnetometer_lsm9ds1::readValues()
@@ -78,7 +79,7 @@ int magnetometer_lsm9ds1::readValues()
 
     } while( read_ret < 0 && ++retry_counter < 3 );
 
-    if( read_ret > 0 )
+    if( read_ret >= 0 )
     {
         this->x_val = (magn_buffer[0] * 0.14)/1000.0;
         this->y_val = (magn_buffer[1] * 0.14)/1000.0;

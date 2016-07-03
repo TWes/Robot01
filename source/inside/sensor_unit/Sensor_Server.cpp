@@ -70,9 +70,9 @@ void Sensor_Server::setup()
 	i2c_bus.i2c_write<uint8_t>( 0x6B, 0x10, 0x20  ); //disable sleep mode
 
 	//activate magnetometer   
-    this->magnetometer = new magnetometer_lsm9ds1( &i2c_bus );
-    this->magnetometer->activateSensor();
-    this->magnetometer->configureSensor();
+    	this->magnetometer = new magnetometer_lsm9ds1( &i2c_bus );
+	this->magnetometer->activateSensor();
+	this->magnetometer->configureSensor();
 
 	// Create the udp socket, port doesn't matter
 	udp_connection.createSocket(0);
@@ -668,14 +668,11 @@ void Sensor_Server::I2C_thread_funktion()
 
 
 		// Read Magnetometer
-        if( this->magnetometer->readValues() >= 0 )
-        {
-            IMU_meas.mag = this->magnetometer->getValues();
-        }
-        else
-        {
-            std::cout << "Error reading magnetometer" << std::endl;
-        }
+		if( this->magnetometer->readValues() >= 0 )
+	        {
+	            IMU_meas.mag = this->magnetometer->getValues();
+        	}
+
 
 		IMU_meas.timestamp = act_time;
 

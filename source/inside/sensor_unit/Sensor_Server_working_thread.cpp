@@ -31,11 +31,10 @@ void Sensor_Server::working_thread_function()
             act_imu_meas = *(IMU_values.begin());
     IMU_queue_mutex.unlock();
 
-    /*float act_magn_orientation = calcMagnetometerOrientation
-                    ( act_imu_meas.mag[0], act_imu_meas.mag[1], act_imu_meas.mag[2] );
+    float act_magn_orientation = calcMagnetometerOrientation( act_imu_meas.mag );
 
 	
-    std::cout << "Magn Orientation: " << act_magn_orientation << std::endl; */
+    /*std::cout << "Magn Orientation: " << act_magn_orientation << std::endl; */
 
 
 
