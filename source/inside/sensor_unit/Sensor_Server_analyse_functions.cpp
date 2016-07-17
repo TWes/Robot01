@@ -4,8 +4,8 @@ float calcMagnetometerOrientation(  magnetometer_val_t magn_meas )
 {
 	float orientation = 0.0;
 
-	std::cout << "Input: " << magn_meas.x_val << " - " << magn_meas.y_val
-			<< " - " <<  magn_meas.z_val << std::endl;
+	//std::cout << "Input: " << magn_meas.x_val << " - " << magn_meas.y_val
+	//		<< " - " <<  magn_meas.z_val << std::endl;
 	
 	/*if( y_val == 0.0 && x_val < 0.0 )
 	{

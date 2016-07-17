@@ -3,7 +3,7 @@
 
 #include "i2c_access.hpp"
 #include "magnetometer_interface.hpp"
-
+#include "lsm9ds1_register.hpp"
 
 /**
  * @brief The magnetometer_lsm9ds1 class
@@ -22,6 +22,10 @@ public:
 private:
     i2c_access *i2c_bus;
 
+	int16_t x_offset;
+	int16_t y_offset;
+	int16_t z_offset;
 };
+
 
 #endif // MAGNETOMETER_LSM9DS1_HPP

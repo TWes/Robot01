@@ -25,16 +25,16 @@ void Sensor_Server::working_thread_function()
 	* Calgulate the orientation change 
 	* out of the magnetometer
 	************************************/
-     IMU_Measurement act_imu_meas;
+	IMU_Measurement act_imu_meas;
 
-     IMU_queue_mutex.lock();
+	IMU_queue_mutex.lock();
             act_imu_meas = *(IMU_values.begin());
-    IMU_queue_mutex.unlock();
+	IMU_queue_mutex.unlock();
 
-    float act_magn_orientation = calcMagnetometerOrientation( act_imu_meas.mag );
+	float act_magn_orientation = calcMagnetometerOrientation( act_imu_meas.mag );
 
 	
-    /*std::cout << "Magn Orientation: " << act_magn_orientation << std::endl; */
+	/*std::cout << "Magn Orientation: " << act_magn_orientation << std::endl; */
 
 
 

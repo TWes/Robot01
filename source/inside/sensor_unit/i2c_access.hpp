@@ -32,7 +32,7 @@ public:
 	T i2c_read(char address, signed int reg);
 
 	template <typename T>
-	void i2c_write(char address, signed int reg, T value);
+	void i2c_write(char address, signed int reg, T value, bool highestBytefirst );
 
 	int i2c_read( char address, signed int reg, signed int length, char* buffer_out ); 
 
@@ -93,15 +93,27 @@ template <typename T> T i2c_access::i2c_read(char address, signed int reg)
 }
 
 template <typename T>
-void i2c_access::i2c_write(char address, signed int reg, T value)
+void i2c_access::i2c_write(char address, signed int reg, T value, bool highestBytefirst = false )
 {
 	char buffer[1+sizeof(T)];
 
 	buffer[0] = reg;
 
-	for( int i=0; i < sizeof(T); i++)
+	if( highestBytefirst )
 	{
-		buffer[i+1] =  value >> ((sizeof(T) - i - 1) *  8);
+		for( int i=sizeof(T); i > 0; i--)
+		{
+			buffer[i] =  value >> ((i - 1) *  8);
+		}
+	}
+
+	else
+	{
+
+		for( int i=0; i < sizeof(T); i++)
+		{
+			buffer[i+1] =  value >> ((sizeof(T) - i - 1) *  8);
+		}
 	}
 
 
