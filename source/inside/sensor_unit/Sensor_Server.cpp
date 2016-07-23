@@ -71,6 +71,13 @@ void Sensor_Server::setup()
 	this->cam_state = 0;
 
 	CAM_thread = std::thread( &Sensor_Server::CAM_thread_funktion, this);
+	
+
+	//activate magnetometer   
+    	this->magnetometer = new magnetometer_lsm9ds1( &i2c_bus, (this->options.calibrate_magnetomer? 2 : 1) );
+	this->magnetometer->activateSensor();
+	this->magnetometer->configureSensor();
+
 	I2C_thread = std::thread( &Sensor_Server::I2C_thread_funktion, this); 
 
 
@@ -79,11 +86,7 @@ void Sensor_Server::setup()
 
 	// activate Gyro and acc
 	i2c_bus.i2c_write<uint8_t>( 0x6B, 0x10, 0x20  ); //disable sleep mode
-
-	//activate magnetometer   
-    	this->magnetometer = new magnetometer_lsm9ds1( &i2c_bus, (this->options.calibrate_magnetomer? 2 : 1) );
-	this->magnetometer->activateSensor();
-	this->magnetometer->configureSensor();
+	
 
 	// Create the udp socket, port doesn't matter
 	udp_connection.createSocket(0);
@@ -688,9 +691,9 @@ void Sensor_Server::I2C_thread_funktion()
 	        {
 	            IMU_meas.mag = this->magnetometer->getValues();
 
-			/*std::cout 	<< "x: " << IMU_meas.mag.x_val << "\n"
+			std::cout 	<< "x: " << IMU_meas.mag.x_val << "\n"
 					<< "y: " << IMU_meas.mag.y_val << "\n"
-					<< "z: " << IMU_meas.mag.z_val << std::endl; */
+					<< "z: " << IMU_meas.mag.z_val << std::endl;
 	
 			/*file 	<< IMU_meas.mag.x_val << ","
 				<< IMU_meas.mag.y_val << ","

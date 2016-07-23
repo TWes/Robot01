@@ -1,14 +1,20 @@
 #ifndef MAGNETOMETER_LSM9DS1_HPP
 #define MAGNETOMETER_LSM9DS1_HPP
 
-
-
 #include "i2c_access.hpp"
 #include "magnetometer_interface.hpp"
 #include "lsm9ds1_register.hpp"
 #include "time_helper.hpp"
 
 typedef struct{
+
+	float scale_x = 1.0;
+	float scale_y = 1.0;
+	float scale_z = 1.0;
+
+	float origin_x = 0.0;
+	float origin_y = 0.0;
+	float origin_z = 0.0;
 
 } magnetometer_config_t;
 

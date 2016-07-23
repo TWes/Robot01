@@ -73,10 +73,17 @@ int magnetometer_lsm9ds1::readValues()
     {
 	// +- 4 gauss	- 0.14
 	// +- 8 gauss	- 0.29	
+	float newXVal = magn_buffer[0] * scale;
+	newXVal = (newXVal - this->config.origin_x) \
+			* this->config.scale_x;
 
-        this->x_val = (magn_buffer[0] * 0.14)/1000.0;
-        this->y_val = (magn_buffer[1] * 0.14)/1000.0;
-        this->z_val = (magn_buffer[2] * 0.14)/1000.0;
+	float newYVal = magn_buffer[1] * scale;
+	newYVal = (newYVal - this->config.origin_y) \
+			* this->config.scale_y;
+
+        this->x_val = newXVal;
+        this->y_val = newYVal;
+        this->z_val = magn_buffer[2] * scale;
     }
 
     return read_ret;
@@ -85,13 +92,14 @@ int magnetometer_lsm9ds1::readValues()
 void magnetometer_lsm9ds1::configure2D()
 {
 	std::cout << "Config2d" << std::endl;
-	
+
+	magnetometer_config_t newConfig;	
+
 	const float duration_ms = 2000.0;
 
 	std::cout << "Point Robot to north [enter]" << std::endl;
 	getchar();
 	std::cout << "calculating..." << std::endl;
-
 
 	// Read the north Values
 	magnetometer_val_t north = this->readMeanOverTime( duration_ms );
@@ -117,6 +125,42 @@ void magnetometer_lsm9ds1::configure2D()
 
 	// Read the east Values
 	magnetometer_val_t east = this->readMeanOverTime( duration_ms );
+
+	
+	std::cout << "Generate configuration." << std::endl;
+
+	// Calc the elipse covering the measurements
+	struct{ float x; float y;} NS;
+	struct{ float x; float y;} EW;
+
+	NS.x = south.x_val - north.x_val;
+	NS.y = south.y_val - north.y_val;
+	EW.x = west.x_val - east.x_val;
+	EW.y = west.y_val - east.y_val; 	
+
+	float a = 0.5 * sqrt( EW.x * EW.x + EW.y * EW.y  );
+	float b = 0.5 * sqrt( NS.x * NS.x + NS.y * NS.y  );
+	
+	newConfig.scale_x = a/b;
+
+	struct{ float x; float y;} half_NS;
+	struct{ float x; float y;} half_EW;
+		
+	half_NS.x = 0.5 * NS.x;
+	half_NS.y = 0.5 * NS.y;
+	half_EW.x = 0.5 * EW.x;
+	half_EW.y = 0.5 * EW.y;
+
+	struct{ float x; float y;} middle1, middle2;
+	middle1.x = north.x_val + half_NS.x;
+	middle1.y = north.y_val + half_NS.y;
+	middle2.x = east.x_val + half_EW.x;
+	middle2.y = east.y_val + half_EW.y;
+
+	newConfig.origin_x = 0.5 * (middle1.x + middle2.x);
+	newConfig.origin_y = 0.5 * (middle1.y + middle2.y);
+
+	this->config = newConfig;
 
 	std::cout << "Calibration finished" << std::endl;
 }
