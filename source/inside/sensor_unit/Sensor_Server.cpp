@@ -29,13 +29,16 @@ std::string toBinaryString( int16_t number )
 	return ret;
 }
 
-Sensor_Server::Sensor_Server( int portnr ) : Server_inet( portnr )
+Sensor_Server::Sensor_Server( int argc, char** argv, int portnr ) \
+	: Server_inet( portnr )
 {
 	this->start_up =true;
 
 	this->udp_sending_thread = NULL;
 
     this->magnetometer = NULL;
+
+	this->evaluate_options( argc, argv );
 }
 
 Sensor_Server::~Sensor_Server()
@@ -53,6 +56,14 @@ Sensor_Server::~Sensor_Server()
 
 void Sensor_Server::setup()
 {
+	// If just the help should be shown -> exit
+	if( this->options.show_help )
+	{
+		continue_server = false;
+		printHelp();
+	}
+
+
     log_file.open( "logfile");
 
     i2c_bus.open_connection();
@@ -666,17 +677,28 @@ void Sensor_Server::I2C_thread_funktion()
 		}
 
 
+
+
+		/*std::fstream file;
+		file.open( "rawmagnetometer", 
+				std::fstream::out | std::fstream::app); */
+	
 		// Read Magnetometer
 		if( this->magnetometer->readValues() >= 0 )
 	        {
 	            IMU_meas.mag = this->magnetometer->getValues();
 
-			std::cout 	<< "x: " << IMU_meas.mag.x_val << "\n"
+			/*std::cout 	<< "x: " << IMU_meas.mag.x_val << "\n"
 					<< "y: " << IMU_meas.mag.y_val << "\n"
-					<< "z: " << IMU_meas.mag.z_val << std::endl;
-
+					<< "z: " << IMU_meas.mag.z_val << std::endl; */
+	
+			/*file 	<< IMU_meas.mag.x_val << ","
+				<< IMU_meas.mag.y_val << ","
+				<< IMU_meas.mag.z_val << "\n" << std::flush; */
 
         	}
+
+		//file.close();
 
 
 		IMU_meas.timestamp = act_time;
@@ -688,6 +710,8 @@ void Sensor_Server::I2C_thread_funktion()
 			this->IMU_values.pop_back();
 		}
 		IMU_queue_mutex.unlock();
+				
+
 
 
 		usleep( 50000 );
@@ -747,3 +771,60 @@ bool operator==(struct timeval end, struct timeval begin )
 {
 	return ( end.tv_sec == begin.tv_sec  &&  end.tv_usec == begin.tv_usec );
 }
+
+/**
+ * @brief evaluate_options - Interpret and set the options
+ * @param argc - number of agruments
+ * @param argv - array with the arguments
+ */
+void Sensor_Server::evaluate_options( int argc, char** argv )
+{
+	// Convert the input to a string vector
+	std::vector<std::string> arguments;
+	for( int i = 0; i < argc; i++ )
+	{
+		arguments.push_back(std::string( argv[i] ));
+	}
+
+	// Go through the options
+	for( int i = 1; i < arguments.size(); i++ )
+	{
+		std::string begining = arguments.at(i).substr(0,2);
+		std::string end = arguments.at(i).substr(2,arguments.at(i).size());
+
+
+		if( begining == "-c" )
+		{
+			if( end == "magn2" )
+			{
+				this->options.calibrate_magnetomer = 2;
+			}
+			else
+			{
+				std::cout << "Unknown Calibration: \"" << end << "\"" << std::endl;
+			}			
+		}
+
+		else if( begining == "-h" )
+		{		
+			this->options.show_help = true;
+		}
+
+		else
+		{
+			std::cout << "Unknown argument: " << arguments.at(i) << std::endl;
+		}		
+	}
+}
+
+/**
+ * @brief printHelp - Prints help in the console
+ */
+void Sensor_Server::printHelp()
+{
+	std::cout << "Sensor Server" << "\n\n"
+		<< "-h : Print this help message.\n\n"
+		<< "-cmagn2 : Calibrate the magnetometer in XY Plane.\n"
+	<< std::endl;
+}
+

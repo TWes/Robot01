@@ -85,7 +85,7 @@ int i2c_access::i2c_read( char address, signed int reg, signed int length, char*
 	if( this->max_buffer_size == 0 &&
  			this->buffer_size < length )
 	{
-		std::cout << "i2c: Allocate: " << length << " Bytes" << std::endl;
+		//std::cout << "i2c: Allocate: " << length << " Bytes" << std::endl;
 
 		if( this->buffer != NULL )
 		{

@@ -36,6 +36,16 @@ typedef struct{
 } UDP_subscriber_entry_t;
 
 
+/** Struct that contains the options passed
+	when starting the server */
+typedef struct{
+	int calibrate_magnetomer = 0;	/// Shoult the Magnetometer be calibrated at the beginning?
+					/// 2 - In XY Axis; 3 - In XYZ Axis; else no calibration
+	bool show_help = false;		// just show help and exit
+} option_struct_t;
+
+
+
 /**
  * @brief The Sensor_Server class
  * The sensor server which reads and evaluates the sensors
@@ -43,7 +53,7 @@ typedef struct{
 class Sensor_Server : public Server_inet
 {
 	public:
-		Sensor_Server( int portnr );
+		Sensor_Server( int argc, char** argv, int portnr );
 		~Sensor_Server();
 
 		std::mutex i2c_mutex;
@@ -97,6 +107,11 @@ class Sensor_Server : public Server_inet
 		void handle_connection( int client_handle );
 		void cleanup();
 private:
+
+	void evaluate_options( int argc, char** argv );
+	option_struct_t options; // The choosen options
+	void printHelp();
+
 	struct sockaddr_in getSocketAdressByFh( int fh );
 
 	udp_connection_inet udp_connection;

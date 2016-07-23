@@ -18,7 +18,7 @@ int main( int argc, char** argv)
 {
 	 signal(SIGINT, sighandler);
 
-	Server = new Sensor_Server( 2553 );
+	Server = new Sensor_Server( argc, argv, 2553 );
 
 	Server->run();
 
