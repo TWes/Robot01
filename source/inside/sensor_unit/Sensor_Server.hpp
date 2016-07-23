@@ -39,9 +39,8 @@ typedef struct{
 /** Struct that contains the options passed
 	when starting the server */
 typedef struct{
-	int calibrate_magnetomer = 0;	/// Shoult the Magnetometer be calibrated at the beginning?
-					/// 2 - In XY Axis; 3 - In XYZ Axis; else no calibration
-	bool show_help = false;		// just show help and exit
+	bool calibrate_magnetomer = false;	/// Shoult the Magnetometer be calibrated at the beginning?
+	bool show_help = false;			/// just show help and exit
 } option_struct_t;
 
 
@@ -118,8 +117,6 @@ private:
 	std::vector<UDP_subscriber_entry_t> UDP_subscriber;
 	std::thread *udp_sending_thread;
 	void udp_sending_function();
-	
-
 };
 
 

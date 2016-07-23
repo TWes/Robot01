@@ -81,7 +81,7 @@ void Sensor_Server::setup()
 	i2c_bus.i2c_write<uint8_t>( 0x6B, 0x10, 0x20  ); //disable sleep mode
 
 	//activate magnetometer   
-    	this->magnetometer = new magnetometer_lsm9ds1( &i2c_bus );
+    	this->magnetometer = new magnetometer_lsm9ds1( &i2c_bus, (this->options.calibrate_magnetomer? 2 : 1) );
 	this->magnetometer->activateSensor();
 	this->magnetometer->configureSensor();
 
@@ -711,9 +711,6 @@ void Sensor_Server::I2C_thread_funktion()
 		}
 		IMU_queue_mutex.unlock();
 				
-
-
-
 		usleep( 50000 );
 
 	} // End of while loop
@@ -795,9 +792,9 @@ void Sensor_Server::evaluate_options( int argc, char** argv )
 
 		if( begining == "-c" )
 		{
-			if( end == "magn2" )
+			if( end == "magn" )
 			{
-				this->options.calibrate_magnetomer = 2;
+				this->options.calibrate_magnetomer = true;
 			}
 			else
 			{
@@ -824,7 +821,7 @@ void Sensor_Server::printHelp()
 {
 	std::cout << "Sensor Server" << "\n\n"
 		<< "-h : Print this help message.\n\n"
-		<< "-cmagn2 : Calibrate the magnetometer in XY Plane.\n"
+		<< "-cmagn : Calibrate the magnetometer.\n"
 	<< std::endl;
 }
 

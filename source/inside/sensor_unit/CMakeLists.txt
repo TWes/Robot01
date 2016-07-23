@@ -20,6 +20,7 @@ set( SENSOR_UNIT_FILES
 	Sensor_Server_analyse_functions.cpp
 	magnetometer_interface.cpp
 	magnetometer_lsm9ds1.cpp
+	time_helper.cpp
 )
 
 add_executable( sensor_server ${SENSOR_UNIT_FILES} )
