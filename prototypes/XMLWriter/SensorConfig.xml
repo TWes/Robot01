@@ -1,0 +1,10 @@
+<SensorConfig>
+	<!-- The Magnetometer config file -->
+	<Magnetometer>
+		<Scale ScaleX="0.81" ScaleY="1.0" ScaleZ="1.0"/>
+	</Magnetometer>
+	<Accelerometer>
+		<Scale ScaleX="0.99" ScaleY="1.0" ScaleZ="1.0">
+		</Scale>
+	</Accelerometer>
+</SensorConfig>
