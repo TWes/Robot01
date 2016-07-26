@@ -20,6 +20,9 @@
 #include "sensor_protocol.hpp"
 #include "udp_connection_inet.hpp"
 
+#include "XMLWriter.hpp"
+
+
 #include "magnetometer_interface.hpp"
 #include "magnetometer_lsm9ds1.hpp"
 

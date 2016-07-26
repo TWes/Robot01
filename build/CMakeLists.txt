@@ -42,6 +42,11 @@ add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/shared/protocol_headers
 	${CMAKE_CURRENT_SOURCE_DIR}/source/shared/protocol_headers
 )
 
+# Build the XML library
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/shared/XML_library
+	${CMAKE_CURRENT_SOURCE_DIR}/source/shared/XML_library
+)
+
 ##########################
 ## Build inside targets ##
 ##########################

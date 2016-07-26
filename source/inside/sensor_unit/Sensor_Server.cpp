@@ -71,18 +71,22 @@ void Sensor_Server::setup()
 	this->cam_state = 0;
 
 	CAM_thread = std::thread( &Sensor_Server::CAM_thread_funktion, this);
-	
+	    
+    XMLWriter xmlConfig;
+    xmlConfig.addRoot("SensorServerConfig");
+
+    xmlConfig.ReadFromFile( "SensorConfigFile.xml");
 
 	//activate magnetometer   
-    	this->magnetometer = new magnetometer_lsm9ds1( &i2c_bus, (this->options.calibrate_magnetomer? 2 : 1) );
+    this->magnetometer = new magnetometer_lsm9ds1( &i2c_bus,
+                                xmlConfig,
+                                (this->options.calibrate_magnetomer? 2 : 1) );
 	this->magnetometer->activateSensor();
 	this->magnetometer->configureSensor();
 
 	I2C_thread = std::thread( &Sensor_Server::I2C_thread_funktion, this); 
 
-
 	working_thread = std::thread( &Sensor_Server::working_thread_function, this );
-
 
 	// activate Gyro and acc
 	i2c_bus.i2c_write<uint8_t>( 0x6B, 0x10, 0x20  ); //disable sleep mode
@@ -94,13 +98,15 @@ void Sensor_Server::setup()
 	this->udp_sending_thread = new std::thread( &Sensor_Server::udp_sending_function, this);
 
 
+    //xmlConfig.WriteToFile("SensorConfigFile.xml");
+
+
      log_file << "Sensor_server setup completed.";
 }
 
 void Sensor_Server::cleanup()
 {
 	std::cout << "Wait for threads to end" << std::endl;
-
 
 	webcam.release();
 

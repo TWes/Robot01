@@ -5,6 +5,7 @@
 #include "magnetometer_interface.hpp"
 #include "lsm9ds1_register.hpp"
 #include "time_helper.hpp"
+#include "XMLWriter.hpp"
 
 typedef struct{
 
@@ -25,7 +26,7 @@ typedef struct{
 class magnetometer_lsm9ds1 : public magnetometer_interface
 {
 public:
-    magnetometer_lsm9ds1( i2c_access *i2c_interface, int configMode = 0);
+    magnetometer_lsm9ds1(i2c_access *i2c_interface, XMLWriter &file, int configMode = 0);
     ~magnetometer_lsm9ds1();
 
     int activateSensor();
@@ -40,6 +41,10 @@ private:
 	void configure2D();
 
 	magnetometer_val_t readMeanOverTime( float duration_ms );
+
+    XMLWriter *magnetometer_entry;
+    void loadFromConfigFile();
+    void writeToConfigFile();
 
 	float scale;
 };
