@@ -69,16 +69,20 @@ void XMLWriter::WriteToFile( std::string filepath )
  */
 XMLElement *XMLWriter::ReadFromFile( std::string filepath )
 {
+    std::fstream file;
+    file.open( filepath.c_str(), std::ios_base::in );
+
+    // Couldnt open file
+    if( !file.is_open() )
+    {
+        return NULL;
+    }
+
     if( this->root != NULL )
     {
         delete this->root;
         this->root = NULL;
     }
-
-    std::fstream file;
-    file.open( filepath.c_str(), std::ios_base::in );
-
-    if( !file.is_open() ) return NULL;
 
     this->root = new XMLElement();
     this->root->setRoot();
@@ -101,13 +105,15 @@ std::string XMLWriter::findAttributeInNode(std::string node, std::string Attribu
     {
         tmp = this->root->findNode( WayNode );
 
-        if( tmp == NULL ) return std::string("");
+        if( tmp == NULL )
+	{
+		 return std::string("");
+	}
     }
 
     tmp = tmp->findNode( node );
 
     if( tmp == NULL ) return std::string("");
-
 
     return tmp->getAttribute( Attribute );
 }
@@ -138,6 +144,5 @@ XMLElement* XMLWriter::getNode( std::string node )
     if( this->root == NULL ) return NULL;
 
     return this->root->findNode( node );
-
 }
 

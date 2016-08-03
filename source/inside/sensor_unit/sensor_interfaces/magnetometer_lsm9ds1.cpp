@@ -49,7 +49,7 @@ int magnetometer_lsm9ds1::configureSensor()
 			break;
 		case 2:
 			this->configure2D();
-            this->writeToConfigFile();
+            		this->writeToConfigFile();
 			break;
 
 		default:
@@ -211,28 +211,39 @@ magnetometer_val_t magnetometer_lsm9ds1::readMeanOverTime( float duration_ms )
 
 void magnetometer_lsm9ds1::loadFromConfigFile()
 {
+    magnetometer_config_t newConfig;
+    newConfig.origin_x = this->magnetometer_entry->findAttributeInNodeAsFloat( "Offset", "OffsetX", "Magnetometer");
+    newConfig.origin_y = this->magnetometer_entry->findAttributeInNodeAsFloat( "Offset", "OffsetY", "Magnetometer");
+    newConfig.origin_z = this->magnetometer_entry->findAttributeInNodeAsFloat( "Offset", "OffsetZ", "Magnetometer");
 
-    magnetometer_config_t config;
-    config.origin_x = this->magnetometer_entry->findAttributeInNodeAsFloat( "Magnetometer", "Scale", "OffsetX");
 
-    std::cout << "config: " << config.origin_x << std::endl;
+    newConfig.scale_x = this->magnetometer_entry->findAttributeInNodeAsFloat( "Scale", "ScaleX", "Magnetometer");
+    newConfig.scale_y = this->magnetometer_entry->findAttributeInNodeAsFloat( "Scale", "ScaleY", "Magnetometer");
+    newConfig.scale_z = this->magnetometer_entry->findAttributeInNodeAsFloat( "Scale", "ScaleZ", "Magnetometer");
 
+    this->config = newConfig;
 }
 
 void magnetometer_lsm9ds1::writeToConfigFile()
 {
-    std::cout << "Write to config file" << std::endl;
-
     XMLElement *magnetometerNode = this->magnetometer_entry->getNode( "Magnetometer" );
-    if( magnetometer_entry == NULL )
+    if( magnetometerNode == NULL )
     {
+	if( this->magnetometer_entry->getRoot() == NULL )
+		std::cout << "Root is zero" << std::endl;
+
         magnetometerNode = this->magnetometer_entry->getRoot()->addElement( "Magnetometer");
-        magnetometerNode->addAttribute( "model", "lsm9ds1");
+	magnetometerNode->addAttribute( "model", "lsm9ds1");
+   
     }
 
     std::stringstream ss;
 
-    XMLElement * scaleNode = magnetometerNode->addElement( "Scale" );
+    XMLElement * scaleNode = magnetometerNode->findNode( "Scale" );
+    if( scaleNode == NULL )
+    {
+	scaleNode = magnetometerNode->addElement( "Scale" );
+    }
     scaleNode->setNoChild();
     ss << this->config.scale_x;
     scaleNode->addAttribute( "ScaleX", ss.str() );
@@ -241,13 +252,16 @@ void magnetometer_lsm9ds1::writeToConfigFile()
     ss.str(std::string()); ss << this->config.scale_z;
     scaleNode->addAttribute( "ScaleZ", ss.str() );
 
-
-    XMLElement * offsetNode = magnetometerNode->addElement( "Offset" );
+    XMLElement * offsetNode = magnetometerNode->findNode( "Offset" );
+    if( offsetNode == NULL )
+    {
+	offsetNode = magnetometerNode->addElement( "Offset" );
+    }
     offsetNode->setNoChild();
     ss.str(std::string()); ss << this->config.origin_x;
-    offsetNode->addAttribute( "OffestX", ss.str() );
+    offsetNode->addAttribute( "OffsetX", ss.str() );
     ss.str(std::string()); ss << this->config.origin_y;
-    offsetNode->addAttribute( "OffestY", ss.str() );
+    offsetNode->addAttribute( "OffsetY", ss.str() );
     ss.str(std::string()); ss << this->config.origin_z;
-    offsetNode->addAttribute( "OffestZ", ss.str() );
+    offsetNode->addAttribute( "OffsetZ", ss.str() );
 }

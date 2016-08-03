@@ -23,8 +23,8 @@
 #include "XMLWriter.hpp"
 
 
-#include "magnetometer_interface.hpp"
-#include "magnetometer_lsm9ds1.hpp"
+#include "sensor_interfaces/magnetometer_interface.hpp"
+#include "sensor_interfaces/magnetometer_lsm9ds1.hpp"
 
 /** Struct that contains every information needed
     to handle an udp subscription */

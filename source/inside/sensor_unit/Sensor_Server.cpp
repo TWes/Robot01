@@ -98,10 +98,11 @@ void Sensor_Server::setup()
 	this->udp_sending_thread = new std::thread( &Sensor_Server::udp_sending_function, this);
 
 
-    //xmlConfig.WriteToFile("SensorConfigFile.xml");
+    	xmlConfig.WriteToFile("SensorConfigFile.xml");
 
 
      log_file << "Sensor_server setup completed.";
+
 }
 
 void Sensor_Server::cleanup()
