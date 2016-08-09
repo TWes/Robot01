@@ -31,13 +31,28 @@ void Sensor_Server::working_thread_function()
             act_imu_meas = *(IMU_values.begin());
 	IMU_queue_mutex.unlock();
 
+	static float last_magn_orientation = -1.0;
 	float act_magn_orientation = calcMagnetometerOrientation( act_imu_meas.mag );
+	float magn_orientation_change = 0.0;
+
+	if( last_magn_orientation >= 0.0 )
+	{
+		magn_orientation_change = act_magn_orientation - last_magn_orientation;
+	
+		if( magn_orientation_change > M_PI)
+		{
+			magn_orientation_change = (2*M_PI) - magn_orientation_change;
+			magn_orientation_change *= -1.0;
+		}
+		else if( magn_orientation_change < -M_PI )
+		{
+			magn_orientation_change = magn_orientation_change + (2*M_PI);
+		}
+	}
+
+	last_magn_orientation = act_magn_orientation;
 
 	
-	/*std::cout << "Magn Orientation: " << act_magn_orientation << std::endl; */
-
-
-
 	/*****************************
          * Calculate the new Position out of
          * the decoder

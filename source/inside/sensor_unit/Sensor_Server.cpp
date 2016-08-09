@@ -698,9 +698,9 @@ void Sensor_Server::I2C_thread_funktion()
 	        {
 	            IMU_meas.mag = this->magnetometer->getValues();
 
-			std::cout 	<< "x: " << IMU_meas.mag.x_val << "\n"
+			/*std::cout 	<< "x: " << IMU_meas.mag.x_val << "\n"
 					<< "y: " << IMU_meas.mag.y_val << "\n"
-					<< "z: " << IMU_meas.mag.z_val << std::endl;
+					<< "z: " << IMU_meas.mag.z_val << std::endl;*/
 	
 			/*file 	<< IMU_meas.mag.x_val << ","
 				<< IMU_meas.mag.y_val << ","
