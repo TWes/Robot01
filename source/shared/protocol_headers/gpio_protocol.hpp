@@ -5,11 +5,11 @@
 
 typedef enum
 {
-	NO_ANSWER = 0,	// Client doesnt want anything
-	ANSWER = 1,
-	SET_VARIABLE = 2, // client wants to set a variable on the server
-	GET_VARIABLE = 4, // client wants to get a variable from the server
+	NO_ANSWER = 0,	// Client doesnt want anything,
+	SET_VARIABLE = 1, // client wants to set a variable on the server
+	GET_VARIABLE = 2, // client wants to get a variable from the server
 	MOVEMENT_INSTRUCTION = 8, // client sends a movement instruction
+	ANSWER = 8
 	
 }gpio_request_enum_t;
 
