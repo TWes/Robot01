@@ -53,13 +53,11 @@ void GraphHelper::emitPlot1Subscribe()
     switch( plot1Combo->currentIndex() )
     {
     case 1:
-        sensor_connection->init_UDP_Var( GET_RAW_GYROSKOPE, PLOT1 , 100 );
-        break;
-    case 2:
-        sensor_connection->init_UDP_Var( GET_RAW_ACCELEROMETER, PLOT1   );
-        break;
-    case 3:
-        sensor_connection->init_UDP_Var( GET_FILTERED_GYROSCOPE, PLOT1   );
+        if( !sensor_connection->imuValuesSubscribed )
+        {
+            sensor_connection->init_UDP_Var( GET_RAW_IMU_VALUES, PLOT1 , 100 );
+            sensor_connection->imuValuesSubscribed = true;
+        }
         break;
 
     }

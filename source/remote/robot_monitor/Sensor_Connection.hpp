@@ -65,6 +65,8 @@ public:
 
     udp_connection *udp_socket;
     udp_connection_information_t udp_socket_information;
+    bool imuValuesSubscribed = false;
+
 
     void start_server();
     void end_server();

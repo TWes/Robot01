@@ -14,9 +14,7 @@ typedef enum{
 
 typedef enum{
     GET_POSE = 1,
-    GET_RAW_GYROSKOPE = 2,
-    GET_RAW_ACCELEROMETER = 3,
-    GET_FILTERED_GYROSCOPE = 4
+    GET_RAW_IMU_VALUES = 2,
 } get_variable_enume_t;
 
 

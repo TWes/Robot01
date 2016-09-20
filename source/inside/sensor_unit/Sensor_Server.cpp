@@ -348,7 +348,7 @@ void Sensor_Server::udp_sending_function()
 								entry.client_info);
 					}
 					break;
-				case GET_RAW_GYROSKOPE:
+                case GET_RAW_IMU_VALUES:
 				{
 					int16_t answer_header[3];
 					answer_header[0] = SUBSCRIBE_UDP;
@@ -361,11 +361,11 @@ void Sensor_Server::udp_sending_function()
 					IMU_queue_mutex.unlock();
 
 					
-					answer_header[1] = 3 * sizeof( float );
+                    answer_header[1] = sizeof( act_imu_meas );
 		
-					char message[ 3*sizeof(uint16_t) + 3 * sizeof(float) ];
+                    char message[ 3*sizeof(uint16_t) + sizeof(act_imu_meas) ];
 					memcpy( message, answer_header, 3*sizeof(uint16_t) );
-					memcpy( (message + 3*sizeof(uint16_t) ), act_imu_meas.gyro, 3 * sizeof( float ) );  
+                    memcpy( (message + 3*sizeof(uint16_t) ), &act_imu_meas, sizeof( act_imu_meas ) );
 
 					this->udp_connection.send( message, sizeof(message),
 								entry.client_info);
