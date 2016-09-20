@@ -21,6 +21,7 @@ set( ROBOT_MONITOR_FILES
 	Sensor_Connection.cpp
 	status_widget.cpp
 	output_box.cpp
+	GraphPlotter.cpp
 )
 
 add_executable( robot_monitor ${ROBOT_MONITOR_FILES} )

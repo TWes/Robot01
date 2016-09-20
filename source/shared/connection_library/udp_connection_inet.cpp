@@ -116,7 +116,6 @@ void udp_connection_inet::polling_function()
         FD_ZERO( &socket_list );
         FD_SET( this->socket_fh, &socket_list );
 
-
         struct timeval timeout;
         timeout.tv_sec = 1;
         timeout.tv_usec = 0;

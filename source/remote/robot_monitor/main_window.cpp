@@ -8,18 +8,22 @@ main_window::main_window()
 
     this->centralWidget = new QWidget( this );
 
-    QGridLayout *layout = new QGridLayout( this );
+    layout = new QGridLayout( this );
+
 
     this->MapWidget = new map_widget( this );
-    layout->addWidget( this->MapWidget, 1, 0, 1, 1 );
+    layout->addWidget( this->MapWidget, 0, 1, 2, 1 );
 
     this->StatusWidget = new status_widget( this );
-    layout->addWidget( this->StatusWidget, 0, 0, 1, 1 );
+    layout->addWidget( this->StatusWidget, 1, 0, 1, 1 );
 
-    this->debug_output = new output_box( this );
-    layout->addWidget( this->debug_output, 0, 1, 2, 1 );
+    /*this->debug_output = new output_box( this );
+    layout->addWidget( this->debug_output, 1, 0, 1, 1 );
     QObject::connect( sensor_connection, SIGNAL(debugOutput(QString) ),
-                      this->debug_output, SLOT(append(QString)) );
+                      this->debug_output, SLOT(append(QString)) ); */
+
+    this->graph_plotter = new GraphPlotter(this);
+    layout->addWidget( this->graph_plotter, 0,0,1,1 );
 
     this->centralWidget->setLayout( layout );
     this->setCentralWidget( this->centralWidget );

@@ -11,7 +11,10 @@
 #include "udp_connection_inet.hpp"
 
 typedef enum{
-    WRITE_POSE
+    WRITE_POSE,
+    PLOT1,
+    PLOT2,
+    PLOT3
 } action_t;
 
 
@@ -78,6 +81,7 @@ private:
 
     int get_Pose();
     int init_UDP_Pose();
+    int init_UDP_Var(get_variable_enume_t _to_subscribe , action_t _todo);
 };
 
 #endif // SENSOR_CONNECTION_HPP

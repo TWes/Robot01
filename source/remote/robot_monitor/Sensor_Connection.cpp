@@ -116,9 +116,6 @@ int Sensor_Connection::init_UDP_Pose()
         return -1;
     }
 
-
-
-
     return 0;
 }
 
@@ -344,20 +341,81 @@ void udp_connection::handle_connection(char *message, int message_lenght, udp_co
 
     request_entry_t *act = this->connection->getEntryById( headder[2] );
 
-    if( act->todo_action == WRITE_POSE )
+    switch(  act->todo_action )
     {
-        if( headder[1] == sizeof( Pose_t ))
-        {
-            Pose_t recv_pose;
+    case WRITE_POSE:
+        Pose_t recv_pose;
 
-            memcpy( &recv_pose, (message + sizeof(headder)), sizeof( Pose_t ) );
+        memcpy( &recv_pose, (message + sizeof(headder)), sizeof( Pose_t ) );
 
-            this->connection->act_pose = recv_pose;
-        }
+        this->connection->act_pose = recv_pose;
+        break;
 
+    default:
+        std::cout << "Got Action: " << act->todo_action << std::endl;
     }
+
+
+
 
     delete act;
 
     return;
+}
+
+int Sensor_Connection::init_UDP_Var( get_variable_enume_t _to_subscribe, action_t _todo)
+{
+    // Erstelle den udp socket
+    if( this->udp_socket == NULL )
+    {
+        udp_connection_information_t socket_info;
+        this->udp_socket = new udp_connection( this );
+
+        this->udp_socket->createSocket( 0, socket_info );
+        udp_socket_information = socket_info;
+
+        this->udp_socket->start_reveiving();
+    }
+
+    uint16_t headder[3];
+
+    request_entry_t new_entry;
+
+    new_entry.id = this->actual_id++;
+    new_entry.stream = true;
+    gettimeofday( &new_entry.timestamp, NULL );
+    new_entry.time_lo_live.tv_sec = 3;
+    new_entry.time_lo_live.tv_usec = 0;
+    new_entry.todo_action = _todo;
+
+    headder[0] = SUBSCRIBE_UDP;
+    headder[1] = 3 * sizeof( uint32_t );
+    headder[2] = new_entry.id;
+
+    // receive the pose
+    uint32_t data[3];
+    data[0] = _to_subscribe;
+    data[1] = udp_socket_information.port_nr;
+    data[2] = 1000; // intervall in ms
+
+    char message[ 3*sizeof(uint16_t) + 3 * sizeof(uint32_t ) ];
+
+    memcpy( message, headder, 3*sizeof(uint16_t) );
+    memcpy( (message + 3*sizeof(uint16_t) ), data, 3 * sizeof( uint32_t ) );
+
+    open_requests_mutex.lock();
+        this->open_requests.push_back( new_entry );
+    open_requests_mutex.unlock();
+
+    int ret = this->sendData( message, sizeof(message) );
+
+    if( ret < 0 )
+    {
+        // Fehler
+        return -1;
+    }
+
+    return 0;
+
+
 }
