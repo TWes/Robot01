@@ -332,9 +332,9 @@ void udp_connection::handle_connection(char *message, int message_lenght, udp_co
     {
         memcpy( headder, message, sizeof(headder) );
 
-        std::cout << "h(0): " << headder[0] << "\n"
-                  << "h(0): " << headder[1] << "\n"
-                  << "h(0): " << headder[2] << std::endl;
+        /*std::cout << "h(0): " << headder[0] << "\n"
+                  << "h(1): " << headder[1] << "\n"
+                  << "h(2): " << headder[2] << std::endl; */
     }
     else
     { return; }    
@@ -350,7 +350,15 @@ void udp_connection::handle_connection(char *message, int message_lenght, udp_co
 
         this->connection->act_pose = recv_pose;
         break;
+    case PLOT1:
+        float gyro[3];
 
+        memcpy( gyro, (message + sizeof(headder)), 3* sizeof( float ) );
+
+        std::cout << "Gyro: " << gyro[0] << " | " << gyro[1] << " | " << gyro[2] << std::endl;
+
+
+        break;
     default:
         std::cout << "Got Action: " << act->todo_action << std::endl;
     }
@@ -363,7 +371,7 @@ void udp_connection::handle_connection(char *message, int message_lenght, udp_co
     return;
 }
 
-int Sensor_Connection::init_UDP_Var( get_variable_enume_t _to_subscribe, action_t _todo)
+int Sensor_Connection::init_UDP_Var( get_variable_enume_t _to_subscribe, action_t _todo, int sending_interval)
 {
     // Erstelle den udp socket
     if( this->udp_socket == NULL )
@@ -396,7 +404,7 @@ int Sensor_Connection::init_UDP_Var( get_variable_enume_t _to_subscribe, action_
     uint32_t data[3];
     data[0] = _to_subscribe;
     data[1] = udp_socket_information.port_nr;
-    data[2] = 1000; // intervall in ms
+    data[2] = sending_interval; // intervall in ms
 
     char message[ 3*sizeof(uint16_t) + 3 * sizeof(uint32_t ) ];
 

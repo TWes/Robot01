@@ -22,6 +22,7 @@ set( ROBOT_MONITOR_FILES
 	status_widget.cpp
 	output_box.cpp
 	GraphPlotter.cpp
+	graph_helper.cpp
 )
 
 add_executable( robot_monitor ${ROBOT_MONITOR_FILES} )

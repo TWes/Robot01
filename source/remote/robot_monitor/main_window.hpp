@@ -2,12 +2,12 @@
 #define MAIN_WINDOW_H
 
 #include <QtGui>
+#include <QtCore>
 
 #include "map_widget.hpp"
 #include "GraphPlotter.h"
+#include "graph_helper.hpp"
 #include "Sensor_Connection.hpp"
-#include <QtCore>
-
 #include "status_widget.hpp"
 #include "output_box.hpp"
 
@@ -28,6 +28,7 @@ public:
     map_widget *MapWidget;
     status_widget *StatusWidget;
     output_box *debug_output;
+    GraphHelper *graphHelper;
     GraphPlotter *graph_plotter;
 
     // Globaly needed

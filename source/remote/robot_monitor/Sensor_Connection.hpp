@@ -63,7 +63,6 @@ public:
     std::vector<request_entry_t> open_requests;
     request_entry_t* getEntryById( int id );
 
-
     udp_connection *udp_socket;
     udp_connection_information_t udp_socket_information;
 
@@ -71,6 +70,8 @@ public:
     void end_server();
 
     QWidget *parent;
+
+    int init_UDP_Var(get_variable_enume_t _to_subscribe , action_t _todo, int sending_interval = 1000);
 
 signals:
     void debugOutput( QString message );
@@ -81,7 +82,6 @@ private:
 
     int get_Pose();
     int init_UDP_Pose();
-    int init_UDP_Var(get_variable_enume_t _to_subscribe , action_t _todo);
 };
 
 #endif // SENSOR_CONNECTION_HPP
