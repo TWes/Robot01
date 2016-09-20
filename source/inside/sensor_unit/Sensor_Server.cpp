@@ -163,17 +163,17 @@ void Sensor_Server::handle_connection( int client_handle )
 
             switch( new_value[0])
             {
-            case 1: left_direction = 0; break;
-            case 2: left_direction = 1; break;
-            case 4: left_direction = -1; break;
+            case 1: right_direction = 0; break;
+            case 2: right_direction = 1; break;
+            case 4: right_direction = -1; break;
             default: break;
             }
 
             switch( new_value[1])
             {
-		case 1: right_direction = 0; break;
-		case 2: right_direction = 1; break;
-            	case 4: right_direction = -1; break;
+		case 1: left_direction = 0; break;
+		case 2: left_direction = 1; break;
+            	case 4: left_direction = -1; break;
             	default: break;
             }
 
@@ -228,8 +228,8 @@ void Sensor_Server::handle_connection( int client_handle )
 		}
 
 		struct sockaddr_in adress = getSocketAdressByFh( client_handle );
-		//std::cout << "Client: " << std::string(inet_ntoa( adress.sin_addr )) << " and port " << data[1]
-		//<< " im intervall von " << data[2] << "ms" << std::endl;
+		std::cout << "Client: " << std::string(inet_ntoa( adress.sin_addr )) << " and port " << data[1]
+		<< " im intervall von " << data[2] << "ms; should send: " << data[0] << std::endl;
 		
 		udp_connection_information_t client( inet_ntoa( adress.sin_addr ),
 				 (int) data[1] );
@@ -324,12 +324,14 @@ void Sensor_Server::udp_sending_function()
 		{
 			// Do we have to send already?
 			if( act_time >= entry.next_sending_time )
-			{			
+			{					
+				//std::cout << "Should send UDP: " << entry.seq_number << std::endl;		
 
 				switch( entry.sending_object )
 				{
 				// Send the position
 				case GET_POSE:
+				{
 					//std::cout << "get Pose" << std::endl;
 					int16_t answer_header[3];
 					answer_header[0] = SUBSCRIBE_UDP;
@@ -343,9 +345,34 @@ void Sensor_Server::udp_sending_function()
 					memcpy( (message + 3*sizeof(uint16_t) ), &pose_buffer, 1 * sizeof(Position_t ) );  
 
 					this->udp_connection.send( message, sizeof(message),
-								entry.client_info);			
+								entry.client_info);
+					}
+					break;
+				case GET_RAW_GYROSKOPE:
+				{
+					int16_t answer_header[3];
+					answer_header[0] = SUBSCRIBE_UDP;
+					answer_header[2] = entry.seq_number;
 
+					IMU_Measurement act_imu_meas;
 
+					IMU_queue_mutex.lock();
+				            act_imu_meas = *(IMU_values.begin());
+					IMU_queue_mutex.unlock();
+
+					
+					answer_header[1] = 3 * sizeof( float );
+		
+					char message[ 3*sizeof(uint16_t) + 3 * sizeof(float) ];
+					memcpy( message, answer_header, 3*sizeof(uint16_t) );
+					memcpy( (message + 3*sizeof(uint16_t) ), act_imu_meas.gyro, 3 * sizeof( float ) );  
+
+					this->udp_connection.send( message, sizeof(message),
+								entry.client_info);
+				}
+				break;
+				default:
+					std::cout << "should send: " << entry.sending_object << std::endl;
 					break;
 				}
 
@@ -357,7 +384,7 @@ void Sensor_Server::udp_sending_function()
 		}
 
 
-		usleep( 1000000 );
+		usleep( 10000 );
 	}
 	
 

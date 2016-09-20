@@ -4,6 +4,9 @@ void Sensor_Server::working_thread_function()
 {
     while( this->continue_server )
     {
+	const float wheel_distance = 0.1; // 10 cm
+	const float delay_time = 500000; // 0.5 s
+
 	// Variables which contain the measurements
 	// of the wheel encoder
         Wheel_Measurement act_wheel_meas;
@@ -52,6 +55,23 @@ void Sensor_Server::working_thread_function()
 
 	last_magn_orientation = act_magn_orientation;
 
+	
+	/*****************************
+         * Calculate the new Position out of
+         * the steering commands
+         ****************************/	
+	const float predicted_velocity = 0.6;
+	
+	float predicted_left_velocity = this->left_direction * predicted_velocity;
+	float predicted_right_velocity = this->right_direction * predicted_velocity;
+
+	//std::cout << (int) left_direction << " | " << (int) right_direction << std::endl;
+	//std::cout << predicted_left_velocity << " | " << predicted_right_velocity << std::endl;
+
+	float predicted_orientation_change = (predicted_left_velocity - predicted_right_velocity)/ wheel_distance;
+
+
+	std::cout << "Theta: " << predicted_orientation_change << std::endl;
 	
 	/*****************************
          * Calculate the new Position out of
@@ -182,7 +202,7 @@ void Sensor_Server::working_thread_function()
         last_wheel_meas = act_wheel_meas;
 	last_imu_meas = act_imu_meas;
 
-        usleep(500000);
+        usleep(delay_time);
     }
 }
 
