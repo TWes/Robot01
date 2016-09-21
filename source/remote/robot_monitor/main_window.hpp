@@ -12,6 +12,7 @@
 #include "output_box.hpp"
 
 extern Sensor_Connection *sensor_connection;
+extern GraphHelper *globalGraphHelper;
 
 class main_window : public QMainWindow
 {

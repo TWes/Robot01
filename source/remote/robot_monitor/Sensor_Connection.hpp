@@ -9,12 +9,12 @@
 #include "Sensor_structs.hpp"
 #include "sensor_protocol.hpp"
 #include "udp_connection_inet.hpp"
+#include "graph_helper.hpp"
+
 
 typedef enum{
     WRITE_POSE,
-    PLOT1,
-    PLOT2,
-    PLOT3
+    PLOT1
 } action_t;
 
 
@@ -30,6 +30,7 @@ class Sensor_Connection;
 
 class udp_connection : public udp_connection_inet
 {
+
 public:
     udp_connection( Sensor_Connection *sensor );
 
@@ -78,12 +79,16 @@ public:
 signals:
     void debugOutput( QString message );
 
-
 private:
     int actual_id;
 
     int get_Pose();
     int init_UDP_Pose();
 };
+
+extern Sensor_Connection *sensor_connection;
+
+class GraphHelper;
+extern GraphHelper *globalGraphHelper;
 
 #endif // SENSOR_CONNECTION_HPP

@@ -351,20 +351,17 @@ void udp_connection::handle_connection(char *message, int message_lenght, udp_co
         this->connection->act_pose = recv_pose;
         break;
     case PLOT1:
-        float gyro[3];
+        IMU_Measurement imuMeas;
 
-        memcpy( gyro, (message + sizeof(headder)), 3* sizeof( float ) );
+        memcpy( &imuMeas, (message + sizeof(headder)), sizeof( IMU_Measurement ) );
 
-        std::cout << "Gyro: " << gyro[0] << " | " << gyro[1] << " | " << gyro[2] << std::endl;
-
+        // Tell the Graph Helper the Values
+        globalGraphHelper->GetNewIMUMeas( imuMeas );
 
         break;
     default:
         std::cout << "Got Action: " << act->todo_action << std::endl;
     }
-
-
-
 
     delete act;
 

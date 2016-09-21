@@ -1,5 +1,7 @@
 #include "main_window.hpp"
 
+GraphHelper *globalGraphHelper;
+
 main_window::main_window()
 {
     sensor_connection = new Sensor_Connection( QApplication::arguments().at(1).toStdString() , 2553, this);
@@ -11,8 +13,10 @@ main_window::main_window()
     layout = new QGridLayout( this );
 
 
+    /*
     this->MapWidget = new map_widget( this );
     layout->addWidget( this->MapWidget, 0, 1, 2, 1 );
+    */
 
     this->StatusWidget = new status_widget( this );
     layout->addWidget( this->StatusWidget, 2, 0, 1, 1 );
@@ -22,11 +26,12 @@ main_window::main_window()
     QObject::connect( sensor_connection, SIGNAL(debugOutput(QString) ),
                       this->debug_output, SLOT(append(QString)) ); */
 
-    this->graphHelper = new GraphHelper( this );
-    layout->addWidget( this->graphHelper, 0,0,1,1);
-
     this->graph_plotter = new GraphPlotter(this);
     layout->addWidget( this->graph_plotter, 1,0,1,1 );
+
+    this->graphHelper = new GraphHelper( this->graph_plotter, this );
+    globalGraphHelper = this->graphHelper;
+    layout->addWidget( this->graphHelper, 0,0,1,1);
 
     this->centralWidget->setLayout( layout );
     this->setCentralWidget( this->centralWidget );

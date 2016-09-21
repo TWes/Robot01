@@ -3,9 +3,13 @@
 
 #include <QtGui>
 #include <QtCore>
+#include <sys/time.h>
 
 #include "Sensor_Connection.hpp"
 #include "sensor_protocol.hpp"
+#include "GraphPlotter.h"
+
+class Sensor_Connection;
 
 extern Sensor_Connection *sensor_connection;
 
@@ -14,23 +18,25 @@ class GraphHelper : public QWidget
     Q_OBJECT
 
 public:
-    GraphHelper(QWidget *parent = 0);
+    GraphHelper( GraphPlotter *plotter, QWidget *parent = 0);
     ~GraphHelper();
 
-private:
+    void GetNewIMUMeas( IMU_Measurement _meas);
 
+private:
+    GraphPlotter *graphPlotter;
     QGridLayout *layout;
 
-    QLabel *testLabel;
-    QComboBox *plot1Combo;
-    QPushButton *plot1SubscribeButton;
+    const float nmbOfBoxes = 9;
+    QCheckBox *checkBoxes[9];
+    bool boxValues[9] = {false};
 
-    QPushButton *plot1UnsubscribeButton;
+    int boxesThatNeedsIMU = 0;
+    double startTimestamp = 0.0;
+
 
 private slots:
-    void emitPlot1Subscribe();
-    void emitPlot1Unsubscribe();
-
+    void CheckBoxesChanged();
 
 };
 

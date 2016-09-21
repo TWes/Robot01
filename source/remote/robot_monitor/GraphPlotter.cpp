@@ -5,9 +5,9 @@ GraphStruct_t GraphPlotter::defaultGraphStyle = GraphStruct_t(1, Qt::black, Poin
 GraphPlotter::GraphPlotter(QWidget *parent)
     : QWidget(parent)
 {
-    viewRect = QRectF(0,0,1,1);
+    viewRect = RectF(0,0,1,1);
 
-    this->addGraph(2, Qt::red, Point, true );
+    /*this->addGraph(2, Qt::red, Point, true );
 
     this->addPoint(1, QPointF( 0.25, 0.25));
     this->addPoint(1, QPointF( 0.5, 0.5));
@@ -17,7 +17,7 @@ GraphPlotter::GraphPlotter(QWidget *parent)
     this->addGraph(3, Qt::blue, Point, false );
     this->addPoint(2, QPointF( 0.25, 0.75));
     this->addPoint(2, QPointF( 0.25, 0.7));
-    this->addPoint(2, QPointF( 0.2, 0.75));
+    this->addPoint(2, QPointF( 0.2, 0.75)); */
 
     setupBrushes();
 }
@@ -37,7 +37,7 @@ void GraphPlotter::addPoint(QPointF _newPoint)
     this->graphs.begin()->points.push_back( _newPoint );
 }
 
-void GraphPlotter::addPoint( unsigned int graphIndex, QPointF _newPoint)
+void GraphPlotter::addPoint(unsigned int graphIndex, QPointF _newPoint, bool scrollTonewPoint)
 {
     if( this->graphs.size() <= graphIndex )
     {
@@ -45,6 +45,15 @@ void GraphPlotter::addPoint( unsigned int graphIndex, QPointF _newPoint)
     }
 
     this->graphs.at( graphIndex).points.push_back( _newPoint );
+
+
+    if( scrollTonewPoint )
+    {
+        this->scrollToPoint( _newPoint );
+    }
+
+    this->update();
+
 }
 
 void GraphPlotter::clear()
@@ -72,6 +81,7 @@ void GraphPlotter::paintEvent(QPaintEvent *event)
 
     painter.drawLine( actYAxis );
     painter.drawLine( actXAxis );
+    painter.drawLine( getZeroAxis() );
 
     drawLabels( painter );
 
@@ -120,6 +130,24 @@ QLine GraphPlotter::getXAxis( QRect _viewPort )
     return AxisLine;
 }
 
+QLine GraphPlotter::getZeroAxis()
+{
+    float fracture = (-viewRect.y) / viewRect.h;
+
+    if( fracture > 0 && fracture <= 1)
+    {
+        QPoint startPoint( actYAxis.x1(), actDrawRect.height() - fracture * actDrawRect.height() + actDrawRect.y()  );
+
+        QLine zeroLine( startPoint, QPoint( actXAxis.x2(), startPoint.y() ));
+
+        return zeroLine;
+    }
+
+    return actXAxis;
+
+}
+
+
 QRect GraphPlotter::getDrawRect( QRect _viewPort)
 {
     float distToTop = _viewPort.height() * 0.1;
@@ -162,22 +190,22 @@ void GraphPlotter::drawLabels(QPainter &_painter)
     QFontMetrics FontMetric = _painter.fontMetrics();
 
     // Draw top Y Label
-    QString topYLabel = QString::number(viewRect.height() + viewRect.y(), 10, 2 );
-    int topYLabelXPos = 0.5 * (actDrawRect.x() - FontMetric.width(topYLabel));
+    QString topYLabel = QString::number(viewRect.h + viewRect.y, 10, 2 );
+    int topYLabelXPos = actDrawRect.x();
     _painter.drawText(  topYLabelXPos , actDrawRect.y(), 100, 100, 0, topYLabel );
 
     // Draw bottom y Label
-    QString bottomYLabel = QString::number(viewRect.y(), 10, 2 );
-    int bottomYLabelXPos = 0.5 * (actDrawRect.x() - FontMetric.width(topYLabel));
+    QString bottomYLabel = QString::number(viewRect.y, 10, 2 );
+    int bottomYLabelXPos = actDrawRect.x();
     _painter.drawText( bottomYLabelXPos, actDrawRect.y() + actDrawRect.height() - 15, 100, 100, 0, bottomYLabel );
 
     // Draw left x Label
-    QString leftXLabel = QString::number(viewRect.x(), 10, 2 );
+    QString leftXLabel = QString::number(viewRect.x, 10, 2 );
     int leftXLabelPos = actDrawRect.x() + 0.5 * FontMetric.width( leftXLabel);
     _painter.drawText( leftXLabelPos, actDrawRect.y() + actDrawRect.height(), 100, 100, 0, leftXLabel );
 
     // Draw right x Label
-    QString rightXLabel = QString::number(viewRect.width() + viewRect.x(), 10, 2 );
+    QString rightXLabel = QString::number(viewRect.w + viewRect.x, 10, 2 );
     int rightXLabelPos = actDrawRect.x() + actDrawRect.width() - FontMetric.width( rightXLabel ) * 0.5;
     _painter.drawText( rightXLabelPos, actDrawRect.y() + actDrawRect.height(), 100, 100, 0, rightXLabel );
 
@@ -209,14 +237,14 @@ void GraphPlotter::drawPoints(QPainter &_painter)
 
         for( QPointF pointToDraw : graphToDraw.points)
         {
+
             if( !viewRect.contains( pointToDraw )) continue;
 
             // calc draw points
             QPoint drawPoint;
 
-
-            drawPoint.setX( actDrawRect.x() + ((pointToDraw.x() - viewRect.x()) * ( actDrawRect.width() / viewRect.width())) );
-            drawPoint.setY( (actDrawRect.height() + actDrawRect.y()) - ( pointToDraw.y() - viewRect.y() ) * ( actDrawRect.height() / viewRect.height() ) );
+            drawPoint.setX( actDrawRect.x() + ((pointToDraw.x() - viewRect.x) * ( actDrawRect.width() / viewRect.w)) );
+            drawPoint.setY( (actDrawRect.height() + actDrawRect.y()) - ( pointToDraw.y() - viewRect.y ) * ( actDrawRect.height() / viewRect.h ) );
 
             switch( graphToDraw.type )
             {
@@ -227,7 +255,6 @@ void GraphPlotter::drawPoints(QPainter &_painter)
             default:
                 _painter.drawPoint( drawPoint );
                 break;
-
             }
 
             if( graphToDraw.connect && !firstPoint )
@@ -251,19 +278,19 @@ void GraphPlotter::wheelEvent(QWheelEvent *event)
 
     float scaleChangeFactor = 1 + scaleChange;
 
-    float newWidth = viewRect.width() / scaleChangeFactor;
-    float newHeight = viewRect.height() /scaleChangeFactor;
+    float newWidth = viewRect.w / scaleChangeFactor;
+    float newHeight = viewRect.h /scaleChangeFactor;
 
-    float deltaWidth = viewRect.width() - newWidth;
-    float deltaHeight = viewRect.height() - newHeight;
+    float deltaWidth = viewRect.w - newWidth;
+    float deltaHeight = viewRect.h - newHeight;
 
-    float newXPos = viewRect.x() + 0.5 * deltaWidth;
-    float newYPos = viewRect.y() + 0.5 * deltaHeight;
+    float newXPos = viewRect.x + 0.5 * deltaWidth;
+    float newYPos = viewRect.y + 0.5 * deltaHeight;
 
-    viewRect.setX( newXPos );
-    viewRect.setY( newYPos);
-    viewRect.setWidth( newWidth  );
-    viewRect.setHeight( newHeight );
+    viewRect.x = newXPos;
+    viewRect.y = newYPos;
+    viewRect.w = newWidth;
+    viewRect.h = newHeight;
 
     this->update();
 }
@@ -275,37 +302,75 @@ void GraphPlotter::mousePressEvent(QMouseEvent *event)
         startMouseDragPos = event->pos();
         startViewPortDragPos = viewRect.topLeft();
 
-        mousePressed = true;
+        leftmousePressed = true;
     }
+
+    if( event->button() == Qt::RightButton )
+    {
+        startMouseDragPos = event->pos();
+        startViewPortDragPos = viewRect.topLeft();
+
+        rightmousePressed = true;
+    }
+
 }
 
 void GraphPlotter::mouseReleaseEvent(QMouseEvent *event)
 {
     if( event->button() == Qt::LeftButton )
     {
-        mousePressed = false;
+        leftmousePressed = false;
     }
+
+    if( event->button() == Qt::RightButton )
+    {
+        rightmousePressed = false;
+    }
+
 }
 
 void GraphPlotter::mouseMoveEvent(QMouseEvent *event)
 {
-    if( mousePressed )
+    if( leftmousePressed )
     {
         QPoint deltaPos = startMouseDragPos - event->pos();
 
-        float horizontalScale = viewRect.width() / actDrawRect.width();
-        float verticalScale = viewRect.height() / actDrawRect.height();
+        float horizontalScale = viewRect.w / actDrawRect.width();
+        float verticalScale = viewRect.h / actDrawRect.height();
 
         float newXPos = startViewPortDragPos.x() + horizontalScale * deltaPos.x();
         float newYPos = startViewPortDragPos.y() - verticalScale * deltaPos.y();
 
         QPointF newPos = QPointF(newXPos, newYPos );
 
-        viewRect = QRectF( newPos, viewRect.size() );
+        viewRect = RectF( newPos.x(), newPos.y(), viewRect.w, viewRect.h );
 
         this->update();
     }
+    else if( rightmousePressed )
+    {
+        QPoint deltaPos = startMouseDragPos - event->pos();
+
+        float scaleChangeX = deltaPos.x() * scalePerPixelMove;
+        float scaleChangeFactorX = 1 + scaleChangeX;
+
+        float scaleChangeY = deltaPos.y() * scalePerPixelMove;
+        float scaleChangeFactorY = 1 + scaleChangeY;
+
+
+        viewRect = RectF( viewRect.x, viewRect.y, viewRect.w / scaleChangeFactorX, viewRect.h/scaleChangeFactorY );
+
+        this->update();
+
+
+    }
 }
 
+void GraphPlotter::scrollToPoint( QPointF _pointToScrollTo )
+{
+    float newRightRange = _pointToScrollTo.x() + (0.2 * viewRect.w );
+
+    viewRect = RectF( newRightRange - viewRect.w, viewRect.y, viewRect.w, viewRect.h);
+}
 
 
