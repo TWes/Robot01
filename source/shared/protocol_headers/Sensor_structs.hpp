@@ -78,6 +78,12 @@ typedef struct
 
 } Position_t;
 
+
+typedef struct{
+	float angular_velocity[3];
+	float linear_velocity[3];
+} status_tuple_t;
+
 bool operator==(struct timeval end, struct timeval begin );
 struct timeval timeval_difference( struct timeval end, struct timeval begin );
 double time_difference( struct timeval end, struct timeval begin );

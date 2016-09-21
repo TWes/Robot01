@@ -109,7 +109,6 @@ class Sensor_Server : public Server_inet
 		void handle_connection( int client_handle );
 		void cleanup();
 private:
-
 	void evaluate_options( int argc, char** argv );
 	option_struct_t options; // The choosen options
 	void printHelp();
@@ -120,6 +119,8 @@ private:
 	std::vector<UDP_subscriber_entry_t> UDP_subscriber;
 	std::thread *udp_sending_thread;
 	void udp_sending_function();
+
+	status_tuple_t act_status_tuple;
 };
 
 

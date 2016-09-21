@@ -15,6 +15,7 @@ typedef enum{
 typedef enum{
     GET_POSE = 1,
     GET_RAW_IMU_VALUES = 2,
+    GET_FILTERED_IMU_VALUES = 3
 } get_variable_enume_t;
 
 

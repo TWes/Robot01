@@ -71,8 +71,15 @@ void Sensor_Server::working_thread_function()
 	float predicted_orientation_change = (predicted_left_velocity - predicted_right_velocity)/ wheel_distance;
 
 
-	std::cout << "Theta: " << predicted_orientation_change << std::endl;
+	//std::cout << "Theta: " << predicted_orientation_change << std::endl;
 	
+	act_status_tuple.angular_velocity[0] = 1.0;
+	act_status_tuple.angular_velocity[1] = 1.2;
+	act_status_tuple.angular_velocity[2] = 1.4;
+	act_status_tuple.linear_velocity[0] = -1.0;
+	act_status_tuple.linear_velocity[1] = -1.2;
+	act_status_tuple.linear_velocity[2] = -1.4;
+
 	/*****************************
          * Calculate the new Position out of
          * the decoder

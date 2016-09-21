@@ -361,16 +361,34 @@ void Sensor_Server::udp_sending_function()
 					IMU_queue_mutex.unlock();
 
 					
-                    answer_header[1] = sizeof( act_imu_meas );
+                			answer_header[1] = sizeof( act_imu_meas );
 		
-                    char message[ 3*sizeof(uint16_t) + sizeof(act_imu_meas) ];
+		                        char message[ 3*sizeof(uint16_t) + sizeof(act_imu_meas) ];
 					memcpy( message, answer_header, 3*sizeof(uint16_t) );
-                    memcpy( (message + 3*sizeof(uint16_t) ), &act_imu_meas, sizeof( act_imu_meas ) );
+			                memcpy( (message + 3*sizeof(uint16_t) ), &act_imu_meas, sizeof( act_imu_meas ) );
 
 					this->udp_connection.send( message, sizeof(message),
 								entry.client_info);
 				}
-				break;
+					break;
+				case GET_FILTERED_IMU_VALUES:
+					{
+					int16_t answer_header[3];
+					answer_header[0] = SUBSCRIBE_UDP;
+					answer_header[2] = entry.seq_number;
+
+					status_tuple_t status_tuple = act_status_tuple;			
+                			answer_header[1] = sizeof( status_tuple_t );
+		
+		                        char message[ 3*sizeof(uint16_t) + sizeof( status_tuple_t ) ];
+					memcpy( message, answer_header, 3*sizeof(uint16_t) );
+			                memcpy( (message + 3*sizeof(uint16_t) ), &status_tuple, sizeof( status_tuple_t ) );
+
+					this->udp_connection.send( message, sizeof(message),
+								entry.client_info);
+
+					}
+					break;
 				default:
 					std::cout << "should send: " << entry.sending_object << std::endl;
 					break;
