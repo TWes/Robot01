@@ -14,7 +14,8 @@
 
 typedef enum{
     WRITE_POSE,
-    PLOT1
+    PLOT1_IMU,
+    PLOT1_FILTERED_VALUES
 } action_t;
 
 
@@ -49,7 +50,7 @@ public:
     Sensor_Connection(std::string ip_address, int port, QWidget *parent);
     ~Sensor_Connection();
 
-    Pose_t act_pose;
+    Position_t act_pose;
 
     void end();
     bool continue_server;
@@ -75,6 +76,7 @@ public:
     QWidget *parent;
 
     int init_UDP_Var(get_variable_enume_t _to_subscribe , action_t _todo, int sending_interval = 1000);
+    int unsubscribe_UDP( get_variable_enume_t _to_subscribe  );
 
 signals:
     void debugOutput( QString message );

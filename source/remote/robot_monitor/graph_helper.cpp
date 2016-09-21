@@ -15,6 +15,12 @@ GraphHelper::GraphHelper(GraphPlotter *plotter, QWidget *parent) : QWidget( pare
     checkBoxes[6] = new QCheckBox("MagnRawX", this);
     checkBoxes[7] = new QCheckBox("MagnRawY", this);
     checkBoxes[8] = new QCheckBox("MagnRawZ", this);
+    checkBoxes[9] = new QCheckBox("FiltLinVelX", this);
+    checkBoxes[10] = new QCheckBox("FiltLinVelY", this);
+    checkBoxes[11] = new QCheckBox("FiltLinVelZ", this);
+    checkBoxes[12] = new QCheckBox("FiltAngVelX", this);
+    checkBoxes[13] = new QCheckBox("FiltAngVelY", this);
+    checkBoxes[14] = new QCheckBox("FiltAngVelZ", this);
 
     for( int i = 0; i < nmbOfBoxes; i++ )
     {
@@ -36,13 +42,18 @@ GraphHelper::GraphHelper(GraphPlotter *plotter, QWidget *parent) : QWidget( pare
     plotter->addGraph(1, Qt::darkGray, Point, true); // 7
     plotter->addGraph(1, Qt::darkRed, Point, true); // 8
     plotter->addGraph(1, Qt::black, Point, true); // 9
+    plotter->addGraph(1, Qt::lightGray, Point, true); // 10
+    plotter->addGraph(1, Qt::darkBlue, Point, true); // 11
+    plotter->addGraph(1, Qt::darkGreen, Point, true); // 12
+    plotter->addGraph(1, Qt::darkYellow, Point, true); // 13
+    plotter->addGraph(1, Qt::cyan, Point, true); // 14
+    plotter->addGraph(1, Qt::yellow, Point, true); // 15
 
     timeval time;
     gettimeofday( &time, NULL );
 
     startTimestamp = (time.tv_sec * (double)1000) + (time.tv_usec / (double)1000);
 }
-
 
 GraphHelper::~GraphHelper()
 {
@@ -60,7 +71,6 @@ GraphHelper::~GraphHelper()
     }
 
 }
-
 
 void GraphHelper::CheckBoxesChanged()
 {
@@ -89,7 +99,7 @@ void GraphHelper::CheckBoxesChanged()
             if( boxesThatNeedsIMU == 1 )
             {
                 // Start IMU
-                sensor_connection->init_UDP_Var( GET_RAW_IMU_VALUES, PLOT1 , 100 );
+                sensor_connection->init_UDP_Var( GET_RAW_IMU_VALUES, PLOT1_IMU , 100 );
             }
         }
         else
@@ -99,7 +109,33 @@ void GraphHelper::CheckBoxesChanged()
             if( boxesThatNeedsIMU == 0 )
             {
                 // Stop IMU
-                std::cout << "Stop IMU" << std::endl;
+                sensor_connection->unsubscribe_UDP( GET_RAW_IMU_VALUES );
+            }
+        }
+    }
+
+    // We need to deal with the filtered
+    else if( changedBox >= 9 && changedBox < 15 )
+    {
+        if( newState )
+        {
+            boxesThatNeedsFilteredValues++;
+
+            if( boxesThatNeedsFilteredValues == 1 )
+            {
+                // Start IMU
+                std::cout << "Start filtered values" << std::endl;
+                sensor_connection->init_UDP_Var( GET_FILTERED_IMU_VALUES, PLOT1_FILTERED_VALUES , 100 );
+            }
+        }
+        else
+        {
+            boxesThatNeedsFilteredValues--;
+
+            if( boxesThatNeedsFilteredValues == 0 )
+            {
+                // Stop IMU
+                sensor_connection->unsubscribe_UDP( GET_FILTERED_IMU_VALUES );
             }
         }
     }
@@ -140,16 +176,50 @@ void GraphHelper::GetNewIMUMeas( IMU_Measurement _meas)
     }
     if( boxValues[6] )
     {
-        graphPlotter->addPoint(7, QPointF( timestamb, _meas.mag[0]), true);
+        graphPlotter->addPoint(7, QPointF( timestamb, _meas.mag.x_val), true);
     }
     if( boxValues[7] )
     {
-        graphPlotter->addPoint(8, QPointF( timestamb, _meas.mag[1]), true);
+        graphPlotter->addPoint(8, QPointF( timestamb, _meas.mag.y_val ), true);
     }
     if( boxValues[8] )
     {
-        graphPlotter->addPoint(9, QPointF( timestamb, _meas.mag[2]), true);
+        graphPlotter->addPoint(9, QPointF( timestamb, _meas.mag.z_val ), true);
     }
 
 }
 
+void GraphHelper::GetNewFilteredMeas(  Status_tuple_t _meas)
+{
+    timeval time;
+    gettimeofday( &time, NULL );
+
+    double timestamb = (time.tv_sec * (double)1000) + (time.tv_usec / (double)1000);
+
+    timestamb -= startTimestamp;
+
+    if( boxValues[9] )
+    {
+        graphPlotter->addPoint(10, QPointF( timestamb, _meas.linear_velocity[0]), true);
+    }
+    if( boxValues[10] )
+    {
+        graphPlotter->addPoint(11, QPointF( timestamb, _meas.linear_velocity[1]), true);
+    }
+    if( boxValues[11] )
+    {
+        graphPlotter->addPoint(12, QPointF( timestamb, _meas.linear_velocity[2]), true);
+    }
+    if( boxValues[12] )
+    {
+        graphPlotter->addPoint(13, QPointF( timestamb, _meas.angular_velocity[0]), true);
+    }
+    if( boxValues[13] )
+    {
+        graphPlotter->addPoint(14, QPointF( timestamb, _meas.angular_velocity[1]), true);
+    }
+    if( boxValues[14] )
+    {
+        graphPlotter->addPoint(15, QPointF( timestamb, _meas.angular_velocity[2]), true);
+    }
+}

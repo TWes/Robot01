@@ -120,7 +120,7 @@ private:
 	std::thread *udp_sending_thread;
 	void udp_sending_function();
 
-	status_tuple_t act_status_tuple;
+    Status_tuple_t act_status_tuple;
 };
 
 

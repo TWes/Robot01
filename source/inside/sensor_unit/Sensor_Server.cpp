@@ -377,12 +377,12 @@ void Sensor_Server::udp_sending_function()
 					answer_header[0] = SUBSCRIBE_UDP;
 					answer_header[2] = entry.seq_number;
 
-					status_tuple_t status_tuple = act_status_tuple;			
-                			answer_header[1] = sizeof( status_tuple_t );
+                    Status_tuple_t status_tuple = act_status_tuple;
+                            answer_header[1] = sizeof( Status_tuple_t );
 		
-		                        char message[ 3*sizeof(uint16_t) + sizeof( status_tuple_t ) ];
+                                char message[ 3*sizeof(uint16_t) + sizeof( Status_tuple_t ) ];
 					memcpy( message, answer_header, 3*sizeof(uint16_t) );
-			                memcpy( (message + 3*sizeof(uint16_t) ), &status_tuple, sizeof( status_tuple_t ) );
+                            memcpy( (message + 3*sizeof(uint16_t) ), &status_tuple, sizeof( Status_tuple_t ) );
 
 					this->udp_connection.send( message, sizeof(message),
 								entry.client_info);

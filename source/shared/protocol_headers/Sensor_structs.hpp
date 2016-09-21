@@ -34,7 +34,6 @@ typedef struct
 } magnetometer_val_t;
 
 
-
 /** One IMU Measurement */
 typedef struct
 {
@@ -62,6 +61,14 @@ typedef struct
 
 typedef struct
 {
+    float angular_velocity[3];
+    float linear_velocity[3];
+
+} Status_tuple_t;
+
+
+typedef struct
+{
     int Right_Wheel_Rotations;
     int Left_Wheel_Rotations;
 
@@ -78,11 +85,6 @@ typedef struct
 
 } Position_t;
 
-
-typedef struct{
-	float angular_velocity[3];
-	float linear_velocity[3];
-} status_tuple_t;
 
 bool operator==(struct timeval end, struct timeval begin );
 struct timeval timeval_difference( struct timeval end, struct timeval begin );

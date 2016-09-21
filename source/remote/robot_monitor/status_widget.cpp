@@ -10,7 +10,7 @@ void status_widget::paintEvent(QPaintEvent *event)
 
     QPainter painter( this );
 
-    Pose_t act_pose = {0.0,0.0,0.0};
+    Position_t act_pose = {0.0,0.0,0.0};
 
     if( sensor_connection != NULL )
     {
@@ -20,8 +20,8 @@ void status_widget::paintEvent(QPaintEvent *event)
     painter.setPen( Qt::black );
 
     std::stringstream ss;
-    ss << "( " << sensor_connection->act_pose.x_pos << " , " \
-       << sensor_connection->act_pose.y_pos << " )";
+    ss << "( " << sensor_connection->act_pose.x << " , " \
+       << sensor_connection->act_pose.y << " )";
     painter.drawText( 10, 10, ss.str().c_str() );
 
     ss.str( std::string() );

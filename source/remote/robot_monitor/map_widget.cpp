@@ -75,8 +75,8 @@ QPoint map_widget::convertToActFrame(double x_val, double y_val, QPaintEvent *ev
 
 void map_widget::drawRobotPose(QPainter *painter , QPaintEvent *event)
 {
-    QPoint Robot_Pose = this->convertToActFrame( sensor_connection->act_pose.x_pos,
-                                                 sensor_connection->act_pose.y_pos,
+    QPoint Robot_Pose = this->convertToActFrame( sensor_connection->act_pose.x,
+                                                 sensor_connection->act_pose.y,
                                                  event );
 
     painter->setPen( QPen( Qt::red, 5, Qt::SolidLine, Qt::RoundCap) );

@@ -20,7 +20,6 @@ Sensor_Connection::~Sensor_Connection()
     }
 }
 
-
 int Sensor_Connection::get_Pose()
 {
     uint16_t headder[3];
@@ -141,7 +140,6 @@ request_entry_t* Sensor_Connection::getEntryById( int id )
     return ret;
 }
 
-
 void Sensor_Connection::receiving_thread_funktion()
 {
     while( this->continue_server )
@@ -245,7 +243,7 @@ void Sensor_Connection::receiving_thread_funktion()
         switch( act_entry->todo_action )
         {
         case WRITE_POSE:
-            this->act_pose = *((Pose_t*) buffer);
+            this->act_pose = *((Position_t*) buffer);
             emit debugOutput( "GotPose: " + QString::number( this->act_pose.theta ) );
             this->parent->update();
             break;
@@ -344,13 +342,13 @@ void udp_connection::handle_connection(char *message, int message_lenght, udp_co
     switch(  act->todo_action )
     {
     case WRITE_POSE:
-        Pose_t recv_pose;
+        Position_t recv_pose;
 
-        memcpy( &recv_pose, (message + sizeof(headder)), sizeof( Pose_t ) );
+        memcpy( &recv_pose, (message + sizeof(headder)), sizeof( Position_t ) );
 
         this->connection->act_pose = recv_pose;
         break;
-    case PLOT1:
+    case PLOT1_IMU:
         IMU_Measurement imuMeas;
 
         memcpy( &imuMeas, (message + sizeof(headder)), sizeof( IMU_Measurement ) );
@@ -359,6 +357,12 @@ void udp_connection::handle_connection(char *message, int message_lenght, udp_co
         globalGraphHelper->GetNewIMUMeas( imuMeas );
 
         break;
+    case PLOT1_FILTERED_VALUES:
+        Status_tuple_t tuple;
+        memcpy( &tuple, (message + sizeof(headder)), sizeof( Status_tuple_t ) );
+        globalGraphHelper->GetNewFilteredMeas( tuple );
+        break;
+
     default:
         std::cout << "Got Action: " << act->todo_action << std::endl;
     }
@@ -422,5 +426,16 @@ int Sensor_Connection::init_UDP_Var( get_variable_enume_t _to_subscribe, action_
 
     return 0;
 
+
+}
+
+int Sensor_Connection::unsubscribe_UDP( get_variable_enume_t _to_subscribe  )
+{
+    std::cout << "Unsubscribe UDP: " << _to_subscribe << std::endl;
+
+    // Send the server to stop
+
+
+    // delete the request
 
 }

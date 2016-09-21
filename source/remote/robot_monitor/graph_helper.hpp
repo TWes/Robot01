@@ -7,11 +7,13 @@
 
 #include "Sensor_Connection.hpp"
 #include "sensor_protocol.hpp"
+#include "Sensor_structs.hpp"
 #include "GraphPlotter.h"
 
 class Sensor_Connection;
 
 extern Sensor_Connection *sensor_connection;
+
 
 class GraphHelper : public QWidget
 {
@@ -22,16 +24,19 @@ public:
     ~GraphHelper();
 
     void GetNewIMUMeas( IMU_Measurement _meas);
+    void GetNewFilteredMeas(  Status_tuple_t _meas);
 
 private:
     GraphPlotter *graphPlotter;
     QGridLayout *layout;
 
-    const float nmbOfBoxes = 9;
-    QCheckBox *checkBoxes[9];
-    bool boxValues[9] = {false};
+    const float nmbOfBoxes = 15;
+    QCheckBox *checkBoxes[15];
+    bool boxValues[15] = {false};
 
     int boxesThatNeedsIMU = 0;
+    int boxesThatNeedsFilteredValues = 0;
+
     double startTimestamp = 0.0;
 
 
