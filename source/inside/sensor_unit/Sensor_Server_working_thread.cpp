@@ -2,60 +2,90 @@
 
 void Sensor_Server::working_thread_function()
 {
+    act_status_tuple.linear_velocity[0] = 0.0;
+    act_status_tuple.linear_velocity[1] = 0.0;
+    act_status_tuple.linear_velocity[2] = 0.0;
+
+    act_status_tuple.angular_velocity[0] = 0.0;
+    act_status_tuple.angular_velocity[1] = 0.0;
+    act_status_tuple.angular_velocity[2] = 0.0;
+
     while( this->continue_server )
     {
 	const float wheel_distance = 0.1; // 10 cm
-	const float delay_time = 500000; // 0.5 s
+	const float delay_time = 10000; // 0.01 s
 
-	// Variables which contain the measurements
-	// of the wheel encoder
-        Wheel_Measurement act_wheel_meas;
         static Wheel_Measurement last_wheel_meas;
 
 	static IMU_Measurement last_imu_meas;
 
-	// The ADC Measurement
-	ADC_Measurement act_adc_measurment;
-		
+	/***************************
+	* Get all the measurements
+	***************************/
+	ADC_Measurement act_adc_measurment;		
 	adc_queue_mutex.lock();
 		act_adc_measurment = *(adc_values.begin());
 	adc_queue_mutex.unlock();
 
+	IMU_Measurement act_imu_meas;
+	IMU_queue_mutex.lock();
+            act_imu_meas = *(IMU_values.begin());
+	IMU_queue_mutex.unlock();
+
+	Wheel_Measurement act_wheel_meas;
+	Wheel_queue_mutex.lock();
+            act_wheel_meas = *(Wheel_values.begin());
+	Wheel_queue_mutex.unlock();
+
+
+	/***********************************
+	* Calgulate the batterie voltage
+	************************************/
 	/*std::cout << "ADC L: " << act_adc_measurment.ADC_low << std::endl;
 	std::cout << "ADC H: " << act_adc_measurment.ADC_high << std::endl;*/
+	act_status_tuple.BatteryLow = act_adc_measurment.ADC_low;
+	act_status_tuple.BatteryHigh = act_adc_measurment.ADC_high;
+
 
 	/***********************************
 	* Calgulate the orientation change 
 	* out of the magnetometer
 	************************************/
-	IMU_Measurement act_imu_meas;
-
-	IMU_queue_mutex.lock();
-            act_imu_meas = *(IMU_values.begin());
-	IMU_queue_mutex.unlock();
-
 	static float last_magn_orientation = -1.0;
-	float act_magn_orientation = calcMagnetometerOrientation( act_imu_meas.mag );
-	float magn_orientation_change = 0.0;
+        double magn_delta_t = time_difference( act_imu_meas.timestamp, last_imu_meas.timestamp) / 1000.0;
+	
+	double magnAngVelZ = 0.0;	
 
-	if( last_magn_orientation >= 0.0 )
+	if( magn_delta_t <= 0.0 || magn_delta_t > 1000 )
+	{}
+	else
 	{
-		magn_orientation_change = act_magn_orientation - last_magn_orientation;
+		float act_magn_orientation = calcMagnetometerOrientation( act_imu_meas.mag );
+		float magn_orientation_change = 0.0;
+
+		if( last_magn_orientation >= 0.0 )
+		{
+			magn_orientation_change = act_magn_orientation - last_magn_orientation;
 	
-		if( magn_orientation_change > M_PI)
-		{
-			magn_orientation_change = (2*M_PI) - magn_orientation_change;
-			magn_orientation_change *= -1.0;
+			if( magn_orientation_change > M_PI)
+			{
+				magn_orientation_change = (2*M_PI) - magn_orientation_change;
+				magn_orientation_change *= -1.0;
+			}
+			else if( magn_orientation_change < -M_PI )
+	 		{
+				magn_orientation_change = magn_orientation_change + (2*M_PI);
+			}
 		}
-		else if( magn_orientation_change < -M_PI )
-		{
-			magn_orientation_change = magn_orientation_change + (2*M_PI);
-		}
+
+		last_magn_orientation = act_magn_orientation;
+
+		magnAngVelZ = magn_orientation_change / magn_delta_t;
+
+		act_status_tuple.magnAngVelZ = magnAngVelZ;
 	}
-
-	last_magn_orientation = act_magn_orientation;
-
 	
+
 	/*****************************
          * Calculate the new Position out of
          * the steering commands
@@ -68,33 +98,28 @@ void Sensor_Server::working_thread_function()
 	//std::cout << (int) left_direction << " | " << (int) right_direction << std::endl;
 	//std::cout << predicted_left_velocity << " | " << predicted_right_velocity << std::endl;
 
-	float predicted_orientation_change = (predicted_left_velocity - predicted_right_velocity)/ wheel_distance;
+	float predictedAngVelZ = (predicted_left_velocity - predicted_right_velocity)/ wheel_distance;
+	float predictedLinVelX = 0.5 * (predicted_left_velocity * predicted_right_velocity) * sin( predictedAngVelZ );
+	float predictedLinVelY = 0.5 * (predicted_left_velocity * predicted_right_velocity) * cos( predictedAngVelZ );
 
+	act_status_tuple.predicdedAngVelZ = predictedAngVelZ;
+	act_status_tuple.predictedLineVelX = predictedLinVelX;
+	act_status_tuple.predictedLineVelY = predictedLinVelY;
 
 	//std::cout << "Theta: " << predicted_orientation_change << std::endl;
 	
-	act_status_tuple.angular_velocity[0] = 1.0;
-	act_status_tuple.angular_velocity[1] = 1.2;
-	act_status_tuple.angular_velocity[2] = 1.4;
-	act_status_tuple.linear_velocity[0] = -1.0;
-	act_status_tuple.linear_velocity[1] = -1.2;
-	act_status_tuple.linear_velocity[2] = -1.4;
-
+	
 	/*****************************
          * Calculate the new Position out of
          * the decoder
-         ****************************/	
-	Wheel_queue_mutex.lock();
-            act_wheel_meas = *(Wheel_values.begin());
-       Wheel_queue_mutex.unlock();
-
+         ****************************/
 	// Get Time Difference and convert it to seconds
         double delta_t = time_difference( act_wheel_meas.timestamp, last_wheel_meas.timestamp) / 1000.0;
 
 	// No new measurements
         if( delta_t == 0.0 )
         {
-	   std::cout << " Wheel delta_t = " << delta_t << std::endl;
+	   //std::cout << " Wheel delta_t = " << delta_t << std::endl;
         }
 	else
 	{
@@ -149,62 +174,61 @@ void Sensor_Server::working_thread_function()
 
 	/*****************************
          * Calculate the new Position out of
-         * the decoder
+         * the IMU
          ****************************/	
 	// Get Time Difference and convert it to seconds
         double imu_delta_t = time_difference( act_imu_meas.timestamp, last_imu_meas.timestamp) / 1000.0;
 
-	if( delta_t == 0.0 )
+	static float gyroBiasX = 4.9;
+	static float gyroBiasY = 3.01;
+	static float gyroBiasZ = -10.18;
+
+	static float accBiasX = -0.1;
+	static float accBiasY = 0.03;
+	static float accBiasZ = 1.13;
+
+	float gyroAngVelX, gyroAngVelY, gyroAngVelZ;
+	float accLineVelX, accLineVelY, accLineVelZ;
+
+	if( delta_t == 0.0 || delta_t > 1000 )
 	{
-		std::cout << " IMU delta_t = " <<imu_delta_t << std::endl;		
+		//std::cout << " IMU delta_t = " << imu_delta_t << std::endl;		
 	}
 	else
 	{
+		
+		gyroAngVelX = act_imu_meas.gyro[0] - gyroBiasX;
+		gyroAngVelY = act_imu_meas.gyro[1] - gyroBiasY;
+		gyroAngVelZ = act_imu_meas.gyro[2] - gyroBiasZ;
+		
 
-        double acceleration_IMU = act_imu_meas.acc[1]; // Beschleunigung in y- Richtung
-        
-	double rotation_IMU = act_imu_meas.gyro[2]; // rotation um die z- Achse
-
-	float velocity[2];
-	velocity[0] = act_imu_meas.acc[0] * imu_delta_t;
-	velocity[1] = act_imu_meas.acc[1] * imu_delta_t;
-
-	static double IMU_velocity;
-
-	IMU_velocity = velocity[0] * 0.4 + 0.6 * IMU_velocity;
-	
-	if( IMU_velocity < 0.01 ) 
-	{
-		IMU_velocity = 0.0;
+		accLineVelX = (act_imu_meas.acc[0] - accBiasX) * delta_t;
+		accLineVelY = (act_imu_meas.acc[1] - accBiasY) * delta_t;
+		accLineVelZ = (act_imu_meas.acc[2] - accBiasZ) * delta_t;
 	}
 
+	act_status_tuple.gyroAngVel[0] = gyroAngVelX;
+	act_status_tuple.gyroAngVel[1] = gyroAngVelY;
+	act_status_tuple.gyroAngVel[2] = gyroAngVelZ;
 
-	/*std::cout << "IMU_velocity" << IMU_velocity << std::endl;
-
-
-	std::cout << "x: " << act_imu_meas.acc[0] << std::endl;
-	std::cout << "y: " << act_imu_meas.acc[1] << std::endl;
-	std::cout << "z: " << act_imu_meas.acc[2] << std::endl; */
-
-
-	/*std::cout << "x: " << act_imu_meas.gyro[0] << std::endl;
-	std::cout << "y: " << act_imu_meas.gyro[1] << std::endl;
-	std::cout << "z: " << act_imu_meas.gyro[2] << std::endl; */
-
-
-	static float x_pos = 0.0;
-
-	x_pos += IMU_velocity * imu_delta_t;
-
-	//std::cout << "X Pos: " << x_pos << std::endl;
+	act_status_tuple.accLineVel[0] = accLineVelX;
+	act_status_tuple.accLineVel[1] = accLineVelY;
+	act_status_tuple.accLineVel[2] = accLineVelZ;
 
 	
+	/************************
+	* Combine all the values
+	*************************/
+	//Calculate the angular velocity from gyroscope
+	act_status_tuple.angular_velocity[0] = 0;
+	act_status_tuple.angular_velocity[1] = 0;
+	act_status_tuple.angular_velocity[2] = 0;
+		
 
-	/*std::cout << "IMU Velo: " << IMU_velocity << std::endl;
-	std::cout << "IMU Rotation: " << rotation_IMU << std::endl; */
-
-	}
-	
+	// Calculate the velocity out of accelerometer
+	act_status_tuple.linear_velocity[0] = 0;
+	act_status_tuple.linear_velocity[1] = 0;
+	act_status_tuple.linear_velocity[2] = 0;
 
         last_wheel_meas = act_wheel_meas;
 	last_imu_meas = act_imu_meas;

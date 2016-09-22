@@ -61,6 +61,18 @@ typedef struct
 
 typedef struct
 {
+    float BatteryLow;
+    float BatteryHigh;	
+
+    float magnAngVelZ;
+
+    float predicdedAngVelZ;
+    float predictedLineVelX;
+    float predictedLineVelY;
+
+    float gyroAngVel[3];
+    float accLineVel[3];
+
     float angular_velocity[3];
     float linear_velocity[3];
 

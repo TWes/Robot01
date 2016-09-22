@@ -766,7 +766,7 @@ void Sensor_Server::I2C_thread_funktion()
 		}
 		IMU_queue_mutex.unlock();
 				
-		usleep( 50000 );
+		usleep( 10000 );
 
 	} // End of while loop
 
