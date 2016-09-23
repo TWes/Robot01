@@ -15,16 +15,24 @@ GraphHelper::GraphHelper(GraphPlotter *plotter, QWidget *parent) : QWidget( pare
     checkBoxes[6] = new QCheckBox("MagnRawX", this);
     checkBoxes[7] = new QCheckBox("MagnRawY", this);
     checkBoxes[8] = new QCheckBox("MagnRawZ", this);
-    checkBoxes[9] = new QCheckBox("FiltLinVelX", this);
-    checkBoxes[10] = new QCheckBox("FiltLinVelY", this);
-    checkBoxes[11] = new QCheckBox("FiltLinVelZ", this);
-    checkBoxes[12] = new QCheckBox("FiltAngVelX", this);
-    checkBoxes[13] = new QCheckBox("FiltAngVelY", this);
-    checkBoxes[14] = new QCheckBox("FiltAngVelZ", this);
+    checkBoxes[9] = new QCheckBox("AccLinVelX", this);
+    checkBoxes[10] = new QCheckBox("AccLinVelY", this);
+    checkBoxes[11] = new QCheckBox("AccLinVelZ", this);
+    checkBoxes[12] = new QCheckBox("GyroAngVelX", this);
+    checkBoxes[13] = new QCheckBox("GyroAngVelY", this);
+    checkBoxes[14] = new QCheckBox("GyroAngVelZ", this);
+
+    checkBoxes[15] = new QCheckBox("BattLow", this);
+    checkBoxes[16] = new QCheckBox("BattHigh", this);
+    checkBoxes[17] = new QCheckBox("magnAngVelZ", this);
+
+    checkBoxes[18] = new QCheckBox("predicdedAngVelZ", this);
+    checkBoxes[19] = new QCheckBox("predictedLineVelX", this);
+    checkBoxes[20] = new QCheckBox("predictedLineVelY", this);
 
     for( int i = 0; i < nmbOfBoxes; i++ )
     {
-        layout->addWidget( checkBoxes[i], i % 3, (int) i/3 );
+        layout->addWidget( checkBoxes[i], i % 6, (int) i/6 );
 
         QObject::connect( checkBoxes[i], SIGNAL(toggled(bool)),
                           this, SLOT(CheckBoxesChanged()));
@@ -48,6 +56,12 @@ GraphHelper::GraphHelper(GraphPlotter *plotter, QWidget *parent) : QWidget( pare
     plotter->addGraph(1, Qt::darkYellow, Point, true); // 13
     plotter->addGraph(1, Qt::cyan, Point, true); // 14
     plotter->addGraph(1, Qt::yellow, Point, true); // 15
+    plotter->addGraph(1, Qt::red, Point, true); // 16
+    plotter->addGraph(1, Qt::blue, Point, true); // 17
+    plotter->addGraph(1, Qt::green, Point, true); // 18
+    plotter->addGraph(1, Qt::gray, Point, true); // 19
+    plotter->addGraph(1, Qt::darkCyan, Point, true); // 20
+    plotter->addGraph(1, Qt::darkMagenta, Point, true); // 21
 
     timeval time;
     gettimeofday( &time, NULL );
@@ -200,26 +214,51 @@ void GraphHelper::GetNewFilteredMeas(  Status_tuple_t _meas)
 
     if( boxValues[9] )
     {
-        graphPlotter->addPoint(10, QPointF( timestamb, _meas.linear_velocity[0]), true);
+        graphPlotter->addPoint(10, QPointF( timestamb, _meas.accLineVel[0]), true);
     }
     if( boxValues[10] )
     {
-        graphPlotter->addPoint(11, QPointF( timestamb, _meas.linear_velocity[1]), true);
+        graphPlotter->addPoint(11, QPointF( timestamb, _meas.accLineVel[1]), true);
     }
     if( boxValues[11] )
     {
-        graphPlotter->addPoint(12, QPointF( timestamb, _meas.linear_velocity[2]), true);
+        graphPlotter->addPoint(12, QPointF( timestamb, _meas.accLineVel[2]), true);
     }
     if( boxValues[12] )
     {
-        graphPlotter->addPoint(13, QPointF( timestamb, _meas.angular_velocity[0]), true);
+        graphPlotter->addPoint(13, QPointF( timestamb, _meas.gyroAngVel[0]), true);
     }
     if( boxValues[13] )
     {
-        graphPlotter->addPoint(14, QPointF( timestamb, _meas.angular_velocity[1]), true);
+        graphPlotter->addPoint(14, QPointF( timestamb, _meas.gyroAngVel[1]), true);
     }
     if( boxValues[14] )
     {
-        graphPlotter->addPoint(15, QPointF( timestamb, _meas.angular_velocity[2]), true);
+        graphPlotter->addPoint(15, QPointF( timestamb, _meas.gyroAngVel[2]), true);
+    }
+
+    if( boxValues[15] )
+    {
+        graphPlotter->addPoint(16, QPointF( timestamb, _meas.BatteryLow), true);
+    }
+    if( boxValues[16] )
+    {
+        graphPlotter->addPoint(17, QPointF( timestamb, _meas.BatteryHigh), true);
+    }
+    if( boxValues[17] )
+    {
+        graphPlotter->addPoint(18, QPointF( timestamb, _meas.magnAngVelZ), true);
+    }
+    if( boxValues[18] )
+    {
+        graphPlotter->addPoint(19, QPointF( timestamb, _meas.predicdedAngVelZ), true);
+    }
+    if( boxValues[19] )
+    {
+        graphPlotter->addPoint(20, QPointF( timestamb, _meas.predictedLineVelX), true);
+    }
+    if( boxValues[20] )
+    {
+        graphPlotter->addPoint(21, QPointF( timestamb, _meas.predictedLineVelY), true);
     }
 }

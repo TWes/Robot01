@@ -30,9 +30,9 @@ private:
     GraphPlotter *graphPlotter;
     QGridLayout *layout;
 
-    const float nmbOfBoxes = 15;
-    QCheckBox *checkBoxes[15];
-    bool boxValues[15] = {false};
+    const float nmbOfBoxes = 21;
+    QCheckBox *checkBoxes[21];
+    bool boxValues[21] = {false};
 
     int boxesThatNeedsIMU = 0;
     int boxesThatNeedsFilteredValues = 0;

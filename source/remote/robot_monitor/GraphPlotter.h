@@ -87,7 +87,6 @@ private:
     const float mouseWheelSkalePerDegree = 0.01;
     const float scalePerPixelMove = 0.0001;
 
-
     QLine actXAxis, actYAxis, axtZeroAxis;
     QRect actDrawRect;
 
@@ -96,6 +95,10 @@ private:
     QLine getXAxis(QRect _viewPort);
     QLine getZeroAxis();
     QRect getDrawRect( QRect _viewPort);
+
+    QPoint MousePosition;
+    void drawMousePos(QPainter &_painter);
+
 
     void drawLabels(QPainter &_painter );
     void drawPoints(QPainter &_painter);

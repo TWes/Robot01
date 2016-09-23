@@ -83,9 +83,12 @@ void GraphPlotter::paintEvent(QPaintEvent *event)
     painter.drawLine( actXAxis );
     painter.drawLine( getZeroAxis() );
 
+    drawMousePos( painter );
+
     drawLabels( painter );
 
     drawPoints( painter );
+
 
     painter.end();
 }
@@ -146,7 +149,6 @@ QLine GraphPlotter::getZeroAxis()
     return actXAxis;
 
 }
-
 
 QRect GraphPlotter::getDrawRect( QRect _viewPort)
 {
@@ -271,6 +273,20 @@ void GraphPlotter::drawPoints(QPainter &_painter)
 
 }
 
+void GraphPlotter::drawMousePos(QPainter &_painter)
+{
+    double xValOnPos = (MousePosition.x() - actDrawRect.x())/ (double) actDrawRect.width() ;
+    xValOnPos = ( xValOnPos * viewRect.w) + viewRect.x;
+    double yValOnPos = ((actDrawRect.height() - (MousePosition.y() - actDrawRect.y()))/ (double)actDrawRect.height());
+    yValOnPos = ( yValOnPos * viewRect.h) + viewRect.y;
+
+    // Draw the Mouse Position
+    QString mousePosLabel = "(" + QString::number( xValOnPos) + "|"
+            + QString::number( yValOnPos ) + ")";
+
+    _painter.drawText( actDrawRect.x() + 0.5 * actDrawRect.width(), 40, mousePosLabel  );
+}
+
 void GraphPlotter::wheelEvent(QWheelEvent *event)
 {
     float rotationDegree = 0.125 * event->delta();
@@ -303,6 +319,10 @@ void GraphPlotter::mousePressEvent(QMouseEvent *event)
         startViewPortDragPos = viewRect.topLeft();
 
         leftmousePressed = true;
+
+        MousePosition = event->pos();
+        this->update();
+
     }
 
     if( event->button() == Qt::RightButton )
@@ -361,9 +381,8 @@ void GraphPlotter::mouseMoveEvent(QMouseEvent *event)
         viewRect = RectF( viewRect.x, viewRect.y, viewRect.w / scaleChangeFactorX, viewRect.h/scaleChangeFactorY );
 
         this->update();
-
-
     }
+
 }
 
 void GraphPlotter::scrollToPoint( QPointF _pointToScrollTo )
