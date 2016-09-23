@@ -129,7 +129,7 @@ void GraphHelper::CheckBoxesChanged()
     }
 
     // We need to deal with the filtered
-    else if( changedBox >= 9 && changedBox < 15 )
+    else if( changedBox >= 9 && changedBox < 21 )
     {
         if( newState )
         {
