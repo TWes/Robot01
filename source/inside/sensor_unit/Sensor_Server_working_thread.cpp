@@ -90,17 +90,14 @@ void Sensor_Server::working_thread_function()
          * Calculate the new Position out of
          * the steering commands
          ****************************/	
-	const float predicted_velocity = 0.6;
+	const float predicted_velocity = 1.5;
 	
 	float predicted_left_velocity = this->left_direction * predicted_velocity;
-	float predicted_right_velocity = this->right_direction * predicted_velocity;
-
-	//std::cout << (int) left_direction << " | " << (int) right_direction << std::endl;
-	//std::cout << predicted_left_velocity << " | " << predicted_right_velocity << std::endl;
-
+	float predicted_right_velocity = this->right_direction * predicted_velocity;	
+	
 	float predictedAngVelZ = (predicted_left_velocity - predicted_right_velocity)/ wheel_distance;
-	float predictedLinVelX = 0.5 * (predicted_left_velocity * predicted_right_velocity) * sin( predictedAngVelZ );
-	float predictedLinVelY = 0.5 * (predicted_left_velocity * predicted_right_velocity) * cos( predictedAngVelZ );
+	float predictedLinVelY = 0.5 * (predicted_left_velocity + predicted_right_velocity) * sin( predictedAngVelZ );
+	float predictedLinVelX = 0.5 * (predicted_left_velocity + predicted_right_velocity) * cos( predictedAngVelZ );
 
 	act_status_tuple.predicdedAngVelZ = predictedAngVelZ;
 	act_status_tuple.predictedLineVelX = predictedLinVelX;
@@ -195,8 +192,7 @@ void Sensor_Server::working_thread_function()
 		//std::cout << " IMU delta_t = " << imu_delta_t << std::endl;		
 	}
 	else
-	{
-		
+	{		
 		gyroAngVelX = act_imu_meas.gyro[0] - gyroBiasX;
 		gyroAngVelY = act_imu_meas.gyro[1] - gyroBiasY;
 		gyroAngVelZ = act_imu_meas.gyro[2] - gyroBiasZ;
