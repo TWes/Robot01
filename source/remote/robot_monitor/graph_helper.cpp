@@ -40,6 +40,9 @@ GraphHelper::GraphHelper(GraphPlotter *plotter, QWidget *parent) : QWidget( pare
 
     this->setLayout( layout );
 
+    scrollOnNewValue = new QCheckBox("Scoll on new Value");
+    scrollOnNewValue->setChecked(true);
+    layout->addWidget( scrollOnNewValue, 7, 0 );
 
     plotter->addGraph(1, Qt::red, Point, true); // 1
     plotter->addGraph(1, Qt::blue, Point, true); // 2
@@ -84,6 +87,10 @@ GraphHelper::~GraphHelper()
         }
     }
 
+    if( scrollOnNewValue != NULL )
+    {
+        delete scrollOnNewValue;
+    }
 }
 
 void GraphHelper::CheckBoxesChanged()
@@ -157,6 +164,8 @@ void GraphHelper::CheckBoxesChanged()
 
 void GraphHelper::GetNewIMUMeas( IMU_Measurement _meas)
 {
+    bool renewOnValue = (scrollOnNewValue->checkState() >= 1);
+
     timeval time;
     gettimeofday( &time, NULL );
 
@@ -166,45 +175,47 @@ void GraphHelper::GetNewIMUMeas( IMU_Measurement _meas)
 
     if( boxValues[0] )
     {
-        graphPlotter->addPoint(1, QPointF( timestamb, _meas.gyro[0]), true);
+        graphPlotter->addPoint(1, QPointF( timestamb, _meas.gyro[0]), renewOnValue);
     }
     if( boxValues[1] )
     {
-        graphPlotter->addPoint(2, QPointF( timestamb, _meas.gyro[1]), true);
+        graphPlotter->addPoint(2, QPointF( timestamb, _meas.gyro[1]), renewOnValue);
     }
     if( boxValues[2] )
     {
-        graphPlotter->addPoint(3, QPointF( timestamb, _meas.gyro[2]), true);
+        graphPlotter->addPoint(3, QPointF( timestamb, _meas.gyro[2]), renewOnValue);
     }
     if( boxValues[3] )
     {
-        graphPlotter->addPoint(4, QPointF( timestamb, _meas.acc[0]), true);
+        graphPlotter->addPoint(4, QPointF( timestamb, _meas.acc[0]), renewOnValue);
     }
     if( boxValues[4] )
     {
-        graphPlotter->addPoint(5, QPointF( timestamb, _meas.acc[1]), true);
+        graphPlotter->addPoint(5, QPointF( timestamb, _meas.acc[1]), renewOnValue);
     }
     if( boxValues[5] )
     {
-        graphPlotter->addPoint(6, QPointF( timestamb, _meas.acc[2]), true);
+        graphPlotter->addPoint(6, QPointF( timestamb, _meas.acc[2]), renewOnValue);
     }
     if( boxValues[6] )
     {
-        graphPlotter->addPoint(7, QPointF( timestamb, _meas.mag.x_val), true);
+        graphPlotter->addPoint(7, QPointF( timestamb, _meas.mag.x_val), renewOnValue);
     }
     if( boxValues[7] )
     {
-        graphPlotter->addPoint(8, QPointF( timestamb, _meas.mag.y_val ), true);
+        graphPlotter->addPoint(8, QPointF( timestamb, _meas.mag.y_val ), renewOnValue);
     }
     if( boxValues[8] )
     {
-        graphPlotter->addPoint(9, QPointF( timestamb, _meas.mag.z_val ), true);
+        graphPlotter->addPoint(9, QPointF( timestamb, _meas.mag.z_val ), renewOnValue);
     }
 
 }
 
 void GraphHelper::GetNewFilteredMeas(  Status_tuple_t _meas)
 {
+    bool renewOnValue = (scrollOnNewValue->checkState() >= 1);
+
     timeval time;
     gettimeofday( &time, NULL );
 
@@ -214,51 +225,50 @@ void GraphHelper::GetNewFilteredMeas(  Status_tuple_t _meas)
 
     if( boxValues[9] )
     {
-        graphPlotter->addPoint(10, QPointF( timestamb, _meas.accLineVel[0]), true);
+        graphPlotter->addPoint(10, QPointF( timestamb, _meas.accLineVel[0]), renewOnValue);
     }
     if( boxValues[10] )
     {
-        graphPlotter->addPoint(11, QPointF( timestamb, _meas.accLineVel[1]), true);
+        graphPlotter->addPoint(11, QPointF( timestamb, _meas.accLineVel[1]), renewOnValue);
     }
     if( boxValues[11] )
     {
-        graphPlotter->addPoint(12, QPointF( timestamb, _meas.accLineVel[2]), true);
+        graphPlotter->addPoint(12, QPointF( timestamb, _meas.accLineVel[2]), renewOnValue);
     }
     if( boxValues[12] )
     {
-        graphPlotter->addPoint(13, QPointF( timestamb, _meas.gyroAngVel[0]), true);
+        graphPlotter->addPoint(13, QPointF( timestamb, _meas.gyroAngVel[0]), renewOnValue);
     }
     if( boxValues[13] )
     {
-        graphPlotter->addPoint(14, QPointF( timestamb, _meas.gyroAngVel[1]), true);
+        graphPlotter->addPoint(14, QPointF( timestamb, _meas.gyroAngVel[1]), renewOnValue);
     }
     if( boxValues[14] )
     {
-        graphPlotter->addPoint(15, QPointF( timestamb, _meas.gyroAngVel[2]), true);
+        graphPlotter->addPoint(15, QPointF( timestamb, _meas.gyroAngVel[2]), renewOnValue);
     }
-
     if( boxValues[15] )
     {
-        graphPlotter->addPoint(16, QPointF( timestamb, _meas.BatteryLow), true);
+        graphPlotter->addPoint(16, QPointF( timestamb, _meas.BatteryLow), renewOnValue);
     }
     if( boxValues[16] )
     {
-        graphPlotter->addPoint(17, QPointF( timestamb, _meas.BatteryHigh), true);
+        graphPlotter->addPoint(17, QPointF( timestamb, _meas.BatteryHigh), renewOnValue);
     }
     if( boxValues[17] )
     {
-        graphPlotter->addPoint(18, QPointF( timestamb, _meas.magnAngVelZ), true);
+        graphPlotter->addPoint(18, QPointF( timestamb, _meas.magnAngVelZ), renewOnValue);
     }
     if( boxValues[18] )
     {
-        graphPlotter->addPoint(19, QPointF( timestamb, _meas.predicdedAngVelZ), true);
+        graphPlotter->addPoint(19, QPointF( timestamb, _meas.predicdedAngVelZ), renewOnValue);
     }
     if( boxValues[19] )
     {
-        graphPlotter->addPoint(20, QPointF( timestamb, _meas.predictedLineVelX), true);
+        graphPlotter->addPoint(20, QPointF( timestamb, _meas.predictedLineVelX), renewOnValue);
     }
     if( boxValues[20] )
     {
-        graphPlotter->addPoint(21, QPointF( timestamb, _meas.predictedLineVelY), true);
+        graphPlotter->addPoint(21, QPointF( timestamb, _meas.predictedLineVelY), renewOnValue);
     }
 }

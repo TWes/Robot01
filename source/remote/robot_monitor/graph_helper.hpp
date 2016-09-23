@@ -34,6 +34,8 @@ private:
     QCheckBox *checkBoxes[21];
     bool boxValues[21] = {false};
 
+    QCheckBox *scrollOnNewValue;
+
     int boxesThatNeedsIMU = 0;
     int boxesThatNeedsFilteredValues = 0;
 
