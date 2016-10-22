@@ -2,7 +2,7 @@
 #define OUTPUT_BOX_HPP
 
 
-#include <QtGui>
+#include <QtWidgets>
 
 
 class output_box : public QTextEdit

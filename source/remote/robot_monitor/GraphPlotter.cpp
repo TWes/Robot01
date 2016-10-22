@@ -44,7 +44,13 @@ void GraphPlotter::addPoint(unsigned int graphIndex, QPointF _newPoint, bool scr
         qDebug() << "Tried to add Point to graph with Index: " << graphIndex;
     }
 
-    this->graphs.at( graphIndex).points.push_back( _newPoint );
+    // Segfault here
+    GraphStruct_t graph = this->graphs.at( graphIndex);
+    std::list<QPointF> &points = graph.points;
+    points.push_back( _newPoint );
+
+
+    //this->graphs.at( graphIndex).points.push_back( _newPoint );
 
 
     if( scrollTonewPoint )
@@ -91,6 +97,7 @@ void GraphPlotter::paintEvent(QPaintEvent *event)
 
 
     painter.end();
+
 }
 
 void GraphPlotter::addGraph( int _size, QColor _color, enum PointTypeEnum _type, bool _connectPoints )
@@ -270,6 +277,7 @@ void GraphPlotter::drawPoints(QPainter &_painter)
             firstPoint = false;
         }
     }
+
 
 }
 

@@ -1,7 +1,7 @@
 #ifndef GRAPHPLOTTER_H
 #define GRAPHPLOTTER_H
 
-#include <QtGui>
+#include <QtWidgets>
 #include <QPainter>
 #include <QPaintEvent>
 #include <QDebug>

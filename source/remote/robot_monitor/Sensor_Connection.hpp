@@ -1,9 +1,10 @@
 #ifndef SENSOR_CONNECTION_HPP
 #define SENSOR_CONNECTION_HPP
 
+#include <QtWidgets>
 #include <string>
 #include <thread>
-#include <QtGui>
+//#include <QtGui>
 
 #include "socket_inet.hpp"
 #include "Sensor_structs.hpp"

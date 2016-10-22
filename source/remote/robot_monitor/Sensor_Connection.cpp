@@ -190,7 +190,7 @@ void Sensor_Connection::receiving_thread_funktion()
             continue;
         }
         // If the socket is readable, but could not read
-        // anithing, the server is down
+        // anything, the server is down
         else if( ret == 0 )
         {
             emit debugOutput( "Server is down" );
@@ -248,6 +248,8 @@ void Sensor_Connection::receiving_thread_funktion()
             this->parent->update();
             break;
         default:
+
+
             break;
         }
 

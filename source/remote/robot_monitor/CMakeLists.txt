@@ -1,6 +1,7 @@
 project( robot_monitor )
 
-find_package(Qt4 REQUIRED QtGui QtCore)
+#find_package(Qt5 REQUIRED QtGui QtCore)
+find_package( Qt5Widgets )
 
 set( EXECUTABLE_OUTPUT_PATH ${PROJECT_BUILD_DIR} )
 
@@ -8,7 +9,10 @@ set( EXECUTABLE_OUTPUT_PATH ${PROJECT_BUILD_DIR} )
 # Set the include Path
 set( ROBOT_MONITOR_INCLUDE_DIRS 
 	.
+	${Qt5Widgets_INCLUDE_DIRS}
 )
+
+add_definitions(${Qt5Widgets_DEFINITIONS})
 
 include_directories( ${ROBOT_MONITOR_INCLUDE_DIRS} )
 
@@ -26,6 +30,6 @@ set( ROBOT_MONITOR_FILES
 )
 
 add_executable( robot_monitor ${ROBOT_MONITOR_FILES} )
-target_link_libraries(robot_monitor Qt4::QtGui Qt4::QtCore socket_inet protocol_headers inet_udp)
+target_link_libraries(robot_monitor Qt5::Widgets socket_inet protocol_headers inet_udp)
 
 install (TARGETS robot_monitor DESTINATION ${BINARY_INSTALL_DIR} )

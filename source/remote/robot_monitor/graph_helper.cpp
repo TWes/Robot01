@@ -79,11 +79,12 @@ GraphHelper::~GraphHelper()
         delete layout;
     }
 
-    for( int i = 0; i <= nmbOfBoxes; i++ )
+    for( int i = 0; i < nmbOfBoxes; i++ )
     {
         if( checkBoxes[i] != NULL )
         {
             delete checkBoxes[i];
+            checkBoxes[i] = NULL;
         }
     }
 
@@ -164,6 +165,7 @@ void GraphHelper::CheckBoxesChanged()
 
 void GraphHelper::GetNewIMUMeas( IMU_Measurement _meas)
 {
+
     bool renewOnValue = (scrollOnNewValue->checkState() >= 1);
 
     timeval time;
@@ -209,11 +211,11 @@ void GraphHelper::GetNewIMUMeas( IMU_Measurement _meas)
     {
         graphPlotter->addPoint(9, QPointF( timestamb, _meas.mag.z_val ), renewOnValue);
     }
-
 }
 
 void GraphHelper::GetNewFilteredMeas(  Status_tuple_t _meas)
 {
+
     bool renewOnValue = (scrollOnNewValue->checkState() >= 1);
 
     timeval time;
@@ -271,4 +273,5 @@ void GraphHelper::GetNewFilteredMeas(  Status_tuple_t _meas)
     {
         graphPlotter->addPoint(21, QPointF( timestamb, _meas.predictedLineVelY), renewOnValue);
     }
+
 }

@@ -1,4 +1,4 @@
-#include <QtGui>
+#include <QtWidgets>
 #include <iostream>
 
 #include "main_window.hpp"
