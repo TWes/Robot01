@@ -1,5 +1,5 @@
-#ifndef SOCKET_INET_HPP
-#define SOCKET_INET_HPP
+#ifndef TCP_SOCKET_HPP
+#define TCP_SOCKET_HPP
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,11 +23,13 @@
 
 #include <errno.h>
 
-class socket_inet
+namespace tcp {
+
+class Socket
 {
 public:
-    socket_inet( std::string socket_address, int port);
-    ~socket_inet();
+    Socket( std::string socket_address, int port);
+    ~Socket();
 
     int start_connection();
     void shutdown_connection();
@@ -44,5 +46,8 @@ public:
     struct sockaddr_in name;
 
 };
+
+
+}
 
 #endif

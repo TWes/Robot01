@@ -27,7 +27,7 @@ public:
     QGridLayout *layout;
 
     map_widget *MapWidget;
-    status_widget *StatusWidget;
+    status_widget *StatusWidget = NULL;
     output_box *debug_output;
     GraphHelper *graphHelper;
     GraphPlotter *graph_plotter;

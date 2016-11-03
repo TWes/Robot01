@@ -165,6 +165,9 @@ void GraphHelper::CheckBoxesChanged()
 
 void GraphHelper::GetNewIMUMeas( IMU_Measurement _meas)
 {
+    static int test = 0;
+    qDebug() << "New IMU: " << test++;
+
 
     bool renewOnValue = (scrollOnNewValue->checkState() >= 1);
 

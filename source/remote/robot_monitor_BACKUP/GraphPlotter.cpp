@@ -45,21 +45,21 @@ void GraphPlotter::addPoint(unsigned int graphIndex, QPointF _newPoint, bool scr
     }
 
     // Segfault here
-    GraphStruct_t graph = this->graphs.at( graphIndex);
-    std::list<QPointF> &points = graph.points;
+    GraphStruct_t &graph = this->graphs.at( graphIndex);
+    std::list<QPointF> &points = graph.points;    
     points.push_back( _newPoint );
 
-
-    //this->graphs.at( graphIndex).points.push_back( _newPoint );
-
+    while( points.size() > graph.maxPoints )
+    {
+        points.pop_front();
+    }
 
     if( scrollTonewPoint )
     {
         this->scrollToPoint( _newPoint );
     }
 
-    this->update();
-
+   this->update();
 }
 
 void GraphPlotter::clear()

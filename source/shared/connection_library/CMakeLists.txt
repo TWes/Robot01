@@ -14,7 +14,7 @@ include_directories( ${LIB_INCLUDE_DIRS} )
 #Set the include files
 set( LIB_INCLUDE_FILES
 	server_inet.hpp
-	socket_inet.hpp
+	tcp_socket.hpp
 	udp_connection_inet.hpp
 	connection_library.hpp
 )
@@ -39,7 +39,7 @@ target_include_directories( server_inet PUBLIC ${LIB_INCLUDE_DIRS} )
 #########################
 
 set( SOCKET_INET_FILES
-	socket_inet.cpp
+	tcp_socket.cpp
 )
 
 add_library( socket_inet ${SOCKET_INET_FILES} )

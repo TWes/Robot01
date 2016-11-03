@@ -13,7 +13,7 @@
 #include <string>
 
 #include "server_inet.hpp"
-#include "socket_inet.hpp"
+#include "tcp_socket.hpp"
 
 #include "Steering.hpp"
 
@@ -29,7 +29,7 @@ public:
 
 	Steering steer;
 
-    socket_inet *sensor_server_connection;
+    tcp::Socket *sensor_server_connection;
     void boroadcast_direction_change(uint32_t left_wheel, uint32_t right_wheel);
 
 	void setup();
@@ -96,7 +96,7 @@ void gpio_Server::boroadcast_direction_change(uint32_t left_wheel, uint32_t righ
 
 gpio_Server::gpio_Server(int port) : Server_inet( port )
 {
-    this->sensor_server_connection = new socket_inet(std::string("127.0.0.1"), 2553 );
+    this->sensor_server_connection = new tcp::Socket(std::string("127.0.0.1"), 2553 );
 }
 
 gpio_Server::~gpio_Server()

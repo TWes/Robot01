@@ -1,18 +1,19 @@
-#include "socket_inet.hpp"
+#include "tcp_socket.hpp"
 
+namespace tcp {
 
-socket_inet::socket_inet(std::string socket_address, int port)
+Socket::Socket(std::string socket_address, int port)
 {
     this->Socket_address = socket_address;
     this->port_nr = port;
 }
 
-socket_inet::~socket_inet()
+Socket::~Socket()
 {
 
 }
 
-int socket_inet::start_connection()
+int Socket::start_connection()
 {
     // Create a socket
     this->socket_fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -42,13 +43,13 @@ int socket_inet::start_connection()
     return 0;
 }
 
-void socket_inet::shutdown_connection()
+void Socket::shutdown_connection()
 {
     close( this->socket_fd );
     this->is_connected == false;
 }
 
-int socket_inet::sendData(char *buffer, int length)
+int Socket::sendData(char *buffer, int length)
 {
     if( !this->is_connected ) return 0;
 
@@ -69,7 +70,7 @@ int socket_inet::sendData(char *buffer, int length)
     return ret;
 }
 
-int socket_inet::readData(char *buffer, int length)
+int Socket::readData(char *buffer, int length)
 {
     if( !this->is_connected ) return 0;
 
@@ -82,4 +83,6 @@ int socket_inet::readData(char *buffer, int length)
     }
 
     return ret;
+}
+
 }
