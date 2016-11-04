@@ -33,7 +33,7 @@ typedef struct{
     float next_sending_time;                    /// The next time a message has to be send
     float sending_interval;                     /// The intervall between to sendings
     uint32_t sending_object;                    /// what should be send
-    udp_connection_information_t client_info;   /// client connection info
+    udp::connection_information_t client_info;   /// client connection info
     int seq_number;                             /// id of subscription
 
 } UDP_subscriber_entry_t;
@@ -115,7 +115,7 @@ private:
 
 	struct sockaddr_in getSocketAdressByFh( int fh );
 
-	udp_connection_inet udp_connection;
+    udp::Socket udp_connection;
 	std::vector<UDP_subscriber_entry_t> UDP_subscriber;
 	std::thread *udp_sending_thread;
 	void udp_sending_function();

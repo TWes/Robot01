@@ -1,12 +1,20 @@
 #include "udp_connection_inet.hpp"
 
-udp_connection_inet::udp_connection_inet()
+namespace udp {
+
+/**
+ * @brief udp_connection_inet::udp_connection_inet Standard Constructor
+ */
+Socket::Socket()
 {
     this->polling_thread = NULL;
     this->continue_thread = false;
 }
 
-udp_connection_inet::~udp_connection_inet()
+/**
+ * @brief udp_connection_inet::~udp_connection_inet Standard Deconstructor
+ */
+Socket::~Socket()
 {
     if( this->polling_thread != NULL )
     {
@@ -14,7 +22,12 @@ udp_connection_inet::~udp_connection_inet()
     }
 }
 
-int udp_connection_inet::createSocket(int portNr)
+/**
+ * @brief udp_connection_inet::createSocket Create a Socket on a free port.
+ * @param portNr The desired port number.
+ * @return Negative error number when Socket creation failed.
+ */
+int Socket::createSocket(int portNr)
 {
     this->socket_fh = socket( AF_INET, SOCK_DGRAM, 0 );
     if( this->socket_fh < 0 )
@@ -36,7 +49,13 @@ int udp_connection_inet::createSocket(int portNr)
     }
 }
 
-int udp_connection_inet::createSocket(int portNr, udp_connection_information_t &port_info)
+/**
+ * @brief udp_connection_inet::createSocket Create a Socket on a free port.
+ * @param portNr The desired port number.
+ * @param port_info Output parameter with the port information.
+ * @return Negative error number when Socket creation failed.
+ */
+int Socket::createSocket(int portNr, connection_information_t &port_info)
 {
     this->socket_fh = socket( AF_INET, SOCK_DGRAM, 0 );
     if( this->socket_fh < 0 )
@@ -73,7 +92,20 @@ int udp_connection_inet::createSocket(int portNr, udp_connection_information_t &
     return 0;
 }
 
-void udp_connection_inet::start_reveiving()
+/**
+ * @brief udp_connection_inet::createSocket Create a Socket on a free port.
+ * @param port_info Output parameter with the port information.
+ * @return Negative error number when Socket creation failed.
+ */
+int Socket::createSocket( connection_information_t &port_info )
+{
+    return this->createSocket(0, port_info);
+}
+
+/**
+ * @brief udp_connection_inet::start_reveiving Starts a thread which receives automaticly.
+ */
+void Socket::start_reveiving()
 {
     if( this->polling_thread != NULL )
     {
@@ -81,10 +113,13 @@ void udp_connection_inet::start_reveiving()
     }
 
     this->continue_thread = true;
-    this->polling_thread = new std::thread( &udp_connection_inet::polling_function, this);
+    this->polling_thread = new std::thread( &Socket::polling_function, this);
 }
 
-void udp_connection_inet::end_receiving()
+/**
+ * @brief udp_connection_inet::end_receiving Ends the automatic receiving.
+ */
+void Socket::end_receiving()
 {
     this->continue_thread = false;
 
@@ -96,14 +131,27 @@ void udp_connection_inet::end_receiving()
     }
 }
 
-void udp_connection_inet::setup() {}
+/**
+ * @brief udp_connection_inet::setup Virtual function which is called before the first handle_connection() call
+ */
+void Socket::setup() {}
 
-void udp_connection_inet::cleanup() {}
+/**
+ * @brief udp_connection_inet::cleanup Virtual function which is called when the receiving thread is ended.
+ */
+void Socket::cleanup() {}
 
-void udp_connection_inet::handle_connection( char* message, int message_lenght,
-                                udp_connection_information_t other ) {}
+/**
+ * @brief udp_connection_inet::handle_connection Virtual function which is called ethery time a message is received.
+ * @param message The raw conntent of the message
+ * @param message_lenght The lenght of the message
+ * @param other Connection information of the communication partner.
+ */
+void Socket::handle_connection( char* message, int message_lenght,
+                                connection_information_t other ) {}
 
-void udp_connection_inet::polling_function()
+
+void Socket::polling_function()
 {
     this->setup();
 
@@ -140,7 +188,7 @@ void udp_connection_inet::polling_function()
         int rec_ret = recvfrom( this->socket_fh, buffer, udp_max_buffer_size,
                                 0, (struct sockaddr*)  &client_info, &client_info_len );
 
-        udp_connection_information_t client_info_for_function;
+        connection_information_t client_info_for_function;
         client_info_for_function.adress = client_info.sin_addr;
         client_info_for_function.port_nr = ntohs(client_info.sin_port);
 
@@ -150,8 +198,15 @@ void udp_connection_inet::polling_function()
     this->cleanup();
 }
 
-int udp_connection_inet::send(const char *message, int message_lenght,
-                               udp_connection_information_t receiver)
+/**
+ * @brief udp_connection_inet::send Sends a message to the receiver.
+ * @param message The raw message.
+ * @param message_lenght The length of the raw message.
+ * @param receiver The receiver.
+ * @return Number of byted realy send.
+ */
+int Socket::send(const char *message, int message_lenght,
+                               connection_information_t receiver)
 {
     struct sockaddr_in receiver_address;
     receiver_address.sin_family = AF_INET;
@@ -165,7 +220,13 @@ int udp_connection_inet::send(const char *message, int message_lenght,
     return send_ret;
 }
 
-int udp_connection_inet::receive( char* buffer, int buffer_size )
+/**
+ * @brief udp_connection_inet::receive Try to read something from the socket.
+ * @param buffer Buffer to write the received bytes to.
+ * @param buffer_size Maximum lenghth of the buffer.
+ * @return The number of bytes realy read.
+ */
+int Socket::receive( char* buffer, int buffer_size )
 {
     struct sockaddr_in client_info;
     socklen_t client_info_len = sizeof( client_info );
@@ -176,8 +237,15 @@ int udp_connection_inet::receive( char* buffer, int buffer_size )
     return rec_ret;
 }
 
-int udp_connection_inet::receive( char* buffer, int buffer_size,
-                                  udp_connection_information_t &sender )
+/**
+ * @brief udp_connection_inet::receive Try to read something from the socket.
+ * @param buffer Buffer to write the received bytes to.
+ * @param buffer_size Maximum lenghth of the buffer.
+ * @param sender Output Parameter: Sender information.
+ * @return The number of bytes realy read.
+ */
+int Socket::receive( char* buffer, int buffer_size,
+                                  connection_information_t &sender )
 {
     struct sockaddr_in client_info;
     socklen_t client_info_len = sizeof( client_info );
@@ -191,12 +259,4 @@ int udp_connection_inet::receive( char* buffer, int buffer_size,
     return rec_ret;
 }
 
-
-udp_connection_information::udp_connection_information(char *ip, int port)
-{
-    inet_aton( ip, &this->adress );
-
-    this->port_nr = port;
 }
-
-udp_connection_information::udp_connection_information() {}

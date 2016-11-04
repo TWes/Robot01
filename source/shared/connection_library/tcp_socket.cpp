@@ -2,6 +2,13 @@
 
 namespace tcp {
 
+Socket::Socket()
+{
+    this->Socket_address = "";
+    this->port_nr = -1;
+}
+
+
 Socket::Socket(std::string socket_address, int port)
 {
     this->Socket_address = socket_address;
@@ -41,6 +48,14 @@ int Socket::start_connection()
     }
 
     return 0;
+}
+
+int Socket::start_connection( std::string socket_address, int port)
+{
+    this->Socket_address = socket_address;
+    this->port_nr = port;
+
+    return this->start_connection();
 }
 
 void Socket::shutdown_connection()

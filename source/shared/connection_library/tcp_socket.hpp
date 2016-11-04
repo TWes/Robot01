@@ -28,10 +28,14 @@ namespace tcp {
 class Socket
 {
 public:
-    Socket( std::string socket_address, int port);
+
+    Socket();
+    Socket( std::string socket_address, int port );
     ~Socket();
 
+
     int start_connection();
+    int start_connection( std::string socket_address, int port);
     void shutdown_connection();
 
     int sendData( char *buffer, int length );
@@ -46,7 +50,6 @@ public:
     struct sockaddr_in name;
 
 };
-
 
 }
 
