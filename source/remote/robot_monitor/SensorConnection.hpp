@@ -1,16 +1,27 @@
 #ifndef SENSORCONNECTION_HPP
 #define SENSORCONNECTION_HPP
 
+#include <memory>
+
 #include "tcp_socket.hpp"
 #include "udp_connection_inet.hpp"
 
-class SensorConnection
+/**
+ * @brief The SensorConnection class
+ * A Singelton class which provides the sensor connection.
+ */
+class SensorConnection : protected tcp::Socket, protected udp::Socket
 {
 public:
+    static SensorConnection *getInstance();
+
+    int setupTCPConnection( std::string targetIP, int targetPort );
+
+private:
     SensorConnection();
     ~SensorConnection();
 
-    void setupTCPConnection( std::string targetIP, int targetPort );
+    static SensorConnection *instance;
 
 };
 
