@@ -38,11 +38,11 @@ SensorConnection *SensorConnection::getInstance()
  * @param targetPort The port
  * @return Error Value
  */
-int SensorConnection::setupTCPConnection( std::string targetIP, int targetPort )
+int SensorConnection::setupTCPConnection(std::string targetIP, int targetPort , int timeoutMS)
 {
     if( !this->tcp::Socket::is_connected )
     {
-        return tcp::Socket::start_connection( targetIP, targetPort );
+        return tcp::Socket::start_connection_with_timeout( targetIP, targetPort, timeoutMS );
     }
 
     return 0;

@@ -22,6 +22,7 @@ set( ROBOT_MONITOR_FILES
 	main.cpp
 	MainWindow.cpp
 	SensorConnection.cpp
+	DialogWindows.cpp
 )
 
 add_executable( robot_monitor ${ROBOT_MONITOR_FILES} )

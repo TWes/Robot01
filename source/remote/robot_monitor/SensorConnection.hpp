@@ -15,7 +15,7 @@ class SensorConnection : protected tcp::Socket, protected udp::Socket
 public:
     static SensorConnection *getInstance();
 
-    int setupTCPConnection( std::string targetIP, int targetPort );
+    int setupTCPConnection( std::string targetIP, int targetPort, int timeoutMS );
 
 private:
     SensorConnection();

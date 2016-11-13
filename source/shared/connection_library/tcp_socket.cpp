@@ -58,6 +58,77 @@ int Socket::start_connection( std::string socket_address, int port)
     return this->start_connection();
 }
 
+int Socket::start_connection_with_timeout(int timeout_ms)
+{
+    // Create a socket
+    this->socket_fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if( this->socket_fd < 0)
+    {
+        //printf("Failed to create socket\n");
+        return -2;
+    }
+
+    // Set socket nonblocking
+    long arg = fcntl(this->socket_fd, F_GETFL, NULL);
+    arg |= O_NONBLOCK;
+    fcntl(this->socket_fd, F_SETFL, arg);
+
+    sockaddr_in address_struct;
+    address_struct.sin_family = AF_INET;
+    address_struct.sin_addr.s_addr = inet_addr( this->Socket_address.c_str() );
+    address_struct.sin_port = htons( this->port_nr );
+
+    int ret = connect( this->socket_fd, (struct sockaddr *) &address_struct, sizeof(address_struct) );
+    if( ret < 0 )
+    {
+        switch( errno )
+        {
+        case EINPROGRESS:
+        {
+            struct timeval timeoutStruct;
+            timeoutStruct.tv_sec = timeout_ms / 1000;
+            timeoutStruct.tv_usec = timeout_ms - (timeoutStruct.tv_sec*1000);
+
+            fd_set socketHandles;
+            FD_ZERO(&socketHandles);
+            FD_SET(this->socket_fd, &socketHandles );
+
+            int selectRet = select(this->socket_fd+1, NULL, &socketHandles, NULL, &timeoutStruct);
+
+            if ( selectRet < 0 )
+            {
+                    std::cout << "Fehler bei Connection select: " << strerror(errno) << std::endl;
+                return -errno;
+            }
+            // No descriptor available => no connection
+            else if ( selectRet == 0 )
+            {
+                throw Timeout("Timeout while connecting to target.");
+            }
+
+        } break;
+
+        default:
+
+            std::cout << "Return of connect: " << ret << ": "
+                        << strerror(errno) << "(" << errno << ")" << std::endl;
+            break;
+        }
+    }
+
+    this->is_connected = true;
+    return 0;
+}
+
+int Socket::start_connection_with_timeout( std::string socket_address, int port, int timeout_ms)
+{
+    this->Socket_address = socket_address;
+    this->port_nr = port;
+
+    return this->start_connection_with_timeout( timeout_ms );
+}
+
+
 void Socket::shutdown_connection()
 {
     close( this->socket_fd );

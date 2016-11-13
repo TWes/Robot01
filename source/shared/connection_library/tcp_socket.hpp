@@ -13,13 +13,14 @@
 #include <netinet/in.h>
 #include <sys/time.h>
 #include <sys/types.h>
-
+#include <fcntl.h>
 
 #include <iostream>
 #include <vector>
 #include <thread>
 #include <mutex>
 #include <string>
+#include <exception>
 
 #include <errno.h>
 
@@ -36,6 +37,9 @@ public:
 
     int start_connection();
     int start_connection( std::string socket_address, int port);
+    int start_connection_with_timeout(int timeout_ms);
+    int start_connection_with_timeout( std::string socket_address, int port, int timeout_ms);
+
     void shutdown_connection();
 
     int sendData( char *buffer, int length );
@@ -50,6 +54,20 @@ public:
     struct sockaddr_in name;
 
 };
+
+class exceptionMessage : public std::exception
+{
+private:
+    const char* message;
+public:
+    exceptionMessage( const char* msg ) : std::exception(), message( msg ) {}
+
+    virtual const char* what() const throw()
+    { return message;  }
+};
+
+class Timeout : public exceptionMessage
+{ public: Timeout(const char* msg) : exceptionMessage(msg) {} };
 
 }
 
