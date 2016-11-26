@@ -44,7 +44,7 @@ void OpenConnectionDialog::acceptButtonClicked()
     if( OpenConnectionDialog::checkIfValidIP(ipString) )
     {
         // setup connection
-        std::cout << "Input: \"" << ipString.toStdString() << "\" is valid." << std::endl;
+        //std::cout << "Input: \"" << ipString.toStdString() << "\" is valid." << std::endl;
 
         // split the input
         QStringList splitetInput = ipString.split( ":", QString::SkipEmptyParts );
@@ -59,6 +59,8 @@ void OpenConnectionDialog::acceptButtonClicked()
         {
             std::cout << exc.what() << std::endl;
         }
+
+        std::cout << "Connected to : " << ipString.toStdString() << std::endl;
     }
     else
     {
