@@ -315,8 +315,8 @@ void Sensor_Server::udp_sending_function()
 		// get actual time in ms
 		struct timeval act_time_struct;
 		gettimeofday( &act_time_struct, NULL);
-		float act_time = act_time_struct.tv_sec * 1000 + 
-				act_time_struct.tv_usec / 1000;		
+		float act_time = act_time_struct.tv_sec * 1000.0 + 
+				act_time_struct.tv_usec / 1000.0;		
 
 		//std::cout << "udp sending: " << act_time << std::endl;
 
@@ -683,7 +683,7 @@ void Sensor_Server::I2C_thread_funktion()
 
 			/*std::cout 	<< "x: " << (gyro_values[0] * 8.75)/1000.0 << "\n"
 					<< "y: " << (gyro_values[1] * 8.75)/1000.0 << "\n"
-					<< "z: " << (gyro_values[2] * 8.75)/1000.0 << std::endl;*/
+					<< "z: " << (gyro_values[2] * 8.75)/1000.0 << std::endl; */
 
 			
 			IMU_meas.gyro[0] = (gyro_values[0] * 8.75)/1000.0;

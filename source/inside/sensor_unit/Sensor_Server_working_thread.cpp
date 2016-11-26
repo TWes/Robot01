@@ -65,7 +65,7 @@ void Sensor_Server::working_thread_function()
 
 		if( last_magn_orientation >= 0.0 )
 		{
-			magn_orientation_change = act_magn_orientation - last_magn_orientation;
+			magn_orientation_change = last_magn_orientation - act_magn_orientation;
 	
 			if( magn_orientation_change > M_PI)
 			{
