@@ -231,7 +231,7 @@ void Sensor_Server::handle_connection( int client_handle )
 		std::cout << "Client: " << std::string(inet_ntoa( adress.sin_addr )) << " and port " << data[1]
 		<< " im intervall von " << data[2] << "ms; should send: " << data[0] << std::endl;
 		
-		udp_connection_information_t client( inet_ntoa( adress.sin_addr ),
+        udp::connection_information_t client( inet_ntoa( adress.sin_addr ),
 				 (int) data[1] );
 
 

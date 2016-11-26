@@ -8,36 +8,44 @@
 #include <thread>
 #include <iostream>
 
-typedef struct udp_connection_information
+namespace udp
 {
-    udp_connection_information();
-    udp_connection_information( char *ip, int port);
+
+typedef struct connection_information
+{
+    connection_information() {}
+    connection_information( char *ip, int port)
+    {
+        inet_aton( ip, &this->adress );
+        this->port_nr = port;
+    }
 
     struct in_addr adress;
     int port_nr;
 
-} udp_connection_information_t;
+} connection_information_t;
 
 
-class udp_connection_inet
+class Socket
 {
 public:
-    udp_connection_inet();
-    ~udp_connection_inet();
+    Socket();
+    ~Socket();
 
     int createSocket( int portNr );
-    int createSocket( int portNr, udp_connection_information_t &port_info );
+    int createSocket( int portNr, connection_information_t &port_info );
+    int createSocket( connection_information_t &port_info );
 
     void start_reveiving();
     void end_receiving();
 
     int receive( char* buffer, int buffer_size );
-    int receive( char* buffer, int buffer_size, udp_connection_information_t &sender );
-    int send( const char* message, int message_lenght, udp_connection_information_t receiver);
+    int receive( char* buffer, int buffer_size, connection_information_t &sender );
+    int send( const char* message, int message_lenght, connection_information_t receiver);
 
     virtual void setup();
     virtual void handle_connection( char* message, int message_lenght,
-                                    udp_connection_information_t other );
+                                    connection_information_t other );
     virtual void cleanup();
 
 private:
@@ -49,4 +57,5 @@ private:
 
 };
 
+}
 #endif

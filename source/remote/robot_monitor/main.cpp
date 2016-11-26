@@ -1,23 +1,12 @@
 #include <QtWidgets>
-#include <iostream>
 
-#include "main_window.hpp"
-
-
-Sensor_Connection *sensor_connection = NULL;
-
+#include "MainWindow.hpp"
 
 int main( int argc, char** argv )
 {
-    if( argc != 2 )
-    {
-        std::cout << "Wrong number of Parameters. Usage <ip>." << std::endl;
-        return -1;
-    }
+    QApplication app( argc, argv );
 
-    QApplication app(argc, argv);
-
-    main_window window;
+    MainWindow window( 0 );
 
     window.show();
 

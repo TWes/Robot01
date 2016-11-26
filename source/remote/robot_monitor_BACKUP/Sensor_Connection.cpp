@@ -279,8 +279,6 @@ void Sensor_Connection::polling_thread_funktion()
 
             emit debugOutput( "Connection established" );
 
-            this->init_UDP_Pose();
-
             state = CONNECTION_ESTABLISHED;
         }
 
@@ -332,9 +330,11 @@ void udp_connection::handle_connection(char *message, int message_lenght, udp_co
     {
         memcpy( headder, message, sizeof(headder) );
 
-        /*std::cout << "h(0): " << headder[0] << "\n"
-                  << "h(1): " << headder[1] << "\n"
-                  << "h(2): " << headder[2] << std::endl; */
+        /*static int test = 0;
+        std::cout   << test++ << " ---------------------\n"
+                    << "h(0): " << headder[0] << "\n"
+                    << "h(1): " << headder[1] << "\n"
+                    << "h(2): " << headder[2] << std::endl; */
     }
     else
     { return; }    

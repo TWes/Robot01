@@ -46,7 +46,9 @@ struct GraphStruct_t
         : size(_size), color(_color), type(_type), connect(_connectPoints) {}
 
     std::list<QPointF> points;
-    int size;
+    int maxPoints = 1000;
+
+    int size;// size of dots
     QColor color;
     enum PointTypeEnum type;
     bool connect;

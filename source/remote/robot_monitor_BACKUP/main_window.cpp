@@ -18,8 +18,8 @@ main_window::main_window()
     layout->addWidget( this->MapWidget, 0, 1, 2, 1 );
     */
 
-    this->StatusWidget = new status_widget( this );
-    layout->addWidget( this->StatusWidget, 2, 0, 1, 1 );
+    /*this->StatusWidget = new status_widget( this );
+    layout->addWidget( this->StatusWidget, 2, 0, 1, 1 ); */
 
     /*this->debug_output = new output_box( this );
     layout->addWidget( this->debug_output, 1, 0, 1, 1 );
@@ -32,6 +32,7 @@ main_window::main_window()
     this->graphHelper = new GraphHelper( this->graph_plotter, this );
     globalGraphHelper = this->graphHelper;
     layout->addWidget( this->graphHelper, 0,0,1,1);
+
 
     this->centralWidget->setLayout( layout );
     this->setCentralWidget( this->centralWidget );

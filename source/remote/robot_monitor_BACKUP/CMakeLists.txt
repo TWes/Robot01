@@ -20,9 +20,13 @@ set(CMAKE_AUTOMOC ON)
 
 set( ROBOT_MONITOR_FILES
 	main.cpp
-	MainWindow.cpp
-	SensorConnection.cpp
-	DialogWindows.cpp
+	main_window.cpp
+	map_widget.cpp
+	Sensor_Connection.cpp
+	status_widget.cpp
+	output_box.cpp
+	GraphPlotter.cpp
+	graph_helper.cpp
 )
 
 add_executable( robot_monitor ${ROBOT_MONITOR_FILES} )

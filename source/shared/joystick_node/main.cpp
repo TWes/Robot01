@@ -11,8 +11,10 @@
 
 #include <fcntl.h>
 
-#include "socket_inet.hpp"
+#include "tcp_socket.hpp"
 #include "gpio_protocol.hpp"
+
+using namespace tcp;
 
 bool end_program = false;
 
@@ -55,7 +57,7 @@ int main( int argc, char** argv )
 
     std::string joystick_name = argv[3];
 
-    socket_inet GPIO_socket( std::string( argv[1]), atoi( argv[2]));
+    Socket GPIO_socket( std::string( argv[1]), atoi( argv[2]));
 
     //open joystick
     int joystick_handle = open( joystick_name.c_str(), O_RDONLY | O_NONBLOCK );
