@@ -18,6 +18,10 @@ set( CMAKE_CXX_FLAGS
 	" -std=gnu++11 -g -pedantic-errors "	
 )
 
+if( NOT NO_QT5 )
+	# Message
+endif( NOT NO_QT5 )
+
 ##########################
 ## Build shared targets ##
 ##########################
@@ -71,9 +75,12 @@ add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/inside/sensor_unit
 ## Build remote targets ##
 ##########################
 # Build the Robot Monitor
-add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/remote/robot_monitor
-	${CMAKE_CURRENT_SOURCE_DIR}/source/remote/robot_monitor
-)
+
+if( NOT NO_QT5 )
+	add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../source/remote/robot_monitor
+		${CMAKE_CURRENT_SOURCE_DIR}/source/remote/robot_monitor
+	)
+endif( NOT NO_QT5 )
 
 ###########################
 ## Build helper programs ##
