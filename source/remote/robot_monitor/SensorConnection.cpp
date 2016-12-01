@@ -6,7 +6,7 @@ SensorConnection *SensorConnection::instance = 0;
 /**
  * @brief SensorConnection::SensorConnection Standard Constructor
  */
-SensorConnection::SensorConnection()
+SensorConnection::SensorConnection() : udp::Socket(), tcp::Socket()
 {
     actID = 0;
 }
@@ -74,47 +74,48 @@ int SensorConnection::shutdownTCPConnection()
  * @param id Return parameter of the id
  * @return Error Param
  */
-int SensorConnection::init_UDP_Var(get_variable_enume_t _to_subscribe, void (*action)(char *, int), int sending_interval, int &id)
+int SensorConnection::init_UDP_Var(get_variable_enume_t _to_subscribe, std::function<void(char*,int)> _action, int sending_interval, int &id)
 {
-    // Check if udp socket is active
 
-    /* if( this->udp_socket == NULL )
+    std::cout << "Init UDP: " << _to_subscribe << std::endl;
+
+    // Check if udp socketis active
+     if( !this->udp::Socket::isSocketActive() )
     {
-        udp_connection_information_t socket_info;
-        this->udp_socket = new udp_connection( this );
-
-        this->udp_socket->createSocket( 0, socket_info );
+        udp::connection_information_t socket_info;
+        udp::Socket::createSocket( socket_info );
         udp_socket_information = socket_info;
 
-        this->udp_socket->start_reveiving();
-    }
-
-    uint16_t headder[3];
+        udp::Socket::start_reveiving();
+     }
 
     request_entry_t new_entry;
 
-    new_entry.id = this->actual_id++;
-    new_entry.stream = true;
-    gettimeofday( &new_entry.timestamp, NULL );
-    new_entry.time_lo_live.tv_sec = 3;
-    new_entry.time_lo_live.tv_usec = 0;
-    new_entry.todo_action = _todo;
+    new_entry.id = this->actID++;
+    new_entry.repeated = true;
+    new_entry.action = _action;
+    new_entry.timestamp = std::chrono::steady_clock::now();
+    new_entry.time_lo_live = std::chrono::seconds(1);
 
-    headder[0] = SUBSCRIBE_UDP;
-    headder[1] = 3 * sizeof( uint32_t );
-    headder[2] = new_entry.id;
 
-    // receive the pose
-    uint32_t data[3];
-    data[0] = _to_subscribe;
-    data[1] = udp_socket_information.port_nr;
-    data[2] = sending_interval; // intervall in ms
+    MessageBuilder message;
+    message     << MessageHeadder( SUBSCRIBE_UDP, new_entry.id )
+                << (uint32_t) _to_subscribe
+                << (uint32_t) udp_socket_information.port_nr
+                << (uint32_t) sending_interval;
 
-    char message[ 3*sizeof(uint16_t) + 3 * sizeof(uint32_t ) ];
+    int ret = tcp::Socket::sendData( message.getData(), message.getLength() );
 
-    memcpy( message, headder, 3*sizeof(uint16_t) );
-    memcpy( (message + 3*sizeof(uint16_t) ), data, 3 * sizeof( uint32_t ) );
+    if( ret < 0 )
+          return -1;
 
+    openRequestMutex.lock();
+        this->openRequests.push_back( new_entry );
+    openRequestMutex.unlock();
+
+    return 0;
+
+    /*
     open_requests_mutex.lock();
         this->open_requests.push_back( new_entry );
     open_requests_mutex.unlock();
@@ -138,5 +139,6 @@ int SensorConnection::init_UDP_Var(get_variable_enume_t _to_subscribe, void (*ac
  */
 int SensorConnection::unsubscribe_UDP(int id)
 {
-
+    std::cout << "Unsubscribe UDP id: " << id << std::endl;
+    return -1;
 }

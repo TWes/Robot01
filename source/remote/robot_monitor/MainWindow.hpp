@@ -7,6 +7,8 @@
 #include <iostream>
 
 #include "DialogWindows.hpp"
+#include "GraphContainer.hpp"
+
 
 class MainWindow : public QMainWindow
 {
@@ -18,18 +20,24 @@ public:
 
 private slots:
     void openConnectionWindow();
+    void closeWindow();
 
 private:
     QLabel *testLabel = 0;
-
+    GraphContainer *graphContainer;
 
     // Actions
     void createActions();
     QAction *openConnectionWindowAction;
+    QAction *closeWindowAction;
 
     // Menues
     void createMenu();
     QMenu *connectionMenu;
+    QMenu *mainMenu;
+
+
+    void closeEvent(QCloseEvent *event);
 
 };
 

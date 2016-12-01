@@ -21,6 +21,13 @@ set( LIB_INCLUDE_FILES
 
 install (FILES ${LIB_INCLUDE_FILES} DESTINATION ${LIB_INSTALL_DIR})
 
+set( CONNECTION_LIB_FILES
+	connection_library.cpp
+)
+add_library( connection_library ${CONNECTION_LIB_FILES} )
+install (TARGETS connection_library DESTINATION ${LIB_INSTALL_DIR} )
+target_include_directories( connection_library PUBLIC ${LIB_INCLUDE_DIRS} )
+
 #########################
 ## Server Inet Library ##
 #########################

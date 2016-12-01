@@ -23,9 +23,10 @@ set( ROBOT_MONITOR_FILES
 	MainWindow.cpp
 	SensorConnection.cpp
 	DialogWindows.cpp
+	GraphContainer.cpp
 )
 
 add_executable( robot_monitor ${ROBOT_MONITOR_FILES} )
-target_link_libraries(robot_monitor Qt5::Widgets socket_inet protocol_headers inet_udp)
+target_link_libraries(robot_monitor Qt5::Widgets socket_inet connection_library protocol_headers inet_udp)
 
 install (TARGETS robot_monitor DESTINATION ${BINARY_INSTALL_DIR} )

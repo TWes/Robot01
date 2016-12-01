@@ -2,42 +2,46 @@
 #define SENSORCONNECTION_HPP
 
 #include <memory>
+#include <functional>
+#include <chrono>
+#include <mutex>
 
 #include "tcp_socket.hpp"
 #include "udp_connection_inet.hpp"
 #include "sensor_protocol.hpp"
+#include "connection_library.hpp"
 
-
-typedef struct {
+struct request_entry_t{
     int id;
     bool repeated;
-    void (*action)(char*, int);
-    timeval timestamp;
-    timeval time_lo_live;
-} request_entry_t;
+    std::function<void(char*,int)> action;
+    std::chrono::steady_clock::time_point timestamp;
+    std::chrono::seconds time_lo_live;
+};
 
 
 /**
  * @brief The SensorConnection class
  * A Singelton class which provides the sensor connection.
  */
-class SensorConnection : protected tcp::Socket, protected udp::Socket
+class SensorConnection : private tcp::Socket, private udp::Socket
 {
 public:
     static SensorConnection *getInstance();
 
     // Request
     int actID;
-    std::vector<request_entry_t> open_requests;
-    request_entry_t getEntryById( int id );
-
+    std::vector<struct request_entry_t> openRequests;
+    std::mutex openRequestMutex;
+    struct request_entry_t getEntryById( int id );
 
     // TCP related
     int setupTCPConnection( std::string targetIP, int targetPort, int timeoutMS );
     int shutdownTCPConnection();
 
     // UDP related
-    int init_UDP_Var( get_variable_enume_t _to_subscribe , void (*action)(char*, int), int sending_interval, int &id );
+    udp::connection_information_t udp_socket_information;
+    int init_UDP_Var( get_variable_enume_t _to_subscribe , std::function<void(char*,int)>, int sending_interval, int &id );
     int unsubscribe_UDP( int id );
 
 
