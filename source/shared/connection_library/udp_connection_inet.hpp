@@ -35,6 +35,8 @@ public:
     int createSocket( int portNr );
     int createSocket( int portNr, connection_information_t &port_info );
     int createSocket( connection_information_t &port_info );
+    bool isSocketActive();
+
 
     void start_reveiving();
     void end_receiving();

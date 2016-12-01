@@ -9,6 +9,8 @@ Socket::Socket()
 {
     this->polling_thread = NULL;
     this->continue_thread = false;
+
+    this->socket_fh = -1;
 }
 
 /**
@@ -100,6 +102,12 @@ int Socket::createSocket(int portNr, connection_information_t &port_info)
 int Socket::createSocket( connection_information_t &port_info )
 {
     return this->createSocket(0, port_info);
+}
+
+
+bool Socket::isSocketActive()
+{
+    return (this->socket_fh != -1);
 }
 
 /**
