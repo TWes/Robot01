@@ -23,10 +23,10 @@ Socket::~Socket()
 int Socket::start_connection()
 {
     // Create a socket
+
     this->socket_fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
     if( this->socket_fd < 0)
     {
-        //printf("Failed to create socket\n");
         return -2;
     }
 
@@ -64,8 +64,7 @@ int Socket::start_connection_with_timeout(int timeout_ms)
     this->socket_fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
     if( this->socket_fd < 0)
     {
-        //printf("Failed to create socket\n");
-        return -2;
+        throw connectionError(errno);
     }
 
     // Set socket nonblocking
@@ -79,6 +78,8 @@ int Socket::start_connection_with_timeout(int timeout_ms)
     address_struct.sin_port = htons( this->port_nr );
 
     int ret = connect( this->socket_fd, (struct sockaddr *) &address_struct, sizeof(address_struct) );
+    //std::cout << "connect returned: " << ret << "err: " << errno <<  std::endl;
+
     if( ret < 0 )
     {
         switch( errno )
@@ -95,10 +96,11 @@ int Socket::start_connection_with_timeout(int timeout_ms)
 
             int selectRet = select(this->socket_fd+1, NULL, &socketHandles, NULL, &timeoutStruct);
 
+            //std::cout << "selectRet: " << selectRet << " err: " << errno << std::endl;
+
             if ( selectRet < 0 )
             {
-                    std::cout << "Fehler bei Connection select: " << strerror(errno) << std::endl;
-                return -errno;
+                    throw connectionError(errno);
             }
             // No descriptor available => no connection
             else if ( selectRet == 0 )
@@ -109,14 +111,13 @@ int Socket::start_connection_with_timeout(int timeout_ms)
         } break;
 
         default:
-
-            std::cout << "Return of connect: " << ret << ": "
-                        << strerror(errno) << "(" << errno << ")" << std::endl;
+            throw connectionError( errno );
             break;
         }
     }
 
     this->is_connected = true;
+
     return 0;
 }
 
@@ -141,17 +142,21 @@ int Socket::sendData(char *buffer, int length)
 
     int ret = send( this->socket_fd, buffer, length, MSG_NOSIGNAL );
 
-    if( ret < 0 )
+    if( ret <= 0 )
     {
        // std::cout << "Fehler beim Schreiben in der Verbindung: "
          //                   << errno << std::endl;
 
         // Connection has been lost
-        if( ret == 32 )
+        if( errno == 32 )
         {
             this->is_connected = false;
         }
-    }
+        else
+        {
+            throw connectionError( errno );
+        }
+    }   
 
     return ret;
 }

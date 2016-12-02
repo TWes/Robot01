@@ -5,6 +5,8 @@
 #include <functional>
 #include <chrono>
 #include <mutex>
+#include <vector>
+#include <algorithm>
 
 #include "tcp_socket.hpp"
 #include "udp_connection_inet.hpp"
@@ -33,7 +35,7 @@ public:
     int actID;
     std::vector<struct request_entry_t> openRequests;
     std::mutex openRequestMutex;
-    struct request_entry_t getEntryById( int id );
+    std::vector<request_entry_t> getEntryById( int id );
 
     // TCP related
     int setupTCPConnection( std::string targetIP, int targetPort, int timeoutMS );
@@ -43,7 +45,8 @@ public:
     udp::connection_information_t udp_socket_information;
     int init_UDP_Var( get_variable_enume_t _to_subscribe , std::function<void(char*,int)>, int sending_interval, int &id );
     int unsubscribe_UDP( int id );
-
+    void handle_connection( char* message, int message_lenght,
+                                    udp::connection_information_t other );
 
 
 

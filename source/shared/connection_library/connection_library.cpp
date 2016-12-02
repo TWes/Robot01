@@ -15,6 +15,19 @@ MessageBuilder::~MessageBuilder()
     }
 }
 
+std::string MessageBuilder::getHexString()
+{
+
+    std::stringstream ss;
+
+    for( int i = 0; i < this->len; i++ )
+    {
+       ss << "[" << "0x" << std::hex << +this->message[i] << "]";
+    }
+
+    return ss.str();
+}
+
 MessageBuilder& MessageBuilder::operator<<( MessageHeadder data )
 {
     int newLength = this->len + data.getLength();

@@ -135,6 +135,7 @@ void GraphContainer::toogleItemsChecked(std::string toToggle)
             //std::cout << "Subscribe UDP: " << service << std::endl;
             SensorConnection::getInstance()->init_UDP_Var( service, functionService[service], 1000, id );
             subscriptionId[service] = id;
+            //std::cout << "Subscribe: " << service << "; id: " << id << std::endl;
         }
     }
     else
@@ -143,7 +144,7 @@ void GraphContainer::toogleItemsChecked(std::string toToggle)
 
         if( subscriptionCounter[service] <= 0 )
         {
-            std::cout << "Unsubscribe UDP: " << service << std::endl;
+            //std::cout << "Unsubscribe UDP: " << service << std::endl;
             SensorConnection::getInstance()->unsubscribe_UDP( subscriptionId[service] );
         }
     }
@@ -153,12 +154,12 @@ void GraphContainer::toogleItemsChecked(std::string toToggle)
 
 void GraphContainer::getRawIMUValues(char* message, int length )
 {
-    std::cout << "Get Status Values" << std::endl;
+    std::cout << "Get Raw Values: " << length << ";" << sizeof(IMU_Measurement) << std::endl;
 }
 
 void GraphContainer::getStatusValues(char* message, int length )
 {
-    std::cout << "Get Status Values" << std::endl;
+    //std::cout << "Get Status Values: " << length << "; " << sizeof(Status_tuple_t) << std::endl;
 }
 
 GraphContainer::~GraphContainer()

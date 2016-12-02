@@ -3,7 +3,7 @@
 
 OpenConnectionDialog::OpenConnectionDialog(QWidget *parent) : QDialog(parent)
 {
-    input = new QLineEdit("192.123.2.13:200", this);
+    input = new QLineEdit("192.168.2.102:2553", this);
     cancelButton = new QPushButton( "Cancel", this);
     acceptButton = new QPushButton( "Connect", this);
 
@@ -54,13 +54,13 @@ void OpenConnectionDialog::acceptButtonClicked()
 
         try{
             SensorConnection::getInstance()->setupTCPConnection( targetIP, targetPort, 5000 );
+            std::cout << "Connected to : " << ipString.toStdString() << std::endl;
         }
         catch( tcp::Timeout &exc )
         {
             std::cout << exc.what() << std::endl;
         }
 
-        std::cout << "Connected to : " << ipString.toStdString() << std::endl;
     }
     else
     {

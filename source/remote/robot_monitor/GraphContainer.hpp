@@ -9,6 +9,7 @@
 #include <QtWidgets>
 
 #include "SensorConnection.hpp"
+#include "Sensor_structs.hpp"
 
 class GraphContainer : public QWidget
 {

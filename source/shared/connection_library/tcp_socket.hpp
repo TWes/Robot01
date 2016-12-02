@@ -21,10 +21,29 @@
 #include <mutex>
 #include <string>
 #include <exception>
+#include <sstream>
 
 #include <errno.h>
+#include <string.h>
 
 namespace tcp {
+
+class connectionError : std::exception
+{
+public:
+    connectionError( int _errornumber) : errornumber(_errornumber) { }
+    const char* what()
+    {
+        std::stringstream ss;
+        ss << "Error sending: " << strerror( this->errornumber );
+        return ss.str().c_str();
+    }
+    int getErrorNumber() { return this->errornumber; }
+
+private:
+    int errornumber;
+};
+
 
 class Socket
 {

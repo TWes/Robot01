@@ -2,6 +2,8 @@
 #define CONNECTION_LIBRARY_HPP
 
 #include <iostream>
+#include <string>
+#include <sstream>
 
 #include <stdint.h>
 #include <string.h>
@@ -20,14 +22,14 @@ public:
 class MessageHeadder : public MessageData
 {
 public:
-    MessageHeadder( uint16_t type, uint16_t _id )
-    { data[0] = type; data[1] = 3*sizeof(uint16_t); data[3] = _id; }
+    MessageHeadder( int16_t type, int16_t content_size, int16_t _id )
+    { data[0] = type; data[1] = content_size; data[2] = _id;}
 
-    int getLength() { return 3 * sizeof(uint16_t); }
+    int getLength() { return 3 * sizeof(int16_t); }
     char* getData() { return  (char*) data; }
 
 private:
-    uint16_t data[3];
+    int16_t data[3];
 };
 
 
@@ -46,6 +48,8 @@ public:
 
     int getLength() { return len; }
     char* getData() { return  message; }
+
+    std::string getHexString();
 
 private:
     char* message = 0;
