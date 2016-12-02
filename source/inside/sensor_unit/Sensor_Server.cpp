@@ -126,7 +126,7 @@ void Sensor_Server::cleanup()
 void Sensor_Server::handle_connection( int client_handle )
 {
 	int16_t headder[3];
-	
+
 	int ret = read( client_handle, headder, 3*sizeof(int16_t) );
 	if( ret <= 0 )
 	{
@@ -134,8 +134,8 @@ void Sensor_Server::handle_connection( int client_handle )
 		return;
 	}
 
-	/*std::cout << "Headder: " << headder[0] << " size: " 
-		<< headder[1] << " id: " << headder[2] << std::endl;*/
+	std::cout << "Headder: " << headder[0] << " size: " 
+		<< headder[1] << " id: " << headder[2] << std::endl;
 
 	if( headder[0] == SET_VARIABLE )
     	{
@@ -247,6 +247,9 @@ void Sensor_Server::handle_connection( int client_handle )
 
     else
     {
+	std::cout << "Headder: " << headder[0] << " size: " 
+		<< headder[1] << " id: " << headder[2] << std::endl;
+
         // Nethertheless read the bytes
         uint8_t data[100];
 
@@ -361,11 +364,11 @@ void Sensor_Server::udp_sending_function()
 					IMU_queue_mutex.unlock();
 
 					
-                			answer_header[1] = sizeof( act_imu_meas );
+                			answer_header[1] = sizeof( IMU_Measurement );
 		
-		                        char message[ 3*sizeof(uint16_t) + sizeof(act_imu_meas) ];
+		                        char message[ 3*sizeof(uint16_t) + sizeof(IMU_Measurement) ];
 					memcpy( message, answer_header, 3*sizeof(uint16_t) );
-			                memcpy( (message + 3*sizeof(uint16_t) ), &act_imu_meas, sizeof( act_imu_meas ) );
+			                memcpy( (message + 3*sizeof(uint16_t) ), &act_imu_meas, sizeof( IMU_Measurement ) );
 
 					this->udp_connection.send( message, sizeof(message),
 								entry.client_info);
