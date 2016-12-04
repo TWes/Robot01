@@ -244,6 +244,10 @@ void Sensor_Server::handle_connection( int client_handle )
 
 		this->UDP_subscriber.push_back(new_entry);		
 	}
+	else if( headder[0] == 6 )
+	{
+		std::cout << "Unsubscribe UDP" << std::endl;
+	}
 
     else
     {
@@ -366,6 +370,12 @@ void Sensor_Server::udp_sending_function()
 					
                 			answer_header[1] = sizeof( IMU_Measurement );
 		
+
+					std::cout << "Total size: " <<  sizeof( IMU_Measurement ) << std::endl;
+					std::cout << "sizeof time point: " << sizeof(std::chrono::system_clock::time_point) << std::endl;
+
+
+
 		                        char message[ 3*sizeof(uint16_t) + sizeof(IMU_Measurement) ];
 					memcpy( message, answer_header, 3*sizeof(uint16_t) );
 			                memcpy( (message + 3*sizeof(uint16_t) ), &act_imu_meas, sizeof( IMU_Measurement ) );
@@ -458,7 +468,7 @@ void Sensor_Server::CAM_thread_funktion()
 			
 			resize( image.image, image.image, cv::Size( 250, 187 )  );
 
-			gettimeofday( &image.timestamp,NULL);
+			image.timestamp = std::chrono::system_clock::now();
 
 			cam_queue_mutex.lock();
 				cam_images.push( image );
@@ -492,8 +502,8 @@ void Sensor_Server::I2C_thread_funktion()
 	while( this->continue_server )
 	{
 
-		struct timeval act_time;
-		gettimeofday( &act_time, NULL);
+		std::chrono::system_clock::time_point act_time;
+		act_time = std::chrono::system_clock::now();
 
 
 		/****************************

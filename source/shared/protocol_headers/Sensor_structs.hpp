@@ -1,6 +1,7 @@
 #ifndef SENSOR_STRUCT_HPP
 #define SENSOR_STRUCT_HPP
 
+#include <chrono>
 #include <opencv2/imgproc/imgproc.hpp>
 
 /** One measurement from the CAM  */
@@ -8,7 +9,7 @@ typedef struct
 {
     cv::Mat image; /// The image taken in this measurement
 	
-    struct timeval timestamp; /// Timestamp
+    std::chrono::system_clock::time_point timestamp; /// Timestamp
 
 } CAM_image;
 
@@ -19,7 +20,7 @@ typedef struct
     float ADC_low;  /// The measurement of half the batteries
     float ADC_high; /// The measurement of the whole batterie pack
 
-    struct timeval timestamp; /// Timestamp
+    std::chrono::system_clock::time_point timestamp; /// Timestamp
 
 } ADC_Measurement;
 
@@ -42,7 +43,7 @@ typedef struct
     magnetometer_val_t mag; /// The magnetometer masurement
 	float temp;
 
-    struct timeval timestamp; /// timestamp
+    std::chrono::system_clock::time_point timestamp; /// timestamp
 
 } IMU_Measurement;
 
@@ -54,7 +55,7 @@ typedef struct
 	float FrontLeft;
 	float BackLeft;
 
-	struct timeval timestamp;
+	std::chrono::system_clock::time_point timestamp;
 
 } Sonar_Measurement;
 
@@ -84,7 +85,7 @@ typedef struct
     int Right_Wheel_Rotations;
     int Left_Wheel_Rotations;
 
-    struct timeval timestamp;
+    std::chrono::system_clock::time_point timestamp;
 
 } Wheel_Measurement;
 

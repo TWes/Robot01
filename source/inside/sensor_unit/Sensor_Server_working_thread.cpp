@@ -52,8 +52,10 @@ void Sensor_Server::working_thread_function()
 	* out of the magnetometer
 	************************************/
 	static float last_magn_orientation = -1.0;
-        double magn_delta_t = time_difference( act_imu_meas.timestamp, last_imu_meas.timestamp) / 1000.0;
-	
+        //double magn_delta_t = time_difference( act_imu_meas.timestamp, last_imu_meas.timestamp) / 1000.0;
+	std::chrono::microseconds tmp_time_diff = std::chrono::duration_cast<std::chrono::microseconds>(act_imu_meas.timestamp - last_imu_meas.timestamp);
+	double magn_delta_t = tmp_time_diff.count();
+
 	double magnAngVelZ = 0.0;	
 
 	if( magn_delta_t <= 0.0 || magn_delta_t > 1000 )
@@ -111,7 +113,10 @@ void Sensor_Server::working_thread_function()
          * the decoder
          ****************************/
 	// Get Time Difference and convert it to seconds
-        double delta_t = time_difference( act_wheel_meas.timestamp, last_wheel_meas.timestamp) / 1000.0;
+	//double delta_t = time_difference( act_wheel_meas.timestamp, last_wheel_meas.timestamp) / 1000.0;
+	std::chrono::microseconds tmp_wheel_time_diff = std::chrono::duration_cast<std::chrono::microseconds>(act_wheel_meas.timestamp - last_wheel_meas.timestamp);
+	double delta_t = tmp_wheel_time_diff.count();
+	
 
 	// No new measurements
         if( delta_t == 0.0 )
@@ -174,7 +179,9 @@ void Sensor_Server::working_thread_function()
          * the IMU
          ****************************/	
 	// Get Time Difference and convert it to seconds
-        double imu_delta_t = time_difference( act_imu_meas.timestamp, last_imu_meas.timestamp) / 1000.0;
+        //double imu_delta_t = time_difference( act_imu_meas.timestamp, last_imu_meas.timestamp) / 1000.0;
+	std::chrono::microseconds tmp_imu_time_diff = std::chrono::duration_cast<std::chrono::microseconds>(act_imu_meas.timestamp - last_imu_meas.timestamp);
+	double imu_delta_t = tmp_imu_time_diff.count();
 
 	static float gyroBiasX = 4.9;
 	static float gyroBiasY = 3.01;
