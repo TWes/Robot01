@@ -12,6 +12,12 @@ GraphContainer::GraphContainer(QWidget *parent) : QWidget( parent )
 
     layout->addWidget( comboBox );
 
+
+    this->plotter = new GraphPlotter(this);
+    layout->addWidget( this->plotter);
+    createGraphs();
+
+
     setLayout( layout );
 }
 
@@ -80,8 +86,6 @@ QComboBox* GraphContainer::createComboBox()
     subscriptionCounter[GET_RAW_IMU_VALUES] = 0;
     subscriptionCounter[GET_FILTERED_IMU_VALUES] = 0;
 
-
-
     return tmp;
 }
 
@@ -148,18 +152,82 @@ void GraphContainer::toogleItemsChecked(std::string toToggle)
             SensorConnection::getInstance()->unsubscribe_UDP( subscriptionId[service] );
         }
     }
-
-
 }
+
+void GraphContainer::createGraphs()
+{
+    plotter->addGraph(1, Qt::red, PointTypeEnum::Point, true);
+    graphMap["GyroRawX"] = 1;
+    plotter->addGraph(1, Qt::red, PointTypeEnum::Point, true);
+    graphMap["GyroRawY"] = 2;
+    plotter->addGraph(1, Qt::red, PointTypeEnum::Point, true);
+    graphMap["GyroRawZ"] = 3;
+
+    plotter->addGraph(1, Qt::red, PointTypeEnum::Point, true);
+    graphMap["AccRawX"] = 4;
+    plotter->addGraph(1, Qt::red, PointTypeEnum::Point, true);
+    graphMap["AccRawY"] = 5;
+    plotter->addGraph(1, Qt::red, PointTypeEnum::Point, true);
+    graphMap["AccRawZ"] = 6;
+
+    plotter->addGraph(1, Qt::red, PointTypeEnum::Point, true);
+    graphMap["MagnRawX"] = 7;
+    plotter->addGraph(1, Qt::red, PointTypeEnum::Point, true);
+    graphMap["MagnRawY"] = 8;
+    plotter->addGraph(1, Qt::red, PointTypeEnum::Point, true);
+    graphMap["MagnRawZ"] = 9;
+
+    plotter->addGraph(1, Qt::blue, PointTypeEnum::Point, true);
+    graphMap["AccLinVelX"] = 10;
+    plotter->addGraph(1, Qt::blue, PointTypeEnum::Point, true);
+    graphMap["AccLinVelY"] = 11;
+    plotter->addGraph(1, Qt::blue, PointTypeEnum::Point, true);
+    graphMap["AccLinVelZ"] = 12;
+
+    plotter->addGraph(1, Qt::blue, PointTypeEnum::Point, true);
+    graphMap["GyroAngVelX"] = 13;
+    plotter->addGraph(1, Qt::blue, PointTypeEnum::Point, true);
+    graphMap["GyroAngVelY"] = 14;
+    plotter->addGraph(1, Qt::blue, PointTypeEnum::Point, true);
+    graphMap["GyroAngVelZ"] = 15;
+
+    plotter->addGraph(1, Qt::blue, PointTypeEnum::Point, true);
+    graphMap["BattLow"] = 16;
+    plotter->addGraph(1, Qt::blue, PointTypeEnum::Point, true);
+    graphMap["BattHigh"] = 17;
+    plotter->addGraph(1, Qt::blue, PointTypeEnum::Point, true);
+    graphMap["magnAngVelZ"] = 18;
+
+    plotter->addGraph(1, Qt::blue, PointTypeEnum::Point, true);
+    graphMap["predicdedAngVelZ"] = 19;
+    plotter->addGraph(1, Qt::blue, PointTypeEnum::Point, true);
+    graphMap["predictedLineVelX"] = 20;
+    plotter->addGraph(1, Qt::blue, PointTypeEnum::Point, true);
+    graphMap["predictedLineVelY"] = 21;
+}
+
 
 void GraphContainer::getRawIMUValues(char* message, int length )
 {
-    std::cout << "Get Raw Values: " << length << ";" << sizeof(IMU_Measurement) << std::endl;
+    if( sizeof(IMU_Measurement) != length )
+    {
+        std::cout << "Get Raw Values: " << length << ";" << sizeof(IMU_Measurement) << std::endl;
+        std::cout << "Sizeof: float: " << sizeof(float) << "; sizeof timeval: " << sizeof(struct timeval)
+                     << "; sizeof magn values: " << sizeof(magnetometer_val_t) << std::endl;
+    }
 }
 
 void GraphContainer::getStatusValues(char* message, int length )
 {
     //std::cout << "Get Status Values: " << length << "; " << sizeof(Status_tuple_t) << std::endl;
+    if( sizeof( Status_tuple_t) != length )
+    {
+        std::cout << "Received message for status tuple does not match correct size." << std::endl;
+        return;
+    }
+
+    Status_tuple_t status;
+    memcpy( &status, message, length);
 }
 
 GraphContainer::~GraphContainer()

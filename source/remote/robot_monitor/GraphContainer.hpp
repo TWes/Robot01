@@ -10,6 +10,7 @@
 
 #include "SensorConnection.hpp"
 #include "Sensor_structs.hpp"
+#include "GraphPlotter.h"
 
 class GraphContainer : public QWidget
 {
@@ -36,11 +37,13 @@ private:
 
     std::map<get_variable_enume_t, int> subscriptionCounter;
     std::map<get_variable_enume_t, int> subscriptionId;
-    //std::map<get_variable_enume_t, void (*)(char*, int)> subscriptionFunction;
     void getRawIMUValues(char* message, int length );
     void getStatusValues(char* message, int length );
 
 
+    GraphPlotter *plotter = NULL;
+    void createGraphs();
+    std::map<std::string, int> graphMap;
 };
 
 
