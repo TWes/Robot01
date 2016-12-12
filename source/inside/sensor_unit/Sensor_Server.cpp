@@ -232,7 +232,7 @@ void Sensor_Server::handle_connection( int client_handle )
 
 	        if( ret <= 0 )
             	{
-                	return;
+                    return;
 		}
 
 		struct sockaddr_in adress = getSocketAdressByFh( client_handle );
@@ -256,7 +256,15 @@ void Sensor_Server::handle_connection( int client_handle )
 	{
 		std::cout << "Unsubscribe UDP" << std::endl;
 	}
+    else if( headder[0] == LOOPBACK )
+    {
+        char* buffer = new char[headder[1]];
+        ret = read( client_handle , buffer, headder[1] );
 
+        int sendRet = write( client_handle, buffer, headder[1]);
+
+        std::cout << "Loopback: \"" << buffer << "\" with ret value: " << sendRet << std::endl;
+    }
     else
     {
 	std::cout << "Headder: " << headder[0] << " size: " 
@@ -267,7 +275,7 @@ void Sensor_Server::handle_connection( int client_handle )
 
         std::cout << "Unknown Command. Read " << headder[1] << " Bytes" << std::endl;
 
-        int ret = read( client_handle , data, headder[1] );
+        int ret = write( client_handle , data, headder[1] );
     }
 
 
