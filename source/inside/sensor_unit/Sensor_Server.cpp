@@ -66,31 +66,42 @@ void Sensor_Server::setup()
 
     log_file.open( "logfile");
 
-    i2c_bus.open_connection();
+    if( !this->options.dummy_mode )
+    {
+        this->cam_state = 0;
 
-	this->cam_state = 0;
-
-	CAM_thread = std::thread( &Sensor_Server::CAM_thread_funktion, this);
+        CAM_thread = std::thread( &Sensor_Server::CAM_thread_funktion, this);
 	    
-    XMLWriter xmlConfig;
-    xmlConfig.addRoot("SensorServerConfig");
+        XMLWriter xmlConfig;
+        xmlConfig.addRoot("SensorServerConfig");
 
-    xmlConfig.ReadFromFile( "SensorConfigFile.xml");
+        xmlConfig.ReadFromFile( "SensorConfigFile.xml");
 
-	//activate magnetometer   
-    this->magnetometer = new magnetometer_lsm9ds1( &i2c_bus,
+        //activate magnetometer
+        this->magnetometer = new magnetometer_lsm9ds1( &i2c_bus,
                                 xmlConfig,
                                 (this->options.calibrate_magnetomer? 2 : 1) );
-	this->magnetometer->activateSensor();
-	this->magnetometer->configureSensor();
+        this->magnetometer->activateSensor();
+        this->magnetometer->configureSensor();
 
-	I2C_thread = std::thread( &Sensor_Server::I2C_thread_funktion, this); 
+        i2c_bus.open_connection();
 
-	working_thread = std::thread( &Sensor_Server::working_thread_function, this );
+        I2C_thread = std::thread( &Sensor_Server::I2C_thread_funktion, this);
 
-	// activate Gyro and acc
-	i2c_bus.i2c_write<uint8_t>( 0x6B, 0x10, 0x20  ); //disable sleep mode
+
+        // activate Gyro and acc
+        i2c_bus.i2c_write<uint8_t>( 0x6B, 0x10, 0x20  ); //disable sleep mode
 	
+        working_thread = std::thread( &Sensor_Server::working_thread_function, this );
+
+        xmlConfig.WriteToFile("SensorConfigFile.xml");
+    }
+    else
+    {
+        working_thread = std::thread( &Sensor_Server::dummy_thread_function, this );
+    }
+
+
 
 	// Create the udp socket, port doesn't matter
 	udp_connection.createSocket(0);
@@ -98,10 +109,7 @@ void Sensor_Server::setup()
 	this->udp_sending_thread = new std::thread( &Sensor_Server::udp_sending_function, this);
 
 
-    	xmlConfig.WriteToFile("SensorConfigFile.xml");
-
-
-     log_file << "Sensor_server setup completed.";
+    log_file << "Sensor_server setup completed.";
 
 }
 
@@ -370,11 +378,6 @@ void Sensor_Server::udp_sending_function()
 					
                 			answer_header[1] = sizeof( IMU_Measurement );
 		
-
-					std::cout << "Total size: " <<  sizeof( IMU_Measurement ) << std::endl;
-					std::cout << "sizeof time point: " << sizeof(std::chrono::system_clock::time_point) << std::endl;
-
-
 
 		                        char message[ 3*sizeof(uint16_t) + sizeof(IMU_Measurement) ];
 					memcpy( message, answer_header, 3*sizeof(uint16_t) );
@@ -875,6 +878,13 @@ void Sensor_Server::evaluate_options( int argc, char** argv )
 			this->options.show_help = true;
 		}
 
+		else if( begining == "-d" )
+		{
+			std::cout << "Start in dummy mode" << std::endl;
+			this->options.dummy_mode = true;
+		}
+
+
 		else
 		{
 			std::cout << "Unknown argument: " << arguments.at(i) << std::endl;
@@ -890,6 +900,7 @@ void Sensor_Server::printHelp()
 	std::cout << "Sensor Server" << "\n\n"
 		<< "-h : Print this help message.\n\n"
 		<< "-cmagn : Calibrate the magnetometer.\n"
+		<< "-d : start in dummy mode. No real sensor data will be send."
 	<< std::endl;
 }
 

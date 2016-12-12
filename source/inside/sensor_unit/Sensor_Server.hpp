@@ -43,7 +43,8 @@ typedef struct{
 	when starting the server */
 typedef struct{
 	bool calibrate_magnetomer = false;	/// Shoult the Magnetometer be calibrated at the beginning?
-	bool show_help = false;			/// just show help and exit
+	bool show_help = false;		/// just show help and exit
+	bool dummy_mode = false	;	/// If this is true, the sensor server will send computer generated values
 } option_struct_t;
 
 
@@ -101,6 +102,7 @@ class Sensor_Server : public Server_inet
 		// Working thread
 		std::thread working_thread;
 		void working_thread_function();
+        void dummy_thread_function();
 
 		Position_t act_position;
 

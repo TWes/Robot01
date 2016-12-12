@@ -233,10 +233,74 @@ void Sensor_Server::working_thread_function()
 	act_status_tuple.linear_velocity[1] = 0;
 	act_status_tuple.linear_velocity[2] = 0;
 
-        last_wheel_meas = act_wheel_meas;
+    last_wheel_meas = act_wheel_meas;
 	last_imu_meas = act_imu_meas;
 
         usleep(delay_time);
     }
 }
 
+
+void Sensor_Server::dummy_thread_function()
+{
+    const float delay_time = 100000; // 0.1 s
+
+    while( this->continue_server )
+    {
+        // fill IMU_Measurement last_imu_meas;
+        IMU_Measurement act_measurment_simulation;
+        act_measurment_simulation.acc[0] = 0.0;
+        act_measurment_simulation.acc[0] = 0.0;
+        act_measurment_simulation.acc[0] = 1.0;
+
+        act_measurment_simulation.gyro[0] = 0.0;
+        act_measurment_simulation.gyro[1] = 0.0;
+        act_measurment_simulation.gyro[2] = 0.0;
+
+        act_measurment_simulation.mag.x_val = 1.0;
+        act_measurment_simulation.mag.y_val = 0.0;
+        act_measurment_simulation.mag.z_val = 0.0;
+
+        act_measurment_simulation.temp = 23.7;
+        act_measurment_simulation.timestamp = std::chrono::system_clock::now();
+
+        IMU_queue_mutex.lock();
+        this->IMU_values.push_front( act_measurment_simulation );
+        while( this->IMU_values.size() > 5 )
+        {
+            this->IMU_values.pop_back();
+        }
+        IMU_queue_mutex.unlock();
+
+        // set
+        //act_status_tuple
+        Status_tuple_t status_simulation;
+        status_simulation.accLineVel[0] = 0.0;
+        status_simulation.accLineVel[1] = 0.0;
+        status_simulation.accLineVel[2] = 0.0;
+
+        status_simulation.angular_velocity[0] = 0.0;
+        status_simulation.angular_velocity[1] = 0.0;
+        status_simulation.angular_velocity[2] = 0.0;
+
+        status_simulation.BatteryHigh = 232;
+        status_simulation.BatteryLow = 102;
+
+        status_simulation.gyroAngVel[0] = 0.0;
+        status_simulation.gyroAngVel[1] = 0.0;
+        status_simulation.gyroAngVel[2] = 0.0;
+
+        status_simulation.linear_velocity[0] = 0.0;
+        status_simulation.linear_velocity[1] = 0.0;
+        status_simulation.linear_velocity[2] = 0.0;
+
+        status_simulation.magnAngVelZ = 0.1;
+        status_simulation.predicdedAngVelZ = 0.01;
+        status_simulation.predictedLineVelX = 0.0;
+        status_simulation.predictedLineVelY = 0.0;
+
+        this->act_status_tuple = status_simulation;
+
+        usleep(delay_time);
+    }
+}
