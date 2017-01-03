@@ -40,6 +40,7 @@ public:
     // TCP related
     int setupTCPConnection( std::string targetIP, int targetPort, int timeoutMS );
     int shutdownTCPConnection();
+    int testTCPConnection();
 
     // UDP related
     udp::connection_information_t udp_socket_information;

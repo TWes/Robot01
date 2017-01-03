@@ -55,6 +55,11 @@ void OpenConnectionDialog::acceptButtonClicked()
         try{
             SensorConnection::getInstance()->setupTCPConnection( targetIP, targetPort, 5000 );
             std::cout << "Connected to : " << ipString.toStdString() << std::endl;
+
+            // Send nothing
+            SensorConnection::getInstance()->testTCPConnection();
+
+
         }
         catch( tcp::Timeout &exc )
         {

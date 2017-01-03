@@ -19,6 +19,8 @@ GraphContainer::GraphContainer(QWidget *parent) : QWidget( parent )
 
 
     setLayout( layout );
+
+    programm_start = std::chrono::system_clock::now();
 }
 
 QComboBox* GraphContainer::createComboBox()
@@ -80,8 +82,32 @@ QComboBox* GraphContainer::createComboBox()
     this->itemService["predictedLineVelX"] = GET_FILTERED_IMU_VALUES;
     this->itemService["predictedLineVelY"] = GET_FILTERED_IMU_VALUES;
 
-    this->functionService[GET_FILTERED_IMU_VALUES] = [this](char* addr, int len)-> void { this->getStatusValues(addr, len);};
-    this->functionService[GET_RAW_IMU_VALUES] = [this](char* addr, int len)-> void { this->getRawIMUValues(addr, len);};
+    this->functionService[GET_FILTERED_IMU_VALUES] =
+            [this](char* addr, int len)-> void
+    {
+        if( sizeof( Status_tuple_t) != len )
+        {
+            std::cout << "Received message for status tuple does not match correct size." << std::endl;
+            return;
+        }
+
+        Status_tuple_t status;
+        memcpy( &status, addr, len);
+
+        this->getStatusValues(status);
+    };
+    this->functionService[GET_RAW_IMU_VALUES] = [this](char* addr, int len)-> void
+    {
+        if( sizeof( IMU_Measurement) != len )
+        {
+            std::cout << "Get Raw Values: " << len << ";" << sizeof(IMU_Measurement) << std::endl;
+        }
+
+        IMU_Measurement measurement;
+        memcpy( &measurement, addr, len );
+
+        this->getRawIMUValues(measurement);
+    };
 
     subscriptionCounter[GET_RAW_IMU_VALUES] = 0;
     subscriptionCounter[GET_FILTERED_IMU_VALUES] = 0;
@@ -206,28 +232,147 @@ void GraphContainer::createGraphs()
     graphMap["predictedLineVelY"] = 21;
 }
 
-
-void GraphContainer::getRawIMUValues(char* message, int length )
+void GraphContainer::getRawIMUValues(IMU_Measurement meas )
 {
-    if( sizeof(IMU_Measurement) != length )
+    float yVal = std::chrono::duration_cast<std::chrono::milliseconds>( meas.timestamp - this->programm_start).count();
+
+    // Suche alle für RAW IMU Values relevanten strings, welcha aktiv sind
+    for( std::pair<std::string, get_variable_enume_t> iter : itemService)
     {
-        std::cout << "Get Raw Values: " << length << ";" << sizeof(IMU_Measurement) << std::endl;
-        std::cout << "Sizeof: float: " << sizeof(float) << "; sizeof timeval: " << sizeof(struct timeval)
-                     << "; sizeof magn values: " << sizeof(magnetometer_val_t) << std::endl;
+        if( iter.second == GET_RAW_IMU_VALUES && itemsChecked[iter.first] )
+        {
+            // Hänge die Punke an die Graphen
+            int graphID = graphMap[iter.first];
+
+            // Get Point
+            float xVal = getValueFromMeasurement( iter.first, meas );
+
+            QPointF pointToAdd = QPointF(yVal, xVal );
+            plotter->addPoint( graphID, pointToAdd, true );
+        }
     }
 }
 
-void GraphContainer::getStatusValues(char* message, int length )
+void GraphContainer::getStatusValues( Status_tuple_t status )
 {
     //std::cout << "Get Status Values: " << length << "; " << sizeof(Status_tuple_t) << std::endl;
-    if( sizeof( Status_tuple_t) != length )
+    float yVal = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::system_clock::now() - this->programm_start).count();
+
+    // Suche alle für RAW IMU Values relevanten strings, welcha aktiv sind
+    for( std::pair<std::string, get_variable_enume_t> iter : itemService)
     {
-        std::cout << "Received message for status tuple does not match correct size." << std::endl;
-        return;
+        if( iter.second == GET_FILTERED_IMU_VALUES && itemsChecked[iter.first] )
+        {
+            // Hänge die Punke an die Graphen
+            int graphID = graphMap[iter.first];
+
+            // Get Point
+            float xVal = getValueFromStatus( iter.first, status );
+
+            QPointF pointToAdd = QPointF(yVal, xVal );
+            plotter->addPoint( graphID, pointToAdd, true );
+        }
+    }
+}
+
+float GraphContainer::getValueFromMeasurement( std::string item, IMU_Measurement data )
+{
+    float value = 0;
+
+    if( item == "GyroRawX" )
+    {
+        value = data.gyro[0];
+    }
+    else if( item == "GyroRawY" )
+    {
+        value = data.gyro[1];
+    }
+    else if( item == "GyroRawZ" )
+    {
+        value  = data.gyro[2];
+    }
+    else if( item == "AccRawX" )
+    {
+        value = data.acc[0];
+    }
+    else if( item == "AccRawY" )
+    {
+        value = data.acc[1];
+    }
+    else if( item == "AccRawZ" )
+    {
+        value = data.acc[2];
+    }
+    else if( item == "MagnRawX" )
+    {
+        value = data.mag.x_val;
+    }
+    else if( item == "MagnRawY" )
+    {
+        value = data.mag.y_val;
+    }
+    else if( item == "MagnRawZ" )
+    {
+        value = data.mag.z_val;
     }
 
-    Status_tuple_t status;
-    memcpy( &status, message, length);
+    return value;
+}
+
+float GraphContainer::getValueFromStatus( std::string item, Status_tuple_t data )
+{
+    float value = 0.0;
+
+    if( item == "AccLinVelX" )
+    {
+        value = data.accLineVel[0];
+    }
+    else if( item == "AccLinVelY")
+    {
+        value = data.accLineVel[1];
+    }
+    else if( item == "AccLinVelZ")
+    {
+        value = data.accLineVel[2];
+    }
+    else if( item == "GyroAngVelX")
+    {
+        value = data.gyroAngVel[0];
+    }
+    else if( item == "GyroAngVelY")
+    {
+        value = data.gyroAngVel[1];
+    }
+    else if( item == "GyroAngVelZ")
+    {
+        value = data.gyroAngVel[2];
+    }
+    else if( item == "BattLow")
+    {
+        value = data.BatteryLow;
+    }
+    else if( item == "BattHigh")
+    {
+        value = data.BatteryHigh;
+    }
+    else if( item == "magnAngVelZ")
+    {
+        value = data.magnAngVelZ;
+    }
+    else if( item == "predicdedAngVelZ")
+    {
+        value = data.predicdedAngVelZ;
+    }
+    else if( item == "predictedLineVelX")
+    {
+        value = data.predictedLineVelX;
+    }
+    else if( item == "predictedLineVelY")
+    {
+        value = data.predictedLineVelY;
+    }
+
+    return value;
 }
 
 GraphContainer::~GraphContainer()

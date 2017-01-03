@@ -156,6 +156,27 @@ void SensorConnection::handle_connection( char* message, int message_lenght,
         ((request_entry_t) entries.at(0)).action( message + sizeof(headder), headder[1] );
 }
 
+
+int SensorConnection::testTCPConnection()
+{
+    return 0;
+
+    // send something to test conection
+    const char* testSring = "Hallo Welt";
+
+    MessageBuilder builder;
+    builder << MessageHeadder( LOOPBACK, strlen(testSring) ,this->actID++ )
+            << testSring;
+
+     int ret = tcp::Socket::sendData( builder.getData(), builder.getLength()  );
+
+     // SOmething has to be read
+
+     std::cout << "Return from test send: " << ret << std::endl;
+
+}
+
+
 /**
  * @brief SensorConnection::getEntryById Returns a std::vector with the corresponding entry.
  * @param id The id to search for.

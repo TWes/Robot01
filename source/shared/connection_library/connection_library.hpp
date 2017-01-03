@@ -45,6 +45,7 @@ public:
     MessageBuilder& operator<<( T data );
 
     MessageBuilder& operator<<( MessageHeadder data );
+    MessageBuilder& operator<<( const char* data );
 
     int getLength() { return len; }
     char* getData() { return  message; }

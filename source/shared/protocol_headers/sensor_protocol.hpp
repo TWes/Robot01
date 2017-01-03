@@ -8,7 +8,8 @@ typedef enum{
 	GET_VARIABLE = 2, // client wants to get a variable from the server
 	MOVEMENT_INSTRUCTION = 4, // client sends a movement instruction
     SUBSCRIBE_UDP =5, // client subscribe to movement information (pose, velocity)
-    UNSUBSCRIBE_UDP=6 // client unsubcribe UDP connection
+    UNSUBSCRIBE_UDP=6, // client unsubcribe UDP connection
+    LOOPBACK = 7
 } sensor_request_enum_t;
 
 

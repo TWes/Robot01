@@ -4,6 +4,7 @@
 #include <iostream>
 #include <map>
 #include <functional>
+#include <chrono>
 
 #include <QString>
 #include <QtWidgets>
@@ -37,13 +38,17 @@ private:
 
     std::map<get_variable_enume_t, int> subscriptionCounter;
     std::map<get_variable_enume_t, int> subscriptionId;
-    void getRawIMUValues(char* message, int length );
-    void getStatusValues(char* message, int length );
+    void getRawIMUValues(IMU_Measurement meas);
+    void getStatusValues(Status_tuple_t status);
 
 
     GraphPlotter *plotter = NULL;
     void createGraphs();
     std::map<std::string, int> graphMap;
+    std::chrono::system_clock::time_point programm_start;
+    float getValueFromMeasurement( std::string item, IMU_Measurement data );
+    float getValueFromStatus( std::string item, Status_tuple_t data );
+
 };
 
 

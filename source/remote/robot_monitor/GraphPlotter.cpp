@@ -5,6 +5,8 @@ GraphStruct_t GraphPlotter::defaultGraphStyle = GraphStruct_t(1, Qt::black, Poin
 GraphPlotter::GraphPlotter(QWidget *parent)
     : QWidget(parent)
 {
+    this->setAttribute( Qt::WA_OpaquePaintEvent );
+
     viewRect = RectF(0,0,1,1);
 
     this->setMinimumSize( 400, 200);
@@ -46,9 +48,9 @@ void GraphPlotter::addPoint(unsigned int graphIndex, QPointF _newPoint, bool scr
         qDebug() << "Tried to add Point to graph with Index: " << graphIndex;
     }
 
-    // Segfault here
+
     GraphStruct_t &graph = this->graphs.at( graphIndex);
-    std::list<QPointF> &points = graph.points;    
+    std::list<QPointF> &points = graph.points;
     points.push_back( _newPoint );
 
     while( points.size() > graph.maxPoints )
@@ -61,7 +63,7 @@ void GraphPlotter::addPoint(unsigned int graphIndex, QPointF _newPoint, bool scr
         this->scrollToPoint( _newPoint );
     }
 
-   this->update();
+    this->update();
 }
 
 void GraphPlotter::clear()
@@ -78,18 +80,20 @@ void GraphPlotter::paintEvent(QPaintEvent *event)
 {
     this->setMinimumSize( 100, 100 );
 
-    QPainter painter;
-    painter.begin( this );
+    QPainter *painter = new QPainter();
+    painter->begin( this );
+
+    painter->fillRect( 0,0, this->width(), this->height(), Qt::lightGray );
 
     setupAxis( event->rect() );
 
-    painter.fillRect( actDrawRect, Qt::white );
+    painter->fillRect( actDrawRect, Qt::white );
 
-    painter.setPen( thinBlackPen );
+   // painter.setPen( thinBlackPen );
 
-    painter.drawLine( actYAxis );
-    painter.drawLine( actXAxis );
-    painter.drawLine( getZeroAxis() );
+    painter->drawLine( actYAxis );
+    painter->drawLine( actXAxis );
+    painter->drawLine( getZeroAxis() );
 
     drawMousePos( painter );
 
@@ -98,7 +102,8 @@ void GraphPlotter::paintEvent(QPaintEvent *event)
     drawPoints( painter );
 
 
-    painter.end();
+    painter->end();
+    delete painter;
 
 }
 
@@ -196,50 +201,53 @@ void GraphPlotter::setupAxis(QRect _viewPort)
     this->actYAxis = getYAxis( _viewPort );
 }
 
-void GraphPlotter::drawLabels(QPainter &_painter)
+void GraphPlotter::drawLabels(QPainter *_painter)
 {
-    QFontMetrics FontMetric = _painter.fontMetrics();
+    QFontMetrics FontMetric = _painter->fontMetrics();
 
     // Draw top Y Label
     QString topYLabel = QString::number(viewRect.h + viewRect.y, 10, 2 );
     int topYLabelXPos = actDrawRect.x();
-    _painter.drawText(  topYLabelXPos , actDrawRect.y(), 100, 100, 0, topYLabel );
+    _painter->drawText(  topYLabelXPos , actDrawRect.y(), 100, 100, 0, topYLabel );
 
     // Draw bottom y Label
     QString bottomYLabel = QString::number(viewRect.y, 10, 2 );
     int bottomYLabelXPos = actDrawRect.x();
-    _painter.drawText( bottomYLabelXPos, actDrawRect.y() + actDrawRect.height() - 15, 100, 100, 0, bottomYLabel );
+    _painter->drawText( bottomYLabelXPos, actDrawRect.y() + actDrawRect.height() - 15, 100, 100, 0, bottomYLabel );
 
     // Draw left x Label
     QString leftXLabel = QString::number(viewRect.x, 10, 2 );
     int leftXLabelPos = actDrawRect.x() + 0.5 * FontMetric.width( leftXLabel);
-    _painter.drawText( leftXLabelPos, actDrawRect.y() + actDrawRect.height(), 100, 100, 0, leftXLabel );
+    _painter->drawText( leftXLabelPos, actDrawRect.y() + actDrawRect.height(), 100, 100, 0, leftXLabel );
 
     // Draw right x Label
     QString rightXLabel = QString::number(viewRect.w + viewRect.x, 10, 2 );
     int rightXLabelPos = actDrawRect.x() + actDrawRect.width() - FontMetric.width( rightXLabel ) * 0.5;
-    _painter.drawText( rightXLabelPos, actDrawRect.y() + actDrawRect.height(), 100, 100, 0, rightXLabel );
+    _painter->drawText( rightXLabelPos, actDrawRect.y() + actDrawRect.height(), 100, 100, 0, rightXLabel );
 
 }
 
-void GraphPlotter::drawPoints(QPainter &_painter)
+void GraphPlotter::drawPoints(QPainter *_painter)
 {
-    QPen actPen = _painter.pen();
+    QPen actPen = _painter->pen();
 
-    for( GraphStruct_t graphToDraw : graphs )
-    {
+    for( auto iterator = graphs.begin(); iterator != graphs.end(); iterator++ )
+    //for( GraphStruct_t graphToDraw : graphs )
+    {     
+        GraphStruct_t graphToDraw = *iterator;
+
         // change Color
         if( actPen.color() != graphToDraw.color )
         {
             actPen.setColor( graphToDraw.color );
-            _painter.setPen( actPen );
+            _painter->setPen( actPen );
         }
 
         // Set Size
         if( actPen.width() != graphToDraw.size )
         {
             actPen.setWidth( graphToDraw.size );
-            _painter.setPen( actPen );
+            _painter->setPen( actPen );
         }
 
 
@@ -261,16 +269,16 @@ void GraphPlotter::drawPoints(QPainter &_painter)
             {
             case PointTypeEnum::Triangle:
             case PointTypeEnum::Point:
-                _painter.drawEllipse( drawPoint, graphToDraw.size, graphToDraw.size);
+                _painter->drawEllipse( drawPoint, graphToDraw.size, graphToDraw.size);
             case PointTypeEnum::Rectange:
             default:
-                _painter.drawPoint( drawPoint );
+                _painter->drawPoint( drawPoint );
                 break;
             }
 
             if( graphToDraw.connect && !firstPoint )
             {
-                _painter.drawLine( lastPoint, drawPoint );
+                _painter->drawLine( lastPoint, drawPoint );
 
                 lastPoint = drawPoint;
             }
@@ -283,7 +291,7 @@ void GraphPlotter::drawPoints(QPainter &_painter)
 
 }
 
-void GraphPlotter::drawMousePos(QPainter &_painter)
+void GraphPlotter::drawMousePos(QPainter *_painter)
 {
     double xValOnPos = (MousePosition.x() - actDrawRect.x())/ (double) actDrawRect.width() ;
     xValOnPos = ( xValOnPos * viewRect.w) + viewRect.x;
@@ -294,7 +302,7 @@ void GraphPlotter::drawMousePos(QPainter &_painter)
     QString mousePosLabel = "(" + QString::number( xValOnPos) + "|"
             + QString::number( yValOnPos ) + ")";
 
-    _painter.drawText( actDrawRect.x() + 0.5 * actDrawRect.width(), 40, mousePosLabel  );
+    _painter->drawText( actDrawRect.x() + 0.5 * actDrawRect.width(), 40, mousePosLabel  );
 }
 
 void GraphPlotter::wheelEvent(QWheelEvent *event)

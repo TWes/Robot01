@@ -6,6 +6,7 @@
 #include <QPaintEvent>
 #include <QDebug>
 #include <QtCore>
+#include <mutex>
 
 #include <iostream>
 
@@ -43,7 +44,13 @@ struct RectF{
 struct GraphStruct_t
 {
     GraphStruct_t(int _size, QColor _color, enum PointTypeEnum _type, bool _connectPoints)
-        : size(_size), color(_color), type(_type), connect(_connectPoints) {}
+        : size(_size), color(_color), type(_type), connect(_connectPoints)
+    {
+    }
+
+    ~GraphStruct_t()
+    {
+    }
 
     std::list<QPointF> points;
     int maxPoints = 1000;
@@ -99,11 +106,11 @@ private:
     QRect getDrawRect( QRect _viewPort);
 
     QPoint MousePosition;
-    void drawMousePos(QPainter &_painter);
+    void drawMousePos(QPainter *_painter);
 
 
-    void drawLabels(QPainter &_painter );
-    void drawPoints(QPainter &_painter);
+    void drawLabels(QPainter *_painter );
+    void drawPoints(QPainter *_painter);
 
     void scrollToPoint( QPointF _pointToScrollTo );
 

@@ -53,7 +53,6 @@ public:
     Socket( std::string socket_address, int port );
     ~Socket();
 
-
     int start_connection();
     int start_connection( std::string socket_address, int port);
     int start_connection_with_timeout(int timeout_ms);

@@ -5,8 +5,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow( parent )
     QWidget *centralWidget = new QWidget();
     QGridLayout *layout = new QGridLayout();
 
-    testLabel = new QLabel("Hallo Welt!" );
-    layout->addWidget( testLabel );
+    //testLabel = new QLabel("Hallo Welt!" );
+    //layout->addWidget( testLabel );
 
     graphContainer = new GraphContainer(this);
     layout->addWidget( graphContainer );
