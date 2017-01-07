@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 #include <iostream>
+#include <algorithm>
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -110,6 +111,7 @@ class Sensor_Server : public Server_inet
 		void setup();
 		void handle_connection( int client_handle );
 		void cleanup();
+
 private:
 	void evaluate_options( int argc, char** argv );
 	option_struct_t options; // The choosen options
@@ -119,6 +121,7 @@ private:
 
     udp::Socket udp_connection;
 	std::vector<UDP_subscriber_entry_t> UDP_subscriber;
+    void deleteIdInUDPSubscriber(int id);
 	std::thread *udp_sending_thread;
 	void udp_sending_function();
 

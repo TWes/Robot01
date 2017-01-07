@@ -146,7 +146,7 @@ void Sensor_Server::handle_connection( int client_handle )
 		<< headder[1] << " id: " << headder[2] << std::endl;
 
 	if( headder[0] == SET_VARIABLE )
-    	{
+    {
         uint16_t data;
 
         // Look if there ist something to read
@@ -155,7 +155,7 @@ void Sensor_Server::handle_connection( int client_handle )
         if( ret <= 0 )
         {
             return;
-         }
+        }
 
         // Look what variable should be read
         switch( data )
@@ -167,7 +167,7 @@ void Sensor_Server::handle_connection( int client_handle )
             if( ret <= 0 )
             {
                 return;
-             }
+            }
 
             switch( new_value[0])
             {
@@ -179,10 +179,10 @@ void Sensor_Server::handle_connection( int client_handle )
 
             switch( new_value[1])
             {
-		case 1: left_direction = 0; break;
-		case 2: left_direction = 1; break;
-            	case 4: left_direction = -1; break;
-            	default: break;
+            case 1: left_direction = 0; break;
+            case 2: left_direction = 1; break;
+            case 4: left_direction = -1; break;
+            default: break;
             }
 
             break;
@@ -197,11 +197,11 @@ void Sensor_Server::handle_connection( int client_handle )
 	else if( headder[0] == GET_VARIABLE )
 	{		
 		uint32_t buffer;
-            	ret = read( client_handle , &buffer, headder[1] );
+        ret = read( client_handle , &buffer, headder[1] );
 
-	        if( ret <= 0 )
-            	{
-                	return;
+        if( ret <= 0 )
+        {
+            return;
 		}
 
 		// look, which variable should be read
@@ -217,8 +217,7 @@ void Sensor_Server::handle_connection( int client_handle )
 		
 			char message[ 3*sizeof(uint16_t) + 1 * sizeof(Position_t ) ];
 			memcpy( message, answer_header, 3*sizeof(uint16_t) );
-			memcpy( (message + 3*sizeof(uint16_t) ), &pose_buffer, 1 * sizeof(Position_t ) );  
-
+            memcpy( (message + 3*sizeof(uint16_t) ), &pose_buffer, 1 * sizeof(Position_t ) );
 
 			ret = write( client_handle, &message, sizeof(message) );
 		}
@@ -230,9 +229,9 @@ void Sensor_Server::handle_connection( int client_handle )
 		uint32_t data[3];
 		ret = read( client_handle , &data, headder[1] );
 
-	        if( ret <= 0 )
-            	{
-                    return;
+        if( ret <= 0 )
+        {
+            return;
 		}
 
 		struct sockaddr_in adress = getSocketAdressByFh( client_handle );
@@ -241,7 +240,6 @@ void Sensor_Server::handle_connection( int client_handle )
 		
         udp::connection_information_t client( inet_ntoa( adress.sin_addr ),
 				 (int) data[1] );
-
 
 		UDP_subscriber_entry_t new_entry;
 		new_entry.next_sending_time = -1.0;
@@ -254,7 +252,8 @@ void Sensor_Server::handle_connection( int client_handle )
 	}
 	else if( headder[0] == 6 )
 	{
-		std::cout << "Unsubscribe UDP" << std::endl;
+        // Delete the given id
+        this->deleteIdInUDPSubscriber(headder[2]);
 	}
     else if( headder[0] == LOOPBACK )
     {
@@ -439,6 +438,20 @@ void Sensor_Server::udp_sending_function()
 	
 
 }
+
+void Sensor_Server::deleteIdInUDPSubscriber(int id)
+{
+    //std::cout << "Unsubscribe UDP with id: " << id << std::endl;
+    //std::cout << "Size before erasing: " << this->UDP_subscriber.size() << std::endl;
+    this->UDP_subscriber.erase(
+                std::remove_if( this->UDP_subscriber.begin(), this->UDP_subscriber.end() ,
+                                [id](UDP_subscriber_entry_t &element)
+                                {
+                                    return element.seq_number == id;
+                                } ) );
+    //std::cout << "Size after erasing: " << this->UDP_subscriber.size() << std::endl;
+}
+
 
 void Sensor_Server::CAM_thread_funktion()
 {
