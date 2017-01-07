@@ -64,6 +64,7 @@ int Socket::start_connection_with_timeout(int timeout_ms)
     this->socket_fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
     if( this->socket_fd < 0)
     {
+        this->shutdown_connection();
         throw connectionError(errno);
     }
 
@@ -100,11 +101,13 @@ int Socket::start_connection_with_timeout(int timeout_ms)
 
             if ( selectRet < 0 )
             {
-                    throw connectionError(errno);
+                this->shutdown_connection();
+                throw connectionError(errno);
             }
             // No descriptor available => no connection
             else if ( selectRet == 0 )
             {
+                this->shutdown_connection();
                 throw Timeout("Timeout while connecting to target.");
             }
 
@@ -133,7 +136,8 @@ int Socket::start_connection_with_timeout( std::string socket_address, int port,
 void Socket::shutdown_connection()
 {
     close( this->socket_fd );
-    this->is_connected == false;
+    this->socket_fd = -1;
+    this->is_connected = false;
 }
 
 int Socket::sendData(char *buffer, int length)
@@ -148,13 +152,8 @@ int Socket::sendData(char *buffer, int length)
          //                   << errno << std::endl;
 
         // Connection has been lost
-        if( errno == 32 )
         {
-            this->is_connected = false;
-        }
-        else
-        {
-            throw connectionError( errno );
+            throw connectionError(errno);
         }
     }   
 
@@ -169,8 +168,9 @@ int Socket::readData(char *buffer, int length)
 
     if( ret < 0 )
     {
-        std::cout << "Fehler beim lesen in der Verbindung: "
-                            << errno << std::endl;
+        //std::cout << "Fehler beim lesen in der Verbindung: "
+        //                    << errno << std::endl;
+        throw connectionError(errno);
     }
 
     return ret;

@@ -24,7 +24,7 @@ int Sensor_Connection::get_Pose()
 {
     uint16_t headder[3];
 
-    request_entry_t new_entry;
+    udp_request_entry_t new_entry;
 
     new_entry.id = this->actual_id++;
     new_entry.stream = false;
@@ -79,7 +79,7 @@ int Sensor_Connection::init_UDP_Pose()
 
     uint16_t headder[3];
 
-    request_entry_t new_entry;
+    udp_request_entry_t new_entry;
 
     new_entry.id = this->actual_id++;
     new_entry.stream = true;
@@ -118,16 +118,16 @@ int Sensor_Connection::init_UDP_Pose()
     return 0;
 }
 
-request_entry_t* Sensor_Connection::getEntryById( int id )
+udp_request_entry_t* Sensor_Connection::getEntryById( int id )
 {
-    request_entry_t* ret = NULL;
+    udp_request_entry_t* ret = NULL;
 
-    std::vector<request_entry_t>::iterator iter;
+    std::vector<udp_request_entry_t>::iterator iter;
     for( iter = this->open_requests.begin(); iter != this->open_requests.end(); iter++ )
     {
         if( iter->id == id )
         {
-            ret = new request_entry_t;
+            ret = new udp_request_entry_t;
             *ret = *iter;
 
             if( !ret->stream )
@@ -212,16 +212,16 @@ void Sensor_Connection::receiving_thread_funktion()
 
         // TODO: Check for Timeouts and streams
         //Find entry in open request list
-        request_entry_t *act_entry = NULL;
+        udp_request_entry_t *act_entry = NULL;
 
         this->open_requests_mutex.lock();
-        std::vector<request_entry_t>::iterator iter;
+        std::vector<udp_request_entry_t>::iterator iter;
 
         for( iter = this->open_requests.begin(); iter != this->open_requests.end(); iter++ )
         {
             if( iter->id == headder[2] )
             {
-                act_entry = new request_entry_t;
+                act_entry = new udp_request_entry_t;
                 *act_entry = *iter;
 
                 this->open_requests.erase( iter++ );
@@ -339,7 +339,7 @@ void udp_connection::handle_connection(char *message, int message_lenght, udp_co
     else
     { return; }    
 
-    request_entry_t *act = this->connection->getEntryById( headder[2] );
+    udp_request_entry_t *act = this->connection->getEntryById( headder[2] );
 
     switch(  act->todo_action )
     {
@@ -390,7 +390,7 @@ int Sensor_Connection::init_UDP_Var( get_variable_enume_t _to_subscribe, action_
 
     uint16_t headder[3];
 
-    request_entry_t new_entry;
+    udp_request_entry_t new_entry;
 
     new_entry.id = this->actual_id++;
     new_entry.stream = true;

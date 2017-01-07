@@ -35,7 +35,7 @@ public:
     const char* what()
     {
         std::stringstream ss;
-        ss << "Error sending: " << strerror( this->errornumber );
+        ss << "Error In connection \"" << strerror( this->errornumber ) << "\"(" << this->errornumber << ")";
         return ss.str().c_str();
     }
     int getErrorNumber() { return this->errornumber; }

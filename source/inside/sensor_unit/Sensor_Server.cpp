@@ -133,7 +133,7 @@ void Sensor_Server::cleanup()
 
 void Sensor_Server::handle_connection( int client_handle )
 {
-	int16_t headder[3];
+    int16_t headder[3];
 
 	int ret = read( client_handle, headder, 3*sizeof(int16_t) );
 	if( ret <= 0 )
@@ -259,11 +259,19 @@ void Sensor_Server::handle_connection( int client_handle )
     else if( headder[0] == LOOPBACK )
     {
         char* buffer = new char[headder[1]];
-        ret = read( client_handle , buffer, headder[1] );
 
-        int sendRet = write( client_handle, buffer, headder[1]);
+        ret = read( client_handle, buffer, headder[1] );
+
+        char* msgBuffer = new char[headder[1]+ 3*sizeof(int16_t)];
+        memcpy( msgBuffer, headder, 3*sizeof(int16_t) );
+        memcpy( msgBuffer + 3*sizeof(int16_t), buffer, headder[1] );
+
+        int sendRet = write( client_handle, msgBuffer, headder[1]+ 3*sizeof(int16_t) );
 
         std::cout << "Loopback: \"" << buffer << "\" with ret value: " << sendRet << std::endl;
+
+        delete msgBuffer;
+        delete buffer;
     }
     else
     {

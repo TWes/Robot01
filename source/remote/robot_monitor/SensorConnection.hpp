@@ -7,13 +7,15 @@
 #include <mutex>
 #include <vector>
 #include <algorithm>
+#include <thread>
+#include <ctime>
 
 #include "tcp_socket.hpp"
 #include "udp_connection_inet.hpp"
 #include "sensor_protocol.hpp"
 #include "connection_library.hpp"
 
-struct request_entry_t{
+struct udp_request_entry_t{
     int id;
     bool repeated;
     std::function<void(char*,int)> action;
@@ -21,6 +23,14 @@ struct request_entry_t{
     std::chrono::seconds time_lo_live;
 };
 
+struct tcp_request_entry_t{
+    int id;
+    bool repeated;
+    std::function<void(void)> onTimeout;
+    std::function<void(char*,int)> onReceive;
+    std::chrono::system_clock::time_point timestamp;
+    std::chrono::milliseconds time_lo_live;
+};
 
 /**
  * @brief The SensorConnection class
@@ -33,14 +43,22 @@ public:
 
     // Request
     int actID;
-    std::vector<struct request_entry_t> openRequests;
+    std::vector<struct udp_request_entry_t> openRequests;
     std::mutex openRequestMutex;
-    std::vector<request_entry_t> getEntryById( int id );
+    std::vector<udp_request_entry_t> getEntryById( int id );
 
     // TCP related
     int setupTCPConnection( std::string targetIP, int targetPort, int timeoutMS );
     int shutdownTCPConnection();
-    int testTCPConnection();
+    int testTCPConnection(std::function<void(void)> onError, std::function<void(void)> onSuccess );
+    std::vector<struct tcp_request_entry_t> openTCPRequests;
+    void startPollingThread();
+    void endPollingThread();
+    bool continueTCPpolling = false;
+    std::thread *tcpPollingThread = NULL;
+    void tcp_polling_function();
+    void checkTCPTimeouts();
+    void checkTCPRequest( int id, char* msg, int len );
 
     // UDP related
     udp::connection_information_t udp_socket_information;
@@ -48,8 +66,6 @@ public:
     int unsubscribe_UDP( int id );
     void handle_connection( char* message, int message_lenght,
                                     udp::connection_information_t other );
-
-
 
 private:
     SensorConnection();

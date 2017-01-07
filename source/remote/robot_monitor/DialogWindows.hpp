@@ -9,6 +9,7 @@
 #include <iostream>
 
 #include "SensorConnection.hpp"
+#include "connectionStatus.hpp"
 
 class OpenConnectionDialog : public QDialog
 {
@@ -19,7 +20,8 @@ public:
     ~OpenConnectionDialog();
 
 private:
-    QLineEdit *input;
+    QLineEdit *input;    
+    ConectionStatus *statusBar;
     QPushButton *acceptButton;
     QPushButton *cancelButton;
 

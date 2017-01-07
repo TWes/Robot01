@@ -25,6 +25,7 @@ set( ROBOT_MONITOR_FILES
 	DialogWindows.cpp
 	GraphContainer.cpp
 	GraphPlotter.cpp
+	connectionStatus.cpp
 )
 
 add_executable( robot_monitor ${ROBOT_MONITOR_FILES} )

@@ -48,7 +48,6 @@ private:
     std::chrono::system_clock::time_point programm_start;
     float getValueFromMeasurement( std::string item, IMU_Measurement data );
     float getValueFromStatus( std::string item, Status_tuple_t data );
-
 };
 
 

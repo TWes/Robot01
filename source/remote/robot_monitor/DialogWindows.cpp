@@ -7,6 +7,8 @@ OpenConnectionDialog::OpenConnectionDialog(QWidget *parent) : QDialog(parent)
     cancelButton = new QPushButton( "Cancel", this);
     acceptButton = new QPushButton( "Connect", this);
 
+    statusBar = new ConectionStatus( Qt::red, "Not Connected", this );
+
     QObject::connect(acceptButton, SIGNAL(clicked()),
                      this, SLOT(acceptButtonClicked()) );
 
@@ -19,6 +21,7 @@ OpenConnectionDialog::OpenConnectionDialog(QWidget *parent) : QDialog(parent)
 
     QVBoxLayout *layout = new QVBoxLayout();
     layout->addWidget(input);
+    layout->addWidget( this->statusBar );
     layout->addLayout(buttonLayout);
 
     setLayout( layout );
@@ -52,20 +55,39 @@ void OpenConnectionDialog::acceptButtonClicked()
         std::string targetIP = splitetInput.at(0).toStdString();
         int targetPort = splitetInput.at(1).toInt();
 
+        this->statusBar->setContent( Qt::yellow, "Connecting..." );
+
         try{
             SensorConnection::getInstance()->setupTCPConnection( targetIP, targetPort, 5000 );
-            std::cout << "Connected to : " << ipString.toStdString() << std::endl;
+
+            auto helperPointer = this->statusBar;
 
             // Send nothing
-            SensorConnection::getInstance()->testTCPConnection();
-
-
+            SensorConnection::getInstance()->testTCPConnection(
+                        [helperPointer]()
+                            {
+                                // Error -> timeout
+                                helperPointer->setContent( Qt::red, "Not Connected", "TImeout while trying to comunicate");
+                                //std::cout << "Timeout" << std::endl;
+                            },
+                        [helperPointer,this]()
+                            {
+                                 // Success
+                                helperPointer->setContent( Qt::green, "Connected" );
+                                //std::cout << "Connected" << std::endl;
+                            }
+                        );
         }
         catch( tcp::Timeout &exc )
         {
-            std::cout << exc.what() << std::endl;
+            std::cout << "In dialouge: " << exc.what() << std::endl;
+            this->statusBar->setContent( Qt::red, "No Connection", exc.what() );
         }
-
+        catch( tcp::connectionError &exc )
+        {
+            std::cout << "In dialouge: " << exc.what() << std::endl;
+            this->statusBar->setContent( Qt::red, "No Connection", exc.what() );
+        }
     }
     else
     {

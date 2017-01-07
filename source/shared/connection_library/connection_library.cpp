@@ -49,7 +49,7 @@ MessageBuilder& MessageBuilder::operator<<( const char* data )
     int newLength = this->len + strlen( data );
     char* newPointer = new char[ newLength];
 
-    std::cout << "old l: " << this->len << " : " << newLength << std::endl;
+    //std::cout << "old l: " << this->len << " : " << newLength << std::endl;
 
     memcpy( newPointer, this->message, this->len );
     strcpy( (newPointer + this->len ), data );

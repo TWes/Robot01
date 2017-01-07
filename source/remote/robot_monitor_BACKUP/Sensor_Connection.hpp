@@ -26,7 +26,7 @@ typedef struct {
     action_t todo_action;
     timeval timestamp;
     timeval time_lo_live;
-} request_entry_t;
+} udp_request_entry_t;
 
 class Sensor_Connection;
 
@@ -63,8 +63,8 @@ public:
     std::thread receiving_thread;
     void receiving_thread_funktion();
     std::mutex open_requests_mutex;
-    std::vector<request_entry_t> open_requests;
-    request_entry_t* getEntryById( int id );
+    std::vector<udp_request_entry_t> open_requests;
+    udp_request_entry_t* getEntryById( int id );
 
     udp_connection *udp_socket;
     udp_connection_information_t udp_socket_information;
