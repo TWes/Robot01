@@ -21,6 +21,9 @@ GraphContainer::GraphContainer(QWidget *parent) : QWidget( parent )
     setLayout( layout );
 
     programm_start = std::chrono::system_clock::now();
+
+    FileWriter::getInstance()->createFile("magnValues");
+
 }
 
 QComboBox* GraphContainer::createComboBox()
@@ -251,6 +254,10 @@ void GraphContainer::getRawIMUValues(IMU_Measurement meas )
             plotter->addPoint( graphID, pointToAdd, true );
         }
     }
+
+    *FileWriter::getInstance()->getFile("magnValues") << meas.mag.x_val << " "
+                                                      << meas.mag.y_val << " "
+                                                      << meas.mag.z_val << std::endl;
 }
 
 void GraphContainer::getStatusValues( Status_tuple_t status )
@@ -370,6 +377,10 @@ float GraphContainer::getValueFromStatus( std::string item, Status_tuple_t data 
     else if( item == "predictedLineVelY")
     {
         value = data.predictedLineVelY;
+    }
+    else
+    {
+        std::cout << "Asked for :\"" << item << "\" which is not known" << std::endl;
     }
 
     return value;

@@ -26,6 +26,7 @@ set( ROBOT_MONITOR_FILES
 	GraphContainer.cpp
 	GraphPlotter.cpp
 	connectionStatus.cpp
+	misc/FileWriter.cpp
 )
 
 add_executable( robot_monitor ${ROBOT_MONITOR_FILES} )

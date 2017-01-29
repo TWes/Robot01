@@ -8,7 +8,7 @@
 typedef struct
 {
     cv::Mat image; /// The image taken in this measurement
-	
+
     std::chrono::system_clock::time_point timestamp; /// Timestamp
 
 } CAM_image;
@@ -28,9 +28,9 @@ typedef struct
 /** Struct containing the one magnetometer meas */
 typedef struct
 {
-    float x_val; /// x-axis measurement
-    float y_val; /// z-axis measurement
-    float z_val; /// z-axis measurement
+	float x_val; /// x-axis measurement
+	float y_val; /// z-axis measurement
+	float z_val; /// z-axis measurement
 
 } magnetometer_val_t;
 

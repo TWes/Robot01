@@ -12,6 +12,7 @@
 #include "SensorConnection.hpp"
 #include "Sensor_structs.hpp"
 #include "GraphPlotter.h"
+#include "misc/FileWriter.hpp"
 
 class GraphContainer : public QWidget
 {
