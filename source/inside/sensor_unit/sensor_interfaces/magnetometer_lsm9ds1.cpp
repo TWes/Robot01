@@ -48,7 +48,7 @@ int magnetometer_lsm9ds1::configureSensor()
             this->loadFromConfigFile();
 			break;
 		case 2:
-			this->configure2D();
+			this->configure3D();
             		this->writeToConfigFile();
 			break;
 
@@ -75,6 +75,9 @@ int magnetometer_lsm9ds1::readValues()
 
     if( read_ret >= 0 )
     {
+	//std::cout << this->config.origin_x << "; " << this->config.scale_x << std::endl;
+
+
 	// +- 4 gauss	- 0.14
 	// +- 8 gauss	- 0.29	
 	float newXVal = magn_buffer[0] * scale;
@@ -85,88 +88,91 @@ int magnetometer_lsm9ds1::readValues()
 	newYVal = (newYVal - this->config.origin_y) \
 			* this->config.scale_y;
 
-        this->x_val = newXVal;
+	float newZVal = magn_buffer[2] * scale;
+	newZVal = (newZVal - this->config.origin_z) \
+			* this->config.scale_z;
+
+	this->x_val = newXVal;
         this->y_val = newYVal;
-        this->z_val = magn_buffer[2] * scale;
+        this->z_val = newZVal;
     }
 
     return read_ret;
 }
 
-void magnetometer_lsm9ds1::configure2D()
+void magnetometer_lsm9ds1::configure3D()
 {
-	std::cout << "Config2d" << std::endl;
+	std::cout << "Config3d" << std::endl;
 
-	magnetometer_config_t newConfig;	
+	this->config = magnetometer_config_t();
 
-	const float duration_ms = 2000.0;
+	magnetometer_config_t locConfig;
 
-	std::cout << "Point Robot to north [enter]" << std::endl;
-	getchar();
-	std::cout << "calculating..." << std::endl;
-
-	// Read the north Values
-	magnetometer_val_t north = this->readMeanOverTime( duration_ms );
-
-	std::cout << "Point Robot to west [enter]" << std::endl;
-	getchar();
-	std::cout << "calculating..." << std::endl;
-
-	// Read the west Values	
-	magnetometer_val_t west = this->readMeanOverTime( duration_ms );
-
+	std::chrono::system_clock::time_point startTime = std::chrono::system_clock::now();
+	std::chrono::milliseconds time_since_start(0);
 	
-	std::cout << "Point Robot to south [enter]" << std::endl;
-	getchar();
-	std::cout << "calculating..." << std::endl;
+	std::vector<float> xVals,yVals,zVals;
 
-	// Read the south Values
-	magnetometer_val_t south = this->readMeanOverTime( duration_ms );
+	std::cout << "Please rotate the robot around" << std::endl;
 
-	std::cout << "Point Robot to east [enter]" << std::endl;
-	getchar();
-	std::cout << "calculating..." << std::endl;
-
-	// Read the east Values
-	magnetometer_val_t east = this->readMeanOverTime( duration_ms );
-
-	
-	std::cout << "Generate configuration." << std::endl;
-
-	// Calc the elipse covering the measurements
-	struct{ float x; float y;} NS;
-	struct{ float x; float y;} EW;
-
-	NS.x = south.x_val - north.x_val;
-	NS.y = south.y_val - north.y_val;
-	EW.x = west.x_val - east.x_val;
-	EW.y = west.y_val - east.y_val; 	
-
-	float a = 0.5 * sqrt( EW.x * EW.x + EW.y * EW.y  );
-	float b = 0.5 * sqrt( NS.x * NS.x + NS.y * NS.y  );
-	
-	newConfig.scale_x = a/b;
-
-	struct{ float x; float y;} half_NS;
-	struct{ float x; float y;} half_EW;
+	do
+	{		
+		this->readValues();
+		magnetometer_val_t act_vals = this->getValues();
 		
-	half_NS.x = 0.5 * NS.x;
-	half_NS.y = 0.5 * NS.y;
-	half_EW.x = 0.5 * EW.x;
-	half_EW.y = 0.5 * EW.y;
+		xVals.push_back( act_vals.x_val );
+		yVals.push_back( act_vals.y_val );
+		zVals.push_back( act_vals.z_val );		
 
-	struct{ float x; float y;} middle1, middle2;
-	middle1.x = north.x_val + half_NS.x;
-	middle1.y = north.y_val + half_NS.y;
-	middle2.x = east.x_val + half_EW.x;
-	middle2.y = east.y_val + half_EW.y;
+		usleep( 1000 );
 
-	newConfig.origin_x = 0.5 * (middle1.x + middle2.x);
-	newConfig.origin_y = 0.5 * (middle1.y + middle2.y);
+		std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+		time_since_start = std::chrono::duration_cast<std::chrono::milliseconds>( now - startTime);
+	
+	} while( time_since_start.count() <= 8000 );
 
-	this->config = newConfig;
+	std::cout << "Got values calculating now" << std::endl;
+
+	std::cout << "sizes: " << xVals.size() << "; " << yVals.size() << "; " << zVals.size() << std::endl;
+
+	std::sort( xVals.begin(), xVals.end() );
+	float xMax, xMin;
+	xMax = *xVals.rbegin();
+	xMin = *xVals.begin();
+
+	float xOffset = (xMax + xMin) * 0.5;
+	float xScale = 2.0 / (xMax - xMin);
+
+	locConfig.origin_x = xOffset;
+	locConfig.scale_x = xScale;
+
+	std::sort( yVals.begin(), yVals.end() );
+	float yMax, yMin;
+	yMax = *yVals.rbegin();
+	yMin = *yVals.begin();
+
+	float yOffset = (yMax + yMin) * 0.5;
+	float yScale = 2.0 / (yMax - yMin);
+
+	locConfig.origin_y = yOffset;
+	locConfig.scale_y = yScale;
+
+	std::sort( zVals.begin(), zVals.end() );
+	float zMax, zMin;
+	zMax = *zVals.rbegin();
+	zMin = *zVals.begin();
+
+	float zOffset = (zMax + zMin) * 0.5;
+	float zScale = 2.0 / (zMax - zMin);
+
+	locConfig.origin_z = zOffset;
+	locConfig.scale_z = zScale;
+
+	this->config = locConfig;
 
 	std::cout << "Calibration finished" << std::endl;
+
+	return;
 }
 
 magnetometer_val_t magnetometer_lsm9ds1::readMeanOverTime( float duration_ms )
@@ -176,7 +182,7 @@ magnetometer_val_t magnetometer_lsm9ds1::readMeanOverTime( float duration_ms )
 	// startzeit = Actuelle Zeit
 	util::time_t act_time = util::getActTime();
 	util::time_t duration = util::calcDuration_ms( duration_ms );
-	
+
 	util::time_t start_time, end_time;
 	start_time = act_time;
 	end_time = act_time + duration;
@@ -189,8 +195,8 @@ magnetometer_val_t magnetometer_lsm9ds1::readMeanOverTime( float duration_ms )
 		value_count++;
 
 		this->readValues();
-		magnetometer_val_t act_vals = this->getValues();		
-		
+		magnetometer_val_t act_vals = this->getValues();
+
 		sum[0] += act_vals.x_val;
 		sum[1] += act_vals.y_val;
 		sum[2] += act_vals.z_val;
@@ -203,7 +209,7 @@ magnetometer_val_t magnetometer_lsm9ds1::readMeanOverTime( float duration_ms )
 	// berechne durchschnitt
 	ret.x_val = sum[0] / value_count;
 	ret.y_val = sum[1] / value_count;
-	ret.z_val = sum[2] / value_count;	 
+	ret.z_val = sum[2] / value_count;
 
 	return ret;
 }
@@ -212,6 +218,10 @@ magnetometer_val_t magnetometer_lsm9ds1::readMeanOverTime( float duration_ms )
 void magnetometer_lsm9ds1::loadFromConfigFile()
 {
     magnetometer_config_t newConfig;
+
+	if( this->magnetometer_entry->getNode( "Magnetometer") != NULL )
+	{
+
     newConfig.origin_x = this->magnetometer_entry->findAttributeInNodeAsFloat( "Offset", "OffsetX", "Magnetometer");
     newConfig.origin_y = this->magnetometer_entry->findAttributeInNodeAsFloat( "Offset", "OffsetY", "Magnetometer");
     newConfig.origin_z = this->magnetometer_entry->findAttributeInNodeAsFloat( "Offset", "OffsetZ", "Magnetometer");
@@ -220,6 +230,7 @@ void magnetometer_lsm9ds1::loadFromConfigFile()
     newConfig.scale_x = this->magnetometer_entry->findAttributeInNodeAsFloat( "Scale", "ScaleX", "Magnetometer");
     newConfig.scale_y = this->magnetometer_entry->findAttributeInNodeAsFloat( "Scale", "ScaleY", "Magnetometer");
     newConfig.scale_z = this->magnetometer_entry->findAttributeInNodeAsFloat( "Scale", "ScaleZ", "Magnetometer");
+	}
 
     this->config = newConfig;
 }
@@ -234,7 +245,6 @@ void magnetometer_lsm9ds1::writeToConfigFile()
 
         magnetometerNode = this->magnetometer_entry->getRoot()->addElement( "Magnetometer");
 	magnetometerNode->addAttribute( "model", "lsm9ds1");
-   
     }
 
     std::stringstream ss;

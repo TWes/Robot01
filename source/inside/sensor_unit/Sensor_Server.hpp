@@ -75,7 +75,7 @@ class Sensor_Server : public Server_inet
 
         magnetometer_interface *magnetometer;
 
-		// Members for ADC		
+		// Members for ADC
 		std::mutex adc_queue_mutex;
 		std::list<ADC_Measurement> adc_values;
 

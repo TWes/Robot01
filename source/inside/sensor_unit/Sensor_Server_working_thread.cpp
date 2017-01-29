@@ -53,7 +53,7 @@ void Sensor_Server::working_thread_function()
 	************************************/
 	static float last_magn_orientation = -1.0;
         //double magn_delta_t = time_difference( act_imu_meas.timestamp, last_imu_meas.timestamp) / 1000.0;
-	std::chrono::microseconds tmp_time_diff = std::chrono::duration_cast<std::chrono::microseconds>(act_imu_meas.timestamp - last_imu_meas.timestamp);
+	std::chrono::milliseconds tmp_time_diff = std::chrono::duration_cast<std::chrono::milliseconds>(act_imu_meas.timestamp - last_imu_meas.timestamp);
 	double magn_delta_t = tmp_time_diff.count();
 
 	double magnAngVelZ = 0.0;	
@@ -82,7 +82,7 @@ void Sensor_Server::working_thread_function()
 
 		last_magn_orientation = act_magn_orientation;
 
-		magnAngVelZ = magn_orientation_change / magn_delta_t;
+		magnAngVelZ = act_magn_orientation;
 
 		act_status_tuple.magnAngVelZ = magnAngVelZ;
 	}
@@ -171,7 +171,6 @@ void Sensor_Server::working_thread_function()
 
 	std::cout << "Velocity; " << left_velocity << "; " <<  right_velocity << std::endl;*/
 	}
-
 	
 
 	/*****************************
@@ -233,7 +232,7 @@ void Sensor_Server::working_thread_function()
 	act_status_tuple.linear_velocity[1] = 0;
 	act_status_tuple.linear_velocity[2] = 0;
 
-    last_wheel_meas = act_wheel_meas;
+    	last_wheel_meas = act_wheel_meas;
 	last_imu_meas = act_imu_meas;
 
         usleep(delay_time);
@@ -279,25 +278,7 @@ void Sensor_Server::dummy_thread_function()
         status_simulation.accLineVel[1] = 0.0;
         status_simulation.accLineVel[2] = 0.0;
 
-        status_simulation.angular_velocity[0] = 0.0;
-        status_simulation.angular_velocity[1] = 0.0;
-        status_simulation.angular_velocity[2] = 0.0;
-
-        status_simulation.BatteryHigh = 232;
-        status_simulation.BatteryLow = 102;
-
-        status_simulation.gyroAngVel[0] = 0.0;
-        status_simulation.gyroAngVel[1] = 0.0;
-        status_simulation.gyroAngVel[2] = 0.0;
-
-        status_simulation.linear_velocity[0] = 0.0;
-        status_simulation.linear_velocity[1] = 0.0;
-        status_simulation.linear_velocity[2] = 0.0;
-
-        status_simulation.magnAngVelZ = 0.1;
-        status_simulation.predicdedAngVelZ = 0.01;
-        status_simulation.predictedLineVelX = 0.0;
-        status_simulation.predictedLineVelY = 0.0;
+   
 
         this->act_status_tuple = status_simulation;
 

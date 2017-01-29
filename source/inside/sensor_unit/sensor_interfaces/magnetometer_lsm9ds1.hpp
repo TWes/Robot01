@@ -1,6 +1,8 @@
 #ifndef MAGNETOMETER_LSM9DS1_HPP
 #define MAGNETOMETER_LSM9DS1_HPP
 
+#include <algorithm>
+
 #include "i2c_access.hpp"
 #include "magnetometer_interface.hpp"
 #include "lsm9ds1_register.hpp"
@@ -38,7 +40,7 @@ private:
 
 	int configMode;
 	magnetometer_config_t config;
-	void configure2D();
+	void configure3D();
 
 	magnetometer_val_t readMeanOverTime( float duration_ms );
 

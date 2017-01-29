@@ -71,11 +71,13 @@ void Sensor_Server::setup()
         this->cam_state = 0;
 
         CAM_thread = std::thread( &Sensor_Server::CAM_thread_funktion, this);
-	    
+
         XMLWriter xmlConfig;
         xmlConfig.addRoot("SensorServerConfig");
 
         xmlConfig.ReadFromFile( "SensorConfigFile.xml");
+
+	i2c_bus.open_connection();
 
         //activate magnetometer
         this->magnetometer = new magnetometer_lsm9ds1( &i2c_bus,
@@ -84,14 +86,12 @@ void Sensor_Server::setup()
         this->magnetometer->activateSensor();
         this->magnetometer->configureSensor();
 
-        i2c_bus.open_connection();
-
         I2C_thread = std::thread( &Sensor_Server::I2C_thread_funktion, this);
 
 
         // activate Gyro and acc
         i2c_bus.i2c_write<uint8_t>( 0x6B, 0x10, 0x20  ); //disable sleep mode
-	
+
         working_thread = std::thread( &Sensor_Server::working_thread_function, this );
 
         xmlConfig.WriteToFile("SensorConfigFile.xml");
@@ -142,8 +142,8 @@ void Sensor_Server::handle_connection( int client_handle )
 		return;
 	}
 
-	std::cout << "Headder: " << headder[0] << " size: " 
-		<< headder[1] << " id: " << headder[2] << std::endl;
+	//std::cout << "Headder: " << headder[0] << " size: " 
+	//	<< headder[1] << " id: " << headder[2] << std::endl;
 
 	if( headder[0] == SET_VARIABLE )
     {
@@ -214,7 +214,7 @@ void Sensor_Server::handle_connection( int client_handle )
 			//std::cout << "get Pose" << std::endl;
 			Position_t pose_buffer = this->act_position;
 			answer_header[1] = sizeof(pose_buffer);
-		
+
 			char message[ 3*sizeof(uint16_t) + 1 * sizeof(Position_t ) ];
 			memcpy( message, answer_header, 3*sizeof(uint16_t) );
             memcpy( (message + 3*sizeof(uint16_t) ), &pose_buffer, 1 * sizeof(Position_t ) );
@@ -339,14 +339,14 @@ void Sensor_Server::handle_connection( int client_handle )
 
 void Sensor_Server::udp_sending_function()
 {
-	
+
 	while( this->continue_server )
 	{
 		// get actual time in ms
 		struct timeval act_time_struct;
 		gettimeofday( &act_time_struct, NULL);
-		float act_time = act_time_struct.tv_sec * 1000.0 + 
-				act_time_struct.tv_usec / 1000.0;		
+		float act_time = act_time_struct.tv_sec * 1000.0 +
+				act_time_struct.tv_usec / 1000.0;
 
 		//std::cout << "udp sending: " << act_time << std::endl;
 
@@ -354,7 +354,7 @@ void Sensor_Server::udp_sending_function()
 		{
 			// Do we have to send already?
 			if( act_time >= entry.next_sending_time )
-			{					
+			{
 				//std::cout << "Should send UDP: " << entry.seq_number << std::endl;		
 
 				switch( entry.sending_object )
@@ -369,7 +369,7 @@ void Sensor_Server::udp_sending_function()
 
 					Position_t pose_buffer = this->act_position;
 					answer_header[1] = sizeof(pose_buffer);
-		
+
 					char message[ 3*sizeof(uint16_t) + 1 * sizeof(Position_t ) ];
 					memcpy( message, answer_header, 3*sizeof(uint16_t) );
 					memcpy( (message + 3*sizeof(uint16_t) ), &pose_buffer, 1 * sizeof(Position_t ) );  
@@ -378,7 +378,7 @@ void Sensor_Server::udp_sending_function()
 								entry.client_info);
 					}
 					break;
-                case GET_RAW_IMU_VALUES:
+	                case GET_RAW_IMU_VALUES:
 				{
 					int16_t answer_header[3];
 					answer_header[0] = SUBSCRIBE_UDP;
@@ -390,9 +390,7 @@ void Sensor_Server::udp_sending_function()
 				            act_imu_meas = *(IMU_values.begin());
 					IMU_queue_mutex.unlock();
 
-					
                 			answer_header[1] = sizeof( IMU_Measurement );
-		
 
 		                        char message[ 3*sizeof(uint16_t) + sizeof(IMU_Measurement) ];
 					memcpy( message, answer_header, 3*sizeof(uint16_t) );
@@ -404,6 +402,8 @@ void Sensor_Server::udp_sending_function()
 					break;
 				case GET_FILTERED_IMU_VALUES:
 					{
+					//std::cout << "Send: " << act_status_tuple.magnAngVelZ << std::endl;
+
 					int16_t answer_header[3];
 					answer_header[0] = SUBSCRIBE_UDP;
 					answer_header[2] = entry.seq_number;
