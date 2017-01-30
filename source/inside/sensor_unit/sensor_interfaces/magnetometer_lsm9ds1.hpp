@@ -47,6 +47,7 @@ private:
     XMLWriter *magnetometer_entry;
     void loadFromConfigFile();
     void writeToConfigFile();
+    void reconfigure(float& x_val,float& y_val,float& z_val);
 
 	float scale;
 };

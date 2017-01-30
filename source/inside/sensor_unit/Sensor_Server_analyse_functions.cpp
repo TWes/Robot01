@@ -4,36 +4,18 @@ float calcMagnetometerOrientation(  magnetometer_val_t magn_meas )
 {
 	float orientation = 0.0;
 
-	//std::cout << "Input: " << magn_meas.x_val << " - " << magn_meas.y_val
-	//		<< " - " <<  magn_meas.z_val << std::endl;
-	
-	if( magn_meas.y_val == 0.0 && magn_meas.x_val < 0.0 )
+	float raw_angle = acos( magn_meas.y_val / \
+		 ( sqrt(  magn_meas.x_val* magn_meas.x_val+ magn_meas.y_val* magn_meas.y_val) ));
+
+	if( magn_meas.x_val > 0 )
 	{
-		orientation = M_PI;
-	}
+		orientation = raw_angle;
 
-	else if( magn_meas.y_val == 0.0 && magn_meas.x_val > 0.0 )
+	}
+	else
 	{
-		orientation = 0.0;
+		orientation = 2*M_PI - raw_angle;
 	}
-
-
-	else if( magn_meas.y_val > 0.0 )
-	{
-		float calc = 0.5 * M_PI;
-		calc -= atan( magn_meas.x_val / magn_meas.y_val );
-		orientation = calc;	
-	}
-
-	else if( magn_meas.y_val < 0.0 )
-	{
-		float calc = 1.5 * M_PI;
-		calc -= atan( magn_meas.x_val / magn_meas.y_val );
-		orientation = calc;
-	}
-
-	//std::cout << "Orientation: " << orientation << std::endl;
 
 	return orientation;
-
 }

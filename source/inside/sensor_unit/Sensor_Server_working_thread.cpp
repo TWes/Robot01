@@ -52,9 +52,8 @@ void Sensor_Server::working_thread_function()
 	* out of the magnetometer
 	************************************/
 	static float last_magn_orientation = -1.0;
-        //double magn_delta_t = time_difference( act_imu_meas.timestamp, last_imu_meas.timestamp) / 1000.0;
 	std::chrono::milliseconds tmp_time_diff = std::chrono::duration_cast<std::chrono::milliseconds>(act_imu_meas.timestamp - last_imu_meas.timestamp);
-	double magn_delta_t = tmp_time_diff.count();
+	double magn_delta_t = tmp_time_diff.count() / 1000.0;
 
 	double magnAngVelZ = 0.0;	
 
@@ -67,22 +66,14 @@ void Sensor_Server::working_thread_function()
 
 		if( last_magn_orientation >= 0.0 )
 		{
-			magn_orientation_change = last_magn_orientation - act_magn_orientation;
-	
-			if( magn_orientation_change > M_PI)
-			{
-				magn_orientation_change = (2*M_PI) - magn_orientation_change;
-				magn_orientation_change *= -1.0;
-			}
-			else if( magn_orientation_change < -M_PI )
-	 		{
-				magn_orientation_change = magn_orientation_change + (2*M_PI);
-			}
+			float abs_magn_change = act_magn_orientation - last_magn_orientation;
+			
+			magn_orientation_change = abs_magn_change / magn_delta_t;
 		}
 
 		last_magn_orientation = act_magn_orientation;
 
-		magnAngVelZ = act_magn_orientation;
+		magnAngVelZ = 0.5 * act_status_tuple.magnAngVelZ + 0.5 * magn_orientation_change;
 
 		act_status_tuple.magnAngVelZ = magnAngVelZ;
 	}

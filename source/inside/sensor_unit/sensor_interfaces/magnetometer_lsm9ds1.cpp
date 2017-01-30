@@ -92,6 +92,9 @@ int magnetometer_lsm9ds1::readValues()
 	newZVal = (newZVal - this->config.origin_z) \
 			* this->config.scale_z;
 
+
+	this->reconfigure( newXVal, newYVal, newZVal );
+
 	this->x_val = newXVal;
         this->y_val = newYVal;
         this->z_val = newZVal;
@@ -274,4 +277,64 @@ void magnetometer_lsm9ds1::writeToConfigFile()
     offsetNode->addAttribute( "OffsetY", ss.str() );
     ss.str(std::string()); ss << this->config.origin_z;
     offsetNode->addAttribute( "OffsetZ", ss.str() );
+}
+
+
+void magnetometer_lsm9ds1::reconfigure(float& x_val,float& y_val,float& z_val)
+{
+    if( x_val > 1.0 )
+    {
+	float diff = 1.0 - x_val;
+	this->config.origin_x -= diff;
+	x_val += -diff;
+
+	//std::cout << "reconfigure X about :" << -diff << "; new val=" << this->config.origin_x << std::endl;
+    }
+    else if( x_val < -1.0 )
+    {
+    	float diff = -1.0 - x_val;
+    	this->config.origin_x += -diff;
+	x_val += -diff;
+	
+	//std::cout << "reconfigure X about :" << -diff << "; new val=" << this->config.origin_x << std::endl;
+    }
+    
+    if( y_val > 1.0 )
+    {
+	float diff = 1.0 - y_val;
+	this->config.origin_y += -diff;
+	y_val += -diff;
+
+	//std::cout << "reconfigure Y about :" << -diff << "; new val=" << this->config.origin_y << std::endl;
+    }
+    else if( y_val < -1.0 )
+    {
+    	float diff = -1.0 - y_val;
+    	this->config.origin_y += -diff;
+	y_val += -diff;
+	
+	//std::cout << "reconfigure Y about :" << -diff << "; new val=" << this->config.origin_y << std::endl;
+    }
+
+
+    if( z_val > 1.0 )
+    {
+	float diff = 1.0 - z_val;
+	this->config.origin_z += -diff;
+	z_val += -diff;
+
+	//std::cout << "reconfigure Z about :" << -diff << "; new val=" << this->config.origin_z << std::endl;
+    }
+    else if( z_val < -1.0 )
+    {
+    	float diff = -1.0 - z_val;
+    	this->config.origin_z += -diff;
+	z_val += -diff;
+	
+	//std::cout << "reconfigure Z about :" << -diff << "; new val=" << this->config.origin_z << std::endl;
+    }
+
+
+
+
 }
