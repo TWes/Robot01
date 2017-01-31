@@ -130,9 +130,9 @@ void Sensor_Server::working_thread_function()
         const double max_velocity = 1.0;
 
         double right_distance_since_last = (right_direction ? right_direction : 1) * \
-                    right_steps_since_last * decoder_steps_to_m;
+        right_steps_since_last * decoder_steps_to_m;
         double left_distance_since_last = (left_direction ? left_direction : 1) * \
-                    left_steps_since_last * decoder_steps_to_m;
+	left_steps_since_last * decoder_steps_to_m;
 
         // the direction variable depends on the direction send by the GPIO Server
         // -1 back; 0 - No movement; 1 foreward
@@ -169,13 +169,8 @@ void Sensor_Server::working_thread_function()
          * the IMU
          ****************************/	
 	// Get Time Difference and convert it to seconds
-        //double imu_delta_t = time_difference( act_imu_meas.timestamp, last_imu_meas.timestamp) / 1000.0;
-	std::chrono::microseconds tmp_imu_time_diff = std::chrono::duration_cast<std::chrono::microseconds>(act_imu_meas.timestamp - last_imu_meas.timestamp);
-	double imu_delta_t = tmp_imu_time_diff.count();
-
-	static float gyroBiasX = 4.9;
-	static float gyroBiasY = 3.01;
-	static float gyroBiasZ = -10.18;
+	std::chrono::milliseconds tmp_imu_time_diff = std::chrono::duration_cast<std::chrono::milliseconds>(act_imu_meas.timestamp - last_imu_meas.timestamp);
+	double imu_delta_t = tmp_imu_time_diff.count() / 1000.0;
 
 	static float accBiasX = -0.1;
 	static float accBiasY = 0.03;
@@ -190,9 +185,9 @@ void Sensor_Server::working_thread_function()
 	}
 	else
 	{		
-		gyroAngVelX = act_imu_meas.gyro[0] - gyroBiasX;
-		gyroAngVelY = act_imu_meas.gyro[1] - gyroBiasY;
-		gyroAngVelZ = act_imu_meas.gyro[2] - gyroBiasZ;
+		gyroAngVelX = act_imu_meas.gyro[0];
+		gyroAngVelY = act_imu_meas.gyro[1];
+		gyroAngVelZ = act_imu_meas.gyro[2];
 		
 
 		accLineVelX = (act_imu_meas.acc[0] - accBiasX) * delta_t;
@@ -213,9 +208,9 @@ void Sensor_Server::working_thread_function()
 	* Combine all the values
 	*************************/
 	//Calculate the angular velocity from gyroscope
-	act_status_tuple.angular_velocity[0] = 0;
-	act_status_tuple.angular_velocity[1] = 0;
-	act_status_tuple.angular_velocity[2] = 0;
+	act_status_tuple.angular_velocity[0] = gyroAngVelX;
+	act_status_tuple.angular_velocity[1] = gyroAngVelY;
+	act_status_tuple.angular_velocity[2] = gyroAngVelZ * 0.5 + magnAngVelZ * 0.5 ;
 		
 
 	// Calculate the velocity out of accelerometer

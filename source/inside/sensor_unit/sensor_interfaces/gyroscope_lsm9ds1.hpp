@@ -5,6 +5,7 @@
 #include "gyroscope_interface.hpp"
 #include "lsm9ds1_register.hpp"
 #include "XMLWriter.hpp"
+#include "time_helper.hpp"
 
 typedef struct
 {
@@ -18,12 +19,12 @@ typedef struct
  * @brief The gyroscope_lsm9ds1 class
  * The implementation of the lsm9ds gyroscope
  */
-class gysroscope_lsm9ds1 : public gyroscope_interface
+class gyroscope_lsm9ds1 : public gyroscope_interface
 {
 
 public:
-	gysroscope_lsm9ds1(i2c_access *i2c_interface, XMLWriter &file, int configMode = 0);
-    ~gysroscope_lsm9ds1();
+	gyroscope_lsm9ds1(i2c_access *i2c_interface, XMLWriter &file, int configMode = 0);
+    ~gyroscope_lsm9ds1();
 
     int activateSensor();
     int configureSensor();
@@ -38,6 +39,8 @@ private:
 	XMLWriter *gyroscope_entry;
     void loadFromConfigFile();
     void writeToConfigFile();
+
+    gyroscope_val_t readMeanOverTime( float duration_ms );
 
     float scale;
 

@@ -1,7 +1,7 @@
 #include "gyroscope_lsm9ds1.hpp"
 
 
-gysroscope_lsm9ds1::gysroscope_lsm9ds1(i2c_access *i2c_interface, XMLWriter &file, int configMode)
+gyroscope_lsm9ds1::gyroscope_lsm9ds1(i2c_access *i2c_interface, XMLWriter &file, int configMode)
 {
     this->i2c_bus = i2c_interface;
 
@@ -13,12 +13,12 @@ gysroscope_lsm9ds1::gysroscope_lsm9ds1(i2c_access *i2c_interface, XMLWriter &fil
 }
 
 
-gysroscope_lsm9ds1::~gysroscope_lsm9ds1()
+gyroscope_lsm9ds1::~gyroscope_lsm9ds1()
 {
 }
 
 
-int gysroscope_lsm9ds1::activateSensor()
+int gyroscope_lsm9ds1::activateSensor()
 {
 
      i2c_bus->i2c_write<uint8_t>( GYROSCOPE_ADDRESS, CTRL_REG1_G, (1<<ODR_G)); //disable sleep mode
@@ -27,7 +27,7 @@ int gysroscope_lsm9ds1::activateSensor()
 }
 
 
-int gysroscope_lsm9ds1::configureSensor()
+int gyroscope_lsm9ds1::configureSensor()
 {
 
     switch ( this->configMode )
@@ -49,7 +49,7 @@ int gysroscope_lsm9ds1::configureSensor()
 }
 
 
-int gysroscope_lsm9ds1::readValues()
+int gyroscope_lsm9ds1::readValues()
 {
     int16_t gyro_values[3];
     int retry_counter = 0;
@@ -65,21 +65,76 @@ int gysroscope_lsm9ds1::readValues()
 
     if( imu1_read_ret >= 0 )
     {
-        this->x_val = gyro_values[0] * this->scale;
-        this->y_val = gyro_values[1] * this->scale;
-        this->z_val = gyro_values[2] * this->scale;
+	// convert from mdps to gradient per second
+	float convert_to_gradient = (2 * M_PI)/(360);
+
+        this->x_val = (gyro_values[0] * this->scale - this->config.origin_x) * convert_to_gradient;
+        this->y_val = (gyro_values[1] * this->scale - this->config.origin_y) * convert_to_gradient;
+        this->z_val = (gyro_values[2] * this->scale - this->config.origin_z) * convert_to_gradient;
     }
 
     return imu1_read_ret;
 }
 
-void gysroscope_lsm9ds1::configure()
+void gyroscope_lsm9ds1::configure()
 {
+	std::cout << "Let the robot stand still for 5 seconds" << std::endl;
 
+	gyroscope_config_t loc_config;
+
+	gyroscope_val_t mean = readMeanOverTime( 5000 );
+
+	loc_config.origin_x = mean.x_val;
+	loc_config.origin_y = mean.y_val;
+	loc_config.origin_z = mean.z_val;
+
+	std::cout << "x: " << mean.x_val << "; y: " << mean.y_val << "; z: " << mean.z_val << std::endl;
+
+	this->config = loc_config;
+}
+
+gyroscope_val_t gyroscope_lsm9ds1::readMeanOverTime( float duration_ms )
+{
+	gyroscope_val_t ret;
+
+	// startzeit = Actuelle Zeit
+	util::time_t act_time = util::getActTime();
+	util::time_t duration = util::calcDuration_ms( duration_ms );
+
+	util::time_t start_time, end_time;
+	start_time = act_time;
+	end_time = act_time + duration;
+
+	float sum[3] = {0.0};
+	unsigned int value_count = 0;
+
+	while( act_time < end_time )
+	{
+		value_count++;
+
+		this->readValues();
+		gyroscope_val_t act_vals = this->getValues();
+
+		sum[0] += act_vals.x_val;
+		sum[1] += act_vals.y_val;
+		sum[2] += act_vals.z_val;
+
+		usleep( 10000 );
+
+		act_time = util::getActTime();
+	}
+
+	// berechne durchschnitt
+	ret.x_val = sum[0] / value_count;
+	ret.y_val = sum[1] / value_count;
+	ret.z_val = sum[2] / value_count;
+
+	return ret;
 }
 
 
-void gysroscope_lsm9ds1::loadFromConfigFile()
+
+void gyroscope_lsm9ds1::loadFromConfigFile()
 {
     gyroscope_config_t newConfig;
 
@@ -94,7 +149,7 @@ void gysroscope_lsm9ds1::loadFromConfigFile()
     this->config = newConfig;
 }
 
-void gysroscope_lsm9ds1::writeToConfigFile()
+void gyroscope_lsm9ds1::writeToConfigFile()
 {
     XMLElement *gyroscopeNode = this->gyroscope_entry->getNode( "Gyroscope" );
     if( gyroscopeNode == NULL )

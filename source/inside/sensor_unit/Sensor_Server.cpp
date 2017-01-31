@@ -87,7 +87,7 @@ void Sensor_Server::setup()
         this->magnetometer->configureSensor();
 
         //activate gyroscope
-        this->gyroscope = new gysroscope_lsm9ds1( &i2c_bus,
+        this->gyroscope = new gyroscope_lsm9ds1( &i2c_bus,
                                                   xmlConfig,
                                                   (this->options.calibrate_gyroscope? 2 : 1));
         this->gyroscope->activateSensor();
