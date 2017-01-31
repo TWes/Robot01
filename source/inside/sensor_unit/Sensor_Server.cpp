@@ -89,7 +89,7 @@ void Sensor_Server::setup()
         //activate gyroscope
         this->gyroscope = new gysroscope_lsm9ds1( &i2c_bus,
                                                   xmlConfig,
-                                                  (this->options.calibrate_magnetomer? 2 : 1));
+                                                  (this->options.calibrate_gyroscope? 2 : 1));
         this->gyroscope->activateSensor();
         this->gyroscope->configureSensor();
 
@@ -705,49 +705,14 @@ void Sensor_Server::I2C_thread_funktion()
 
 
 		// Read Gyroscope
-		int16_t gyro_values[3];
         gyroscope_val_t meas;
-        if( this->gyroscope->readValues() > 0 )
+        if( this->gyroscope->readValues() >= 0 )
         {
             meas = this->gyroscope->getValues();
-            gyro_values[0] = meas.x_val;
-            gyro_values[1] = meas.y_val;
-            gyro_values[2] = meas.z_val;
+            IMU_meas.gyro[0] = meas.x_val;
+            IMU_meas.gyro[1] = meas.y_val;
+            IMU_meas.gyro[2] = meas.z_val;
         }
-
-
-        /*
-        retry_counter = 0;
-        int imu1_read_ret = -1;
-
-		do
-		{	
-			imu1_read_ret = i2c_bus.i2c_read( 0x6b, 0x18, 6, (char*) gyro_values );
-
-			//std::cout << "Read: " << (int) IMU_buffer << std::endl;
-
-			if( imu1_read_ret < 0 )
-			{
-				std::string errormsg = "Error while reading imu: 0x68, 0x3B -> ";
-				errormsg += std::string( std::to_string(imu1_read_ret) );
-				logger << errormsg;
-			}
-
-		} while( imu1_read_ret < 0 && ++retry_counter < 3 );
-
-		if( imu1_read_ret < 0 )
-		{
-			std::cout << "Fehler beim lesen dere IMU: " << imu1_read_ret
-				<< "; " << errno << ": " << strerror( errno) << std::endl;
-		}
-		else
-		{	//Gyroscope
-
-
-			IMU_meas.gyro[0] = (gyro_values[0] * 8.75)/1000.0;
-			IMU_meas.gyro[1] = (gyro_values[1] * 8.75)/1000.0;
-			IMU_meas.gyro[2] = (gyro_values[2] * 8.75)/1000.0;
-        } */
 
 
 		// Read Accelerometer

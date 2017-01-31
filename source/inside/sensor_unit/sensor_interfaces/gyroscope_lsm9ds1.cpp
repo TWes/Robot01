@@ -20,8 +20,8 @@ gysroscope_lsm9ds1::~gysroscope_lsm9ds1()
 
 int gysroscope_lsm9ds1::activateSensor()
 {
-	std::cout << "activate Sensor" << std::endl;
-    i2c_bus->i2c_write<uint8_t>( GYROSCOPE_ADDRESS, CTRL_REG1_G, (1<<ODR_G)); //disable sleep mode
+
+     i2c_bus->i2c_write<uint8_t>( GYROSCOPE_ADDRESS, CTRL_REG1_G, (1<<ODR_G)); //disable sleep mode
 
 	return 0;
 }
@@ -29,7 +29,6 @@ int gysroscope_lsm9ds1::activateSensor()
 
 int gysroscope_lsm9ds1::configureSensor()
 {
-	std::cout << "configureSensor" << std::endl;
 
     switch ( this->configMode )
     {
@@ -52,19 +51,19 @@ int gysroscope_lsm9ds1::configureSensor()
 
 int gysroscope_lsm9ds1::readValues()
 {
-	std::cout << "readValues" << std::endl;
-
     int16_t gyro_values[3];
     int retry_counter = 0;
     int imu1_read_ret = -1;
 
     do
     {
-        imu1_read_ret = i2c_bus->i2c_read( GYROSCOPE_ADDRESS, OUT_X_G ,6, (char*) gyro_values );
+        //imu1_read_ret = i2c_bus->i2c_read( GYROSCOPE_ADDRESS, OUT_X_G ,6, (char*) gyro_values );
+	imu1_read_ret = i2c_bus->i2c_read( 0x6b, 0x18, 6, (char*) gyro_values);
+
 
     } while( imu1_read_ret < 0 && ++retry_counter < 3 );
 
-    if( imu1_read_ret > 0 )
+    if( imu1_read_ret >= 0 )
     {
         this->x_val = gyro_values[0] * this->scale;
         this->y_val = gyro_values[1] * this->scale;
@@ -76,13 +75,12 @@ int gysroscope_lsm9ds1::readValues()
 
 void gysroscope_lsm9ds1::configure()
 {
-    std::cout << "configure" << std::endl;
+
 }
 
 
 void gysroscope_lsm9ds1::loadFromConfigFile()
 {
-	std::cout << "loadFromConfigFile" << std::endl;
     gyroscope_config_t newConfig;
 
     if( this->gyroscope_entry->getNode( "Gyroscope") != NULL )
@@ -98,7 +96,6 @@ void gysroscope_lsm9ds1::loadFromConfigFile()
 
 void gysroscope_lsm9ds1::writeToConfigFile()
 {
-	std::cout << "writeToConfigFile" << std::endl;
     XMLElement *gyroscopeNode = this->gyroscope_entry->getNode( "Gyroscope" );
     if( gyroscopeNode == NULL )
     {
