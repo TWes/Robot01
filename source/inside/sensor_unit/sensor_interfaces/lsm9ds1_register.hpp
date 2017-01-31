@@ -2,6 +2,14 @@
 #define LSM9DS1_REGISTER_HPP
 
 #define MAGNETOMETER_ADDRESS 0x1e
+#define GYROSCOPE_ADDRESS 0x6b
+
+#define CTRL_REG1_G 0x10
+#define ODR_G 5
+#define FS_G 3
+#define BW_G 0
+
+#define OUT_X_G 0x18
 
 #define CTRL_REG1_M 0x20
 #define TEMP_COMP 7

@@ -77,7 +77,7 @@ void Sensor_Server::setup()
 
         xmlConfig.ReadFromFile( "SensorConfigFile.xml");
 
-	i2c_bus.open_connection();
+        i2c_bus.open_connection();
 
         //activate magnetometer
         this->magnetometer = new magnetometer_lsm9ds1( &i2c_bus,
@@ -86,10 +86,16 @@ void Sensor_Server::setup()
         this->magnetometer->activateSensor();
         this->magnetometer->configureSensor();
 
+        //activate gyroscope
+        this->gyroscope = new gysroscope_lsm9ds1( &i2c_bus,
+                                                  xmlConfig,
+                                                  (this->options.calibrate_magnetomer? 2 : 1));
+        this->gyroscope->activateSensor();
+        this->gyroscope->configureSensor();
+
         I2C_thread = std::thread( &Sensor_Server::I2C_thread_funktion, this);
 
-
-        // activate Gyro and acc
+        // activate acc
         i2c_bus.i2c_write<uint8_t>( 0x6B, 0x10, 0x20  ); //disable sleep mode
 
         working_thread = std::thread( &Sensor_Server::working_thread_function, this );
@@ -697,11 +703,22 @@ void Sensor_Server::I2C_thread_funktion()
 			IMU_meas.temp = (temp_values / 16.0) + 25.0;
 		}
 
-		
+
 		// Read Gyroscope
 		int16_t gyro_values[3];
-		retry_counter = 0;
-		int imu1_read_ret = -1;		
+        gyroscope_val_t meas;
+        if( this->gyroscope->readValues() > 0 )
+        {
+            meas = this->gyroscope->getValues();
+            gyro_values[0] = meas.x_val;
+            gyro_values[1] = meas.y_val;
+            gyro_values[2] = meas.z_val;
+        }
+
+
+        /*
+        retry_counter = 0;
+        int imu1_read_ret = -1;
 
 		do
 		{	
@@ -726,15 +743,11 @@ void Sensor_Server::I2C_thread_funktion()
 		else
 		{	//Gyroscope
 
-			/*std::cout 	<< "x: " << (gyro_values[0] * 8.75)/1000.0 << "\n"
-					<< "y: " << (gyro_values[1] * 8.75)/1000.0 << "\n"
-					<< "z: " << (gyro_values[2] * 8.75)/1000.0 << std::endl; */
 
-			
 			IMU_meas.gyro[0] = (gyro_values[0] * 8.75)/1000.0;
 			IMU_meas.gyro[1] = (gyro_values[1] * 8.75)/1000.0;
 			IMU_meas.gyro[2] = (gyro_values[2] * 8.75)/1000.0;
-		}
+        } */
 
 
 		// Read Accelerometer
@@ -751,7 +764,7 @@ void Sensor_Server::I2C_thread_funktion()
 			if( imu2_read_ret < 0 )
 			{
 				std::string errormsg = "Error while reading imu: 0x68, 0x3B -> ";
-				errormsg += std::string( std::to_string(imu1_read_ret) );
+                errormsg += std::string( std::to_string(imu2_read_ret) );
 				logger << errormsg;
 			}
 
@@ -761,7 +774,7 @@ void Sensor_Server::I2C_thread_funktion()
 
 		if( imu2_read_ret < 0 )
 		{
-			std::cout << "Fehler beim lesen dere IMU: " << imu1_read_ret
+            std::cout << "Fehler beim lesen dere IMU: " << imu2_read_ret
 				<< "; " << errno << ": " << strerror( errno) << std::endl;
 		}
 		else
@@ -778,27 +791,12 @@ void Sensor_Server::I2C_thread_funktion()
 
 
 
-
-		/*std::fstream file;
-		file.open( "rawmagnetometer", 
-				std::fstream::out | std::fstream::app); */
 	
 		// Read Magnetometer
 		if( this->magnetometer->readValues() >= 0 )
-	        {
-	            IMU_meas.mag = this->magnetometer->getValues();
-
-			/*std::cout 	<< "x: " << IMU_meas.mag.x_val << "\n"
-					<< "y: " << IMU_meas.mag.y_val << "\n"
-					<< "z: " << IMU_meas.mag.z_val << std::endl;*/
-	
-			/*file 	<< IMU_meas.mag.x_val << ","
-				<< IMU_meas.mag.y_val << ","
-				<< IMU_meas.mag.z_val << "\n" << std::flush; */
-
-        	}
-
-		//file.close();
+        {
+            IMU_meas.mag = this->magnetometer->getValues();
+        }
 
 
 		IMU_meas.timestamp = act_time;
@@ -896,6 +894,10 @@ void Sensor_Server::evaluate_options( int argc, char** argv )
 			{
 				this->options.calibrate_magnetomer = true;
 			}
+            else if( end == "gyro")
+            {
+                this->options.calibrate_gyroscope = true;
+            }
 			else
 			{
 				std::cout << "Unknown Calibration: \"" << end << "\"" << std::endl;
@@ -928,7 +930,8 @@ void Sensor_Server::printHelp()
 {
 	std::cout << "Sensor Server" << "\n\n"
 		<< "-h : Print this help message.\n\n"
-		<< "-cmagn : Calibrate the magnetometer.\n"
+        << "-cmagn : Calibrate the magnetometer.\n"
+        << "-cgyro : Calibrate the gyroscope.\n"
 		<< "-d : start in dummy mode. No real sensor data will be send."
 	<< std::endl;
 }

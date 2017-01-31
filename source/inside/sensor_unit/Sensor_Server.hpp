@@ -26,6 +26,7 @@
 
 #include "sensor_interfaces/magnetometer_interface.hpp"
 #include "sensor_interfaces/magnetometer_lsm9ds1.hpp"
+#include "sensor_interfaces/gyroscope_lsm9ds1.hpp"
 
 /** Struct that contains every information needed
     to handle an udp subscription */
@@ -44,6 +45,7 @@ typedef struct{
 	when starting the server */
 typedef struct{
 	bool calibrate_magnetomer = false;	/// Shoult the Magnetometer be calibrated at the beginning?
+    bool calibrate_gyroscope = false; /// Should the gyroscope be calirated
 	bool show_help = false;		/// just show help and exit
 	bool dummy_mode = false	;	/// If this is true, the sensor server will send computer generated values
 } option_struct_t;
@@ -74,6 +76,7 @@ class Sensor_Server : public Server_inet
 		std::thread I2C_thread;
 
         magnetometer_interface *magnetometer;
+        gyroscope_interface *gyroscope;
 
 		// Members for ADC
 		std::mutex adc_queue_mutex;

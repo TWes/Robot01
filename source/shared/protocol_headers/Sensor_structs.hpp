@@ -34,6 +34,14 @@ typedef struct
 
 } magnetometer_val_t;
 
+/** Struct containing the one gyroscope meas */
+typedef struct
+{
+	float x_val; /// x-axis measurement
+	float y_val; /// z-axis measurement
+	float z_val; /// z-axis measurement
+
+} gyroscope_val_t;
 
 /** One IMU Measurement */
 typedef struct
