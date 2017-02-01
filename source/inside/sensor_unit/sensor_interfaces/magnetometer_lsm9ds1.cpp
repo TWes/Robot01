@@ -20,7 +20,7 @@ int magnetometer_lsm9ds1::activateSensor()
 	tmp = 0;
 	tmp |= 0x1 << TEMP_COMP; // Enable temperature compensation
 	tmp |= 0x1 << OM; // operation mode medium performance
-	tmp |= 0x4 << DO; // Data Rate 10 Hz
+	tmp |= 0x7 << DO; // Data Rate 80 Hz
 
 	i2c_bus->i2c_write<uint8_t>( MAGNETOMETER_ADDRESS, CTRL_REG1_M, tmp  );
 
