@@ -73,7 +73,7 @@ void Sensor_Server::working_thread_function()
 
 		last_magn_orientation = act_magn_orientation;
 
-		magnAngVelZ = 0.5 * act_status_tuple.magnAngVelZ + 0.5 * magn_orientation_change;
+		magnAngVelZ = 0.7 * act_status_tuple.magnAngVelZ + 0.3 * magn_orientation_change;
 
 		act_status_tuple.magnAngVelZ = magnAngVelZ;
 	}
@@ -207,7 +207,6 @@ void Sensor_Server::working_thread_function()
 	/************************
 	* Combine all the values
 	*************************/
-	//Calculate the angular velocity from gyroscope
 	act_status_tuple.angular_velocity[0] = gyroAngVelX;
 	act_status_tuple.angular_velocity[1] = gyroAngVelY;
 	act_status_tuple.angular_velocity[2] = gyroAngVelZ * 0.5 + magnAngVelZ * 0.5 ;
