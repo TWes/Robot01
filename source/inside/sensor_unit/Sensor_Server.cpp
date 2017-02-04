@@ -888,6 +888,10 @@ void Sensor_Server::evaluate_options( int argc, char** argv )
             {
                 this->options.calibrate_gyroscope = true;
             }
+			else if ( end == "acc" )
+			{
+				this->options.calibrate_accelerometer = true;
+			}
 			else
 			{
 				std::cout << "Unknown Calibration: \"" << end << "\"" << std::endl;

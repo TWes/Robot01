@@ -46,8 +46,12 @@ typedef struct{
 /** Struct that contains the options passed
 	when starting the server */
 typedef struct{
-	bool calibrate_magnetomer = false;	/// Shoult the Magnetometer be calibrated at the beginning?
-    bool calibrate_gyroscope = false; /// Should the gyroscope be calirated
+	/// Shoult the Magnetometer be calibrated at the beginning?
+	bool calibrate_magnetomer = false;
+	/// Should the accelerometer be calirated
+    bool calibrate_accelerometer = false; 
+	/// Should the gyroscope be calirated
+    bool calibrate_gyroscope = false; 
 	bool show_help = false;		/// just show help and exit
 	bool dummy_mode = false	;	/// If this is true, the sensor server will send computer generated values
 } option_struct_t;
