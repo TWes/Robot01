@@ -10,6 +10,7 @@
 #include <sys/time.h>
 #include <iostream>
 #include <algorithm>
+#include <exception>
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -62,14 +63,16 @@ class Sensor_Server : public Server_inet
 		Sensor_Server( int argc, char** argv, int portnr );
 		~Sensor_Server();
 
-		std::mutex i2c_mutex;
-		i2c_access i2c_bus;
+        /// Mutex which locks on i2c access
+        std::mutex i2c_mutex;
+        /// Access wrapper to i2c bus
+        i2c_access i2c_bus;
 
-		bool start_up;
-
-      		/* Variables need for calcualtation */
-	        signed char left_direction;
-        	signed char right_direction;
+        /* Variables need for calcualtation */
+        /// Direction given by gpio server
+         signed char left_direction;
+        /// Direction given by gpio server
+        signed char right_direction;
 
 		// Members for the i2c communication
 		void I2C_thread_funktion();

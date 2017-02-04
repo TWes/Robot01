@@ -35,16 +35,18 @@ void logfile::open( std::string filename )
 
 }
 
-
+/**
+ * @brief logfile::close
+ * Close the logfile
+ */
 void logfile::close()
 {
-
     if( !this->file.is_open() )
     {
         return;
     }
 
-    this->close();
+    this->file.close();
 }
 
 void logfile::operator <<(std::string message)

@@ -29,11 +29,15 @@ std::string toBinaryString( int16_t number )
 	return ret;
 }
 
+/**
+ * @brief Sensor_Server::Sensor_Server Stadnard constructor
+ * @param argc Number of parameters in array args
+ * @param argv Arguments as char pointer array
+ * @param portnr Port to which the Sensor Server should listen
+ */
 Sensor_Server::Sensor_Server( int argc, char** argv, int portnr ) \
 	: Server_inet( portnr )
 {
-	this->start_up =true;
-
 	this->udp_sending_thread = NULL;
 
     this->magnetometer = NULL;
@@ -41,6 +45,10 @@ Sensor_Server::Sensor_Server( int argc, char** argv, int portnr ) \
 	this->evaluate_options( argc, argv );
 }
 
+/**
+ * @brief Sensor_Server::~Sensor_Server
+ * Std deconstructor.
+ */
 Sensor_Server::~Sensor_Server()
 {
 	if( this->udp_sending_thread != NULL )
@@ -54,6 +62,11 @@ Sensor_Server::~Sensor_Server()
     }
 }
 
+/**
+ * @brief Sensor_Server::setup
+ * Override of virtual function which is calles before the
+ * server listens to the port.
+ */
 void Sensor_Server::setup()
 {
 	// If just the help should be shown -> exit
@@ -119,24 +132,46 @@ void Sensor_Server::setup()
 
 }
 
+/**
+ * @brief Sensor_Server::cleanup
+ * Override od virtual function which is calles when the server stops listen
+ * to the port.
+ */
 void Sensor_Server::cleanup()
 {
 	std::cout << "Wait for threads to end" << std::endl;
 
-	webcam.release();
+    webcam.release();
 
-	working_thread.join();
+    if( working_thread.joinable() )
+    {
+        working_thread.join();
+    }
 
-	CAM_thread.join();
-	I2C_thread.join();
+    if( CAM_thread.joinable() )
+    {
+        CAM_thread.join();
+    }
 
-    	i2c_bus.close_connection();
+    if( I2C_thread.joinable() )
+    {
+        I2C_thread.join();
+    }
 
-	log_file << "Sensor Server cleanup compleded (closing logfile now)";
+    i2c_bus.close_connection();
 
-	log_file.close();
+    log_file << "Sensor Server cleanup compleded (closing logfile now)";
+
+    log_file.close();
+
 }
 
+/**
+ * @brief Sensor_Server::handle_connection
+ * Override of virtual function which is called as a
+ * callback, when a client has written something.
+ * @param client_handle THe handle who writes smth.
+ */
 void Sensor_Server::handle_connection( int client_handle )
 {
     int16_t headder[3];
@@ -343,9 +378,13 @@ void Sensor_Server::handle_connection( int client_handle )
 	}
 }
 
+/**
+ * @brief Sensor_Server::udp_sending_function
+ * THis function runs in a thread and takes care
+ * of the udp subsciptions
+ */
 void Sensor_Server::udp_sending_function()
 {
-
 	while( this->continue_server )
 	{
 		// get actual time in ms
@@ -445,6 +484,11 @@ void Sensor_Server::udp_sending_function()
 
 }
 
+/**
+ * @brief Sensor_Server::deleteIdInUDPSubscriber
+ * Deletes the given id  from the subscriber list.
+ * @param id Id to delete
+ */
 void Sensor_Server::deleteIdInUDPSubscriber(int id)
 {
     //std::cout << "Unsubscribe UDP with id: " << id << std::endl;
@@ -458,7 +502,11 @@ void Sensor_Server::deleteIdInUDPSubscriber(int id)
     //std::cout << "Size after erasing: " << this->UDP_subscriber.size() << std::endl;
 }
 
-
+/**
+ * @brief Sensor_Server::CAM_thread_funktion
+ * Thread function which which gets the cam image
+ * and processes it.
+ */
 void Sensor_Server::CAM_thread_funktion()
 {
 	while( this->continue_server )
@@ -525,8 +573,12 @@ void Sensor_Server::CAM_thread_funktion()
 
 	} // end of WHILE loop
 }
-		
 
+/**
+ * @brief Sensor_Server::I2C_thread_funktion
+ * Thread function which reads the sensor values
+ * available over i2c
+ */
 void Sensor_Server::I2C_thread_funktion()
 {
 	logfile logger;
