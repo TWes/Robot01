@@ -104,10 +104,13 @@ void Sensor_Server::working_thread_function()
          * the decoder
          ****************************/
 	// Get Time Difference and convert it to seconds
-	//double delta_t = time_difference( act_wheel_meas.timestamp, last_wheel_meas.timestamp) / 1000.0;
-	std::chrono::microseconds tmp_wheel_time_diff = std::chrono::duration_cast<std::chrono::microseconds>(act_wheel_meas.timestamp - last_wheel_meas.timestamp);
-	double delta_t = tmp_wheel_time_diff.count();
-	
+	std::chrono::milliseconds tmp_wheel_time_diff = std::chrono::duration_cast<std::chrono::milliseconds>(act_wheel_meas.timestamp - last_wheel_meas.timestamp);
+	double delta_t = tmp_wheel_time_diff.count() / 1000.0; // Delta t in seconds
+
+	static double decoder_left_velocity = 0.0;
+	static double decoder_right_velocity = 0.0;
+	static double decoder_ang_velocity = 0.0;
+	static double decoder_fwd_velocity = 0.0;
 
 	// No new measurements
         if( delta_t == 0.0 )
@@ -122,45 +125,45 @@ void Sensor_Server::working_thread_function()
         int left_steps_since_last = act_wheel_meas.Left_Wheel_Rotations - last_wheel_meas.Left_Wheel_Rotations;
 
         // in Meter
-        const double wheel_circumference = 0.124;
-	const double decoder_steps_to_m = 0.007920792;
-
-        // Throuought test we found out, that the robot
-        // couldnt move faster than that
-        const double max_velocity = 1.0;
-
-        double right_distance_since_last = (right_direction ? right_direction : 1) * \
-        right_steps_since_last * decoder_steps_to_m;
-        double left_distance_since_last = (left_direction ? left_direction : 1) * \
-	left_steps_since_last * decoder_steps_to_m;
+        const double wheel_circumference = 0.1225;
+	const double decoder_steps_to_m = 0.01071875;
 
         // the direction variable depends on the direction send by the GPIO Server
+        double right_distance_since_last = (right_direction ? right_direction : 1) * \
+        	right_steps_since_last * decoder_steps_to_m;
+        double left_distance_since_last = (left_direction ? left_direction : 1) * \
+		left_steps_since_last * decoder_steps_to_m;
+	
+
         // -1 back; 0 - No movement; 1 foreward
         double right_velocity = (right_distance_since_last) / delta_t;
         double left_velocity = (left_distance_since_last) / delta_t;
+
+	// Throuought test we found out, that the robot
+        // couldnt move faster than that
+        const double max_velocity = 1.0;
 
         // Has to be some Kind of error
         // last_measurement is not updated
         if( right_velocity > max_velocity ||  right_velocity < -max_velocity ||
             left_velocity > max_velocity  || left_velocity < -max_velocity )
-        {	
-
+        {
 		//std::cout << "velocity out of bound" << std::endl;
 		//std::cout << "count diff: " << left_steps_since_last 
 			//<< "; " << left_steps_since_last << std::endl;
-
 	}
+	else
+	{
+		// Succesfully calcuated
+		decoder_left_velocity = 0.7 * decoder_left_velocity + 0.3 * left_velocity;
+		decoder_right_velocity = 0.7 * decoder_right_velocity + 0.3 * right_velocity;
 
-	
-	/*std::cout << "Decoder: " << std::endl;
-
-	std::cout << "Steps: " << left_steps_since_last
-		<< "; " << right_steps_since_last << std::endl;
-
-	std::cout << "Distance: " << left_distance_since_last 
-		<< "; " << right_distance_since_last << std::endl;		
-
-	std::cout << "Velocity; " << left_velocity << "; " <<  right_velocity << std::endl;*/
+		decoder_ang_velocity = (decoder_right_velocity - decoder_left_velocity) / wheel_distance;
+		decoder_fwd_velocity = (decoder_right_velocity + decoder_left_velocity) / 2.0;
+			
+		act_status_tuple.linear_velocity[0] = decoder_ang_velocity;
+		
+	}	
 	}
 	
 
@@ -213,9 +216,9 @@ void Sensor_Server::working_thread_function()
 		
 
 	// Calculate the velocity out of accelerometer
-	act_status_tuple.linear_velocity[0] = 0;
-	act_status_tuple.linear_velocity[1] = 0;
-	act_status_tuple.linear_velocity[2] = 0;
+	//act_status_tuple.linear_velocity[0] = 0;
+	//act_status_tuple.linear_velocity[1] = 0;
+	//act_status_tuple.linear_velocity[2] = 0;
 
     	last_wheel_meas = act_wheel_meas;
 	last_imu_meas = act_imu_meas;
