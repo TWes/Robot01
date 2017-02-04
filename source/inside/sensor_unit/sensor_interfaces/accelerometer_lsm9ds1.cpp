@@ -9,7 +9,8 @@ accelerometer_lsm9ds1::accelerometer_lsm9ds1(i2c_access *i2c_interface, XMLWrite
 
     this->accelerometer_entry = &file;
 
-    scale = 0.068/1000.0;
+    // 0.061 mg/LSB
+    scale = (0.061*9.81)/1000.0; // now in m/s^2
 }
 
 
@@ -65,7 +66,7 @@ int accelerometer_lsm9ds1::readValues()
     {
         this->x_val = (acc_values[0] * this->scale - this->config.origin_x);
         this->y_val = (acc_values[1] * this->scale - this->config.origin_y);
-        this->z_val = (acc_values[2] * this->scale - this->config.origin_z);
+        this->z_val = -(acc_values[2] * this->scale - this->config.origin_z);
     }
 
     return imu1_read_ret;
@@ -73,7 +74,6 @@ int accelerometer_lsm9ds1::readValues()
 
 void accelerometer_lsm9ds1::configure()
 {
-
 	std::cout << "Let the robot stand still for 5 seconds" << std::endl;
 
 	accelerometer_config_t loc_config;
@@ -82,7 +82,11 @@ void accelerometer_lsm9ds1::configure()
 
 	loc_config.origin_x = mean.x_val;
 	loc_config.origin_y = mean.y_val;
-	loc_config.origin_z = mean.z_val;
+	loc_config.origin_z = mean.z_val + 1.0;
+
+	std::cout << "Calibration finished" << std::endl;
+	std::cout << loc_config.origin_x << "; " << loc_config.origin_y << "; " 
+		<< loc_config.origin_z << std::endl;
 
     this->config = loc_config;
 }
