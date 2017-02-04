@@ -24,6 +24,8 @@ set( SENSOR_UNIT_FILES
 	sensor_interfaces/magnetometer_lsm9ds1.cpp
 	sensor_interfaces/gyroscope_interface.cpp
 	sensor_interfaces/gyroscope_lsm9ds1.cpp
+	sensor_interfaces/accelerometer_interface.cpp
+	sensor_interfaces/accelerometer_lsm9ds1.cpp
 	misc/time_helper.cpp
 )
 

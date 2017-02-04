@@ -28,6 +28,7 @@
 #include "sensor_interfaces/magnetometer_interface.hpp"
 #include "sensor_interfaces/magnetometer_lsm9ds1.hpp"
 #include "sensor_interfaces/gyroscope_lsm9ds1.hpp"
+#include "sensor_interfaces/accelerometer_lsm9ds1.hpp"
 
 /** Struct that contains every information needed
     to handle an udp subscription */
@@ -80,6 +81,7 @@ class Sensor_Server : public Server_inet
 
         magnetometer_interface *magnetometer;
         gyroscope_interface *gyroscope;
+        accelerometer_interface *accelerometer;
 
 		// Members for ADC
 		std::mutex adc_queue_mutex;

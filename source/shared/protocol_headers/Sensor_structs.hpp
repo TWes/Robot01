@@ -24,6 +24,14 @@ typedef struct
 
 } ADC_Measurement;
 
+/** Struct containing accelerometer data */
+typedef struct
+{
+    float x_val; /// x-axis measurement
+	float y_val; /// z-axis measurement
+	float z_val; /// z-axis measurement
+
+} accelerometer_val_t;
 
 /** Struct containing the one magnetometer meas */
 typedef struct
