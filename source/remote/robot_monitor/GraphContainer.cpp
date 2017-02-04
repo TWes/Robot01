@@ -85,6 +85,23 @@ QComboBox* GraphContainer::createComboBox()
     this->itemService["predictedLineVelX"] = GET_FILTERED_IMU_VALUES;
     this->itemService["predictedLineVelY"] = GET_FILTERED_IMU_VALUES;
 
+    tmp->addItem(QString::fromUtf8("\u2610")+ " FilteredAngVelX");
+    tmp->addItem(QString::fromUtf8("\u2610")+ " FilteredAngVelY");
+    tmp->addItem(QString::fromUtf8("\u2610")+ " FilteredAngVelZ");
+
+    this->itemService["FilteredAngVelX"] = GET_FILTERED_IMU_VALUES;
+    this->itemService["FilteredAngVelY"] = GET_FILTERED_IMU_VALUES;
+    this->itemService["FilteredAngVelZ"] = GET_FILTERED_IMU_VALUES;
+
+    tmp->addItem(QString::fromUtf8("\u2610")+ " FilteredLineVelX");
+    tmp->addItem(QString::fromUtf8("\u2610")+ " FilteredLineVelY");
+    tmp->addItem(QString::fromUtf8("\u2610")+ " FilteredLineVelZ");
+
+    this->itemService["FilteredLineVelX"] = GET_FILTERED_IMU_VALUES;
+    this->itemService["FilteredLineVelY"] = GET_FILTERED_IMU_VALUES;
+    this->itemService["FilteredLineVelZ"] = GET_FILTERED_IMU_VALUES;
+
+
     this->functionService[GET_FILTERED_IMU_VALUES] =
             [this](char* addr, int len)-> void
     {
@@ -233,6 +250,27 @@ void GraphContainer::createGraphs()
     graphMap["predictedLineVelX"] = 20;
     plotter->addGraph(1, Qt::blue, PointTypeEnum::Point, true);
     graphMap["predictedLineVelY"] = 21;
+
+    plotter->addGraph(1, Qt::blue, PointTypeEnum::Point, true);
+    graphMap["predicdedAngVelZ"] = 19;
+    plotter->addGraph(1, Qt::blue, PointTypeEnum::Point, true);
+    graphMap["predictedLineVelX"] = 20;
+    plotter->addGraph(1, Qt::blue, PointTypeEnum::Point, true);
+    graphMap["predictedLineVelY"] = 21;
+
+    plotter->addGraph(1, Qt::green, PointTypeEnum::Point, true);
+    graphMap["FilteredAngVelX"] = 22;
+    plotter->addGraph(1, Qt::green, PointTypeEnum::Point, true);
+    graphMap["FilteredAngVelY"] = 23;
+    plotter->addGraph(1, Qt::green, PointTypeEnum::Point, true);
+    graphMap["FilteredAngVelZ"] = 24;
+
+    plotter->addGraph(1, Qt::green, PointTypeEnum::Point, true);
+    graphMap["FilteredLineVelX"] = 25;
+    plotter->addGraph(1, Qt::green, PointTypeEnum::Point, true);
+    graphMap["FilteredLineVelY"] = 26;
+    plotter->addGraph(1, Qt::green, PointTypeEnum::Point, true);
+    graphMap["FilteredLineVelZ"] = 27;
 }
 
 void GraphContainer::getRawIMUValues(IMU_Measurement meas )
@@ -378,6 +416,31 @@ float GraphContainer::getValueFromStatus( std::string item, Status_tuple_t data 
     {
         value = data.predictedLineVelY;
     }
+    else if( item == "FilteredAngVelX")
+    {
+        value = data.angular_velocity[0];
+    }
+    else if( item == "FilteredAngVelY")
+    {
+        value = data.angular_velocity[1];
+    }
+    else if( item == "FilteredAngVelZ")
+    {
+        value = data.angular_velocity[2];
+    }
+    else if( item == "FilteredLineVelX")
+    {
+        value = data.linear_velocity[0];
+    }
+    else if( item == "FilteredLineVelY")
+    {
+        value = data.linear_velocity[1];
+    }
+    else if( item == "FilteredLineVelZ")
+    {
+        value = data.linear_velocity[2];
+    }
+
     else
     {
         std::cout << "Asked for :\"" << item << "\" which is not known" << std::endl;
