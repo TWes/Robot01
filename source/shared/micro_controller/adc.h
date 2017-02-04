@@ -15,12 +15,15 @@
  *  Left Wheel encoder      :   0b0000
  *******/
 
+typedef enum{BLACK, WHITE, MIDDLE, NO_WHEEL} wheel_encoder_state;
+
 typedef struct
 {
     uint8_t mux_channel;
     uint16_t last_restistance;
     uint8_t TWI_buffer;
-    enum{BLACK, WHITE, NO_WHEEL} last_state;
+    int change_thresh;
+    wheel_encoder_state last_state;
 
 } adc_entry;
 

@@ -11,6 +11,7 @@ void init_adc_module()
     adc_table[0].mux_channel = 0b0000;
     adc_table[0].last_restistance = 0;
     adc_table[0].TWI_buffer = 0x14;
+    adc_table[0].change_thresh = 10;
     adc_table[0].last_state = BLACK;
 
     rotations[0] = 0;
@@ -19,6 +20,7 @@ void init_adc_module()
     adc_table[1].mux_channel = 0b0001;
     adc_table[1].last_restistance = 0;
     adc_table[1].TWI_buffer = 0x10;
+    adc_table[1].change_thresh = 4;
     adc_table[1].last_state = BLACK;
 
     rotations[1] = 0;
@@ -43,8 +45,8 @@ void init_adc_module()
     ADCSRA |= (1 << 5);
     // enable interrupt
     ADCSRA |= (1 << 3);
-    // set prescaler to 64
-    ADCSRA |= ( 0b110 << 0);
+    // set prescaler to 128
+    ADCSRA |= ( 0b111 << 0);
 
     // Activate Free running Mode
     ADCSRB |= (0b000 << 0);
@@ -59,8 +61,6 @@ void init_adc_module()
 
 ISR( ADC_vect )
 {
-    i2cdata[0x00] = 0xbe;
-
     // handle the ADC Value
     uint16_t adc_value = ADC;
 
@@ -74,38 +74,58 @@ ISR( ADC_vect )
       i2cdata[adc_table[mux_field].TWI_buffer + 2] = adc_value;
       i2cdata[adc_table[mux_field].TWI_buffer + 3] = (adc_value >> 8);
 
-      // Interpret the values
-      // A good threshhold is 3 V (= 0,6 * max = 0x265 )
-      // adc < 0x265 => White
-      // adc >= 0x265 => Black
+      uint16_t last_resistance = adc_table[mux_field].last_restistance;
+      int res_diff = adc_value - last_resistance;
+      if( res_diff < 0 ) res_diff * -1;	
 
-      // New value white, and old value black;
-      if( adc_value < 0x265 &&  adc_table[mux_field].last_state == BLACK )
+      // Threshhold found out by test
+      int threshhold = adc_table[mux_field].change_thresh;
+      if( res_diff > threshhold )
       {
-          // Incement rotations
-          rotations[mux_field]++;
-          i2cdata[adc_table[mux_field].TWI_buffer] = rotations[mux_field];
-          i2cdata[adc_table[mux_field].TWI_buffer + 1] = rotations[mux_field] >> 8;
-
-          // Change State
-          adc_table[mux_field].last_state = WHITE; 
-      }
-
-      // Old Value white, new value black
-      else if( adc_value >= 0x265 &&  adc_table[mux_field].last_state == WHITE )
-      {
-          // Incement rotations
-          rotations[mux_field]++;
-          i2cdata[adc_table[mux_field].TWI_buffer] = rotations[mux_field];
-          i2cdata[adc_table[mux_field].TWI_buffer + 1] = rotations[mux_field] >> 8;
-
-          // Change State
-          adc_table[mux_field].last_state = BLACK;
-      }
-
-      else
-      {
-      }
+	      // Interpret the values
+	      // Ranges found out by test
+	      uint16_t lower_thresh = 613;
+	      uint16_t upper_thresh = 818;
+	
+	      wheel_encoder_state act_state = MIDDLE;
+	      if( adc_value < lower_thresh )
+	      {
+	         act_state = WHITE;
+	      }
+	      else if( adc_value > upper_thresh )
+	      {
+	         act_state = BLACK;
+	      }
+	
+	      wheel_encoder_state last_state = adc_table[mux_field].last_state;
+	
+	      if( last_state == BLACK && act_state == MIDDLE )
+	      {
+		adc_table[mux_field].last_state = MIDDLE; //act_state;
+	      }     
+	      else if( last_state == WHITE && act_state == MIDDLE )
+	      {
+		adc_table[mux_field].last_state = MIDDLE; // act_state;
+	      }
+	      else if( last_state == MIDDLE && act_state == BLACK )
+	      {
+	          // Incement rotations
+	          rotations[mux_field]++;
+	          i2cdata[adc_table[mux_field].TWI_buffer] = rotations[mux_field];
+	          i2cdata[adc_table[mux_field].TWI_buffer + 1] = rotations[mux_field] >> 8;
+	
+	          adc_table[mux_field].last_state = act_state;
+	      }
+	      else if( last_state == MIDDLE && act_state == WHITE )
+	      {
+		   // Incement rotations
+	          rotations[mux_field]++;
+	          i2cdata[adc_table[mux_field].TWI_buffer] = rotations[mux_field];
+	          i2cdata[adc_table[mux_field].TWI_buffer + 1] = rotations[mux_field] >> 8;
+	
+	          adc_table[mux_field].last_state = act_state;
+      	}
+     }
    }
 
    // The measurements commes from the batterie cells
@@ -150,6 +170,5 @@ ISR( ADC_vect )
    }
 
    schedule_counter++;
-
 }
 
