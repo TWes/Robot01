@@ -808,6 +808,12 @@ void Sensor_Server::I2C_thread_funktion()
 
 }
 
+/**
+ * @brief Sensor_Server::getSocketAdressByFh
+ * Search the client list for the Socket address by the file handle.
+ * @param fh The file handle
+ * @return The socketaddress belonging to the file handle.
+ */
 struct sockaddr_in Sensor_Server::getSocketAdressByFh( int fh )
 {
 	for( client_socket_entry iter : *clients )
@@ -819,6 +825,14 @@ struct sockaddr_in Sensor_Server::getSocketAdressByFh( int fh )
 	return ret;
 }
 
+/**
+ * @brief timeval_difference
+ * Calculate the time difference in a timeval
+ * compatible way
+ * @param end First timeval
+ * @param begin Second timeval
+ * @return The difference as timeval.
+ */
 struct timeval timeval_difference( struct timeval end, struct timeval begin )
 {
 	struct timeval ret;
@@ -835,7 +849,13 @@ struct timeval timeval_difference( struct timeval end, struct timeval begin )
 	return ret;
 }
 
-// Returns the difference in milli Seconds
+/**
+ * @brief time_difference
+ * Calculates the time difference from two timevals as double in ms.
+ * @param end First timeval
+ * @param begin Second timeval
+ * @return Difference in milliseconds
+ */
 double time_difference( struct timeval end, struct timeval begin )
 {
 	struct timeval ret;
@@ -852,6 +872,13 @@ double time_difference( struct timeval end, struct timeval begin )
     return ((ret.tv_sec  * 1000.0) + (ret.tv_usec / 1000.0)) ;
 }
 
+/**
+ * @brief operator ==
+ * Compares the two given timevals
+ * @param end Value 1.
+ * @param begin Value 2
+ * @return true id the values are equal, false otherwise
+ */
 bool operator==(struct timeval end, struct timeval begin )
 {
 	return ( end.tv_sec == begin.tv_sec  &&  end.tv_usec == begin.tv_usec );

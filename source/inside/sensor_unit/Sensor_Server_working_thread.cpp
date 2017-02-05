@@ -1,5 +1,11 @@
 #include "Sensor_Server.hpp"
 
+
+/**
+ * @brief Sensor_Server::working_thread_function
+ * A thread function which calculates all the sensor values
+ * together.
+ */
 void Sensor_Server::working_thread_function()
 {
     act_status_tuple.linear_velocity[0] = 0.0;
@@ -220,7 +226,11 @@ void Sensor_Server::working_thread_function()
     }
 }
 
-
+/**
+ * @brief Sensor_Server::dummy_thread_function
+ * A dummy thread function which sets the status values
+ * to predefined values.
+ */
 void Sensor_Server::dummy_thread_function()
 {
     const float delay_time = 100000; // 0.1 s

@@ -1,5 +1,11 @@
 #include "Sensor_Server.hpp"
 
+/**
+ * @brief calcMagnetometerOrientation
+ * Calculates the orientation on the X-Y-Plane from a given magnetometer measurement.
+ * @param magn_meas The measurement.
+ * @return The orientation on X-Y-Plane.
+ */
 float calcMagnetometerOrientation(  magnetometer_val_t magn_meas )
 {
 	float orientation = 0.0;

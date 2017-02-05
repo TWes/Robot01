@@ -52,8 +52,10 @@ typedef struct{
     bool calibrate_accelerometer = false; 
 	/// Should the gyroscope be calirated
     bool calibrate_gyroscope = false; 
-	bool show_help = false;		/// just show help and exit
-	bool dummy_mode = false	;	/// If this is true, the sensor server will send computer generated values
+    /// just show help and exit
+    bool show_help = false;
+    /// If this is true, the sensor server will send computer generated values
+    bool dummy_mode = false	;
 } option_struct_t;
 
 
