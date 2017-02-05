@@ -182,7 +182,24 @@ int main( int argc, char** argv )
                 }
 
                 // Send the command
-                int ret = GPIO_socket.sendData( (char*) data, 6*sizeof(uint16_t));
+
+                try
+                {
+                    int ret = GPIO_socket.sendData( (char*) data, 6*sizeof(uint16_t));
+                }
+                catch( tcp::connectionError &ex)
+                {
+                    if( ex.getErrorNumber() == 32 )
+                    {
+                        state = WAIT_FOR_CONNECTION;
+                    }
+
+                    else
+                    {
+                        std::cout << "Fehler: Konnte nicht an GPIO Server senden. Code: "
+                                     << errno << std::endl;
+                    }
+                }
 
                 if( ret < 0 )
                 {
