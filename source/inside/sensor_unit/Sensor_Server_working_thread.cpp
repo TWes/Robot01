@@ -79,21 +79,21 @@ void Sensor_Server::working_thread_function()
 	}
 	
 
-	/*****************************
+    /*****************************
     * Calculate the new Position out of
     * the steering commands
     ****************************/
-	const float predicted_velocity = 1.5;
+	const float predicted_velocity = 0.7;
 	
 	float predicted_left_velocity = this->left_direction * predicted_velocity;
 	float predicted_right_velocity = this->right_direction * predicted_velocity;	
 	
 	float predictedAngVelZ = (predicted_left_velocity - predicted_right_velocity)/ wheel_distance;
-    float predictedForewardVel = 0.5 * (predicted_left_velocity + predicted_right_velocity);
+        float predictedForewardVel = 0.5 * (predicted_left_velocity + predicted_right_velocity);
 
-    act_status_tuple.predicdedAngVelZ = predictedAngVelZ;
-    act_status_tuple.predictedLineVelX = predictedForewardVel;
-    act_status_tuple.predictedLineVelY = 0;
+   	act_status_tuple.predicdedAngVelZ = 0.5*  predictedAngVelZ + 0.5 * act_status_tuple.predicdedAngVelZ;
+	act_status_tuple.predictedLineVelX = 0.5 * predictedForewardVel + 0.5 * act_status_tuple.predictedLineVelX;
+	act_status_tuple.predictedLineVelY = 0;
 
 	//std::cout << "Theta: " << predicted_orientation_change << std::endl;
 	
@@ -159,7 +159,6 @@ void Sensor_Server::working_thread_function()
 
 		decoder_ang_velocity = (decoder_right_velocity - decoder_left_velocity) / wheel_distance;
 		decoder_fwd_velocity = (decoder_right_velocity + decoder_left_velocity) / 2.0;	
-		
 	}	
 	}
 	
@@ -210,7 +209,7 @@ void Sensor_Server::working_thread_function()
 		
 
 	// Calculate the velocity out of accelerometer
-	act_status_tuple.linear_velocity[0] = 0.5 * decoder_fwd_velocity + 0.5 accLineVelX;
+	act_status_tuple.linear_velocity[0] = 0.5 * decoder_fwd_velocity + 0.5 * accLineVelX;
 	act_status_tuple.linear_velocity[1] = 0;
 	act_status_tuple.linear_velocity[2] = 0;
 
