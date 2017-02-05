@@ -108,7 +108,7 @@ void Sensor_Server::setup()
 
         this->accelerometer = new accelerometer_lsm9ds1( &i2c_bus,
                                                          xmlConfig,
-                                                         (this->options.calibrate_gyroscope? 2 : 1));
+                                                         (this->options.calibrate_accelerometer? 2 : 1));
         this->accelerometer->activateSensor();
         this->accelerometer->configureSensor();
 

@@ -158,9 +158,7 @@ void Sensor_Server::working_thread_function()
 		decoder_right_velocity = 0.7 * decoder_right_velocity + 0.3 * right_velocity;
 
 		decoder_ang_velocity = (decoder_right_velocity - decoder_left_velocity) / wheel_distance;
-		decoder_fwd_velocity = (decoder_right_velocity + decoder_left_velocity) / 2.0;
-			
-		act_status_tuple.linear_velocity[0] = decoder_ang_velocity;
+		decoder_fwd_velocity = (decoder_right_velocity + decoder_left_velocity) / 2.0;	
 		
 	}	
 	}
@@ -172,16 +170,13 @@ void Sensor_Server::working_thread_function()
          ****************************/	
 	// Get Time Difference and convert it to seconds
 	std::chrono::milliseconds tmp_imu_time_diff = std::chrono::duration_cast<std::chrono::milliseconds>(act_imu_meas.timestamp - last_imu_meas.timestamp);
-	double imu_delta_t = tmp_imu_time_diff.count() / 1000.0;
+	double imu_delta_t = tmp_imu_time_diff.count() / 1000.0; // delta t in seconds
 
-	static float accBiasX = -0.1;
-	static float accBiasY = 0.03;
-	static float accBiasZ = 1.13;
-
+	
 	float gyroAngVelX, gyroAngVelY, gyroAngVelZ;
 	float accLineVelX, accLineVelY, accLineVelZ;
 
-	if( delta_t == 0.0 || delta_t > 1000 )
+	if( delta_t == 0.0 || delta_t > 1000.0 )
 	{
 		//std::cout << " IMU delta_t = " << imu_delta_t << std::endl;		
 	}
@@ -192,9 +187,9 @@ void Sensor_Server::working_thread_function()
 		gyroAngVelZ = act_imu_meas.gyro[2];
 		
 
-		accLineVelX = (act_imu_meas.acc[0] - accBiasX) * delta_t;
-		accLineVelY = (act_imu_meas.acc[1] - accBiasY) * delta_t;
-		accLineVelZ = (act_imu_meas.acc[2] - accBiasZ) * delta_t;
+		accLineVelX = (act_imu_meas.acc[0]) * delta_t;
+		accLineVelY = (act_imu_meas.acc[1]) * delta_t;
+		accLineVelZ = (act_imu_meas.acc[2]) * delta_t;
 	}
 
 	act_status_tuple.gyroAngVel[0] = gyroAngVelX;
@@ -215,9 +210,9 @@ void Sensor_Server::working_thread_function()
 		
 
 	// Calculate the velocity out of accelerometer
-	//act_status_tuple.linear_velocity[0] = 0;
-	//act_status_tuple.linear_velocity[1] = 0;
-	//act_status_tuple.linear_velocity[2] = 0;
+	act_status_tuple.linear_velocity[0] = 0.5 * decoder_fwd_velocity + 0.5 accLineVelX;
+	act_status_tuple.linear_velocity[1] = 0;
+	act_status_tuple.linear_velocity[2] = 0;
 
     	last_wheel_meas = act_wheel_meas;
 	last_imu_meas = act_imu_meas;
