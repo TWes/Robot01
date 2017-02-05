@@ -80,21 +80,20 @@ void Sensor_Server::working_thread_function()
 	
 
 	/*****************************
-         * Calculate the new Position out of
-         * the steering commands
-         ****************************/	
+    * Calculate the new Position out of
+    * the steering commands
+    ****************************/
 	const float predicted_velocity = 1.5;
 	
 	float predicted_left_velocity = this->left_direction * predicted_velocity;
 	float predicted_right_velocity = this->right_direction * predicted_velocity;	
 	
 	float predictedAngVelZ = (predicted_left_velocity - predicted_right_velocity)/ wheel_distance;
-	float predictedLinVelY = 0.5 * (predicted_left_velocity + predicted_right_velocity) * sin( predictedAngVelZ );
-	float predictedLinVelX = 0.5 * (predicted_left_velocity + predicted_right_velocity) * cos( predictedAngVelZ );
+    float predictedForewardVel = 0.5 * (predicted_left_velocity + predicted_right_velocity);
 
-	act_status_tuple.predicdedAngVelZ = predictedAngVelZ;
-	act_status_tuple.predictedLineVelX = predictedLinVelX;
-	act_status_tuple.predictedLineVelY = predictedLinVelY;
+    act_status_tuple.predicdedAngVelZ = predictedAngVelZ;
+    act_status_tuple.predictedLineVelX = predictedForewardVel;
+    act_status_tuple.predictedLineVelY = 0;
 
 	//std::cout << "Theta: " << predicted_orientation_change << std::endl;
 	
