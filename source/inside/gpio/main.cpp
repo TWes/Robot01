@@ -74,7 +74,17 @@ void gpio_Server::boroadcast_direction_change(uint32_t left_wheel, uint32_t righ
         message[4] = left_wheel;
         message[5] = right_wheel;
 
-        int ret = this->sensor_server_connection->sendData( (char*) message, 6* sizeof(uint16_t) );
+        int ret = 0;
+
+        try
+        {
+            ret = this->sensor_server_connection->sendData( (char*) message, 6* sizeof(uint16_t) );
+        }
+        catch( tcp::connectionError &ex)
+        {
+            std::cout << "Error sendinf direction broadcast: " << ex.what() << std::endl;
+            return;
+        }
 
         if( ret < 0 )
         {
@@ -133,12 +143,20 @@ void gpio_Server::handle_connection( int client_handle)
             uint16_t headder[3];
 
             // Look if there ist something to read
-            int ret = read( client_handle , headder, 3*sizeof(uint16_t));
 
-            if( ret <= 0 )
+            int ret = 0;
+
+            try
             {
-                 return;
+                ret = read( client_handle , headder, 3*sizeof(uint16_t));
             }
+            catch( tcp::connectionError &ex)
+            {
+                std::cout << "Error reading client: " << ex.what()<< std::endl;
+                return;
+            }
+
+            if( ret <= 0 ) return;
 
 
            //std::cout << "Got headder: " << headder[0] << " | Size: " << headder[1]
@@ -149,7 +167,16 @@ void gpio_Server::handle_connection( int client_handle)
                 uint16_t data[3];
 
                 // Look if there ist something to read
-                int ret = read( client_handle , data, headder[1] );
+                int ret = 0;
+                try
+                {
+                    ret = read( client_handle , data, headder[1] );
+                }
+                catch( tcp::connectionError &ex)
+                {
+                    std::cout << "Error reading client: " << ex.what()<< std::endl;
+                    return;
+                }
 
                 if( ret <= 0 )
                 {
